@@ -1,0 +1,570 @@
+SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0;
+SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
+SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION';
+
+Contrato
+
+-- -----------------------------------------------------
+-- Schema Hospital
+-- -----------------------------------------------------
+DROP SCHEMA IF EXISTS `Hospital` ;
+
+-- -----------------------------------------------------
+-- Schema Hospital
+-- -----------------------------------------------------
+CREATE SCHEMA IF NOT EXISTS `Hospital` ;
+USE `Hospital` ;
+
+-- -----------------------------------------------------
+-- Table `Hospital`.`Persona`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `Hospital`.`Persona` ;
+
+CREATE TABLE IF NOT EXISTS `Hospital`.`Persona` (
+  `cui` VARCHAR(13) NOT NULL,
+  `nombre` VARCHAR(45) NOT NULL,
+  `direccion` MEDIUMTEXT NULL,
+  PRIMARY KEY (`cui`),
+  UNIQUE INDEX `nombreDeUsuario_UNIQUE` (`nombre` ASC))
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `Hospital`.`Paciente`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `Hospital`.`Paciente` ;
+
+CREATE TABLE IF NOT EXISTS `Hospital`.`Paciente` (
+  `id_paciente` INT NOT NULL AUTO_INCREMENT,
+  `internado` TINYINT NULL,
+  `saldo` VARCHAR(45) NULL,
+  `cui` VARCHAR(13) NOT NULL,
+  PRIMARY KEY (`id_paciente`, `cui`),
+  INDEX `fk_Paciente_Persona1_idx` (`cui` ASC),
+  CONSTRAINT `fk_Paciente_Persona1`
+    FOREIGN KEY (`cui`)
+    REFERENCES `Hospital`.`Persona` (`cui`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `Hospital`.`Contrato`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `Hospital`.`Contrato` ;
+
+CREATE TABLE IF NOT EXISTS `Hospital`.`Contrato` (
+  `id_contrato` INT NOT NULL AUTO_INCREMENT,
+  `salario` DOUBLE NOT NULL,
+  `fecha_inicial` DATE NOT NULL,
+  `fecha_final` DATE NULL DEFAULT NULL,
+  `id_empleado` INT NOT NULL ,
+  PRIMARY KEY (`id_contrato`),
+  INDEX `FK_USUARIO_idx` (`id_empleado` ASC),
+  CONSTRAINT `FK_USUARIO`
+    FOREIGN KEY (`id_empleado`)
+    REFERENCES `Hospital`.`Empleado` (`id_empleado`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `Hospital`.`Modulo`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `Hospital`.`Modulo` ;
+
+CREATE TABLE IF NOT EXISTS `Hospital`.`Modulo` (
+  `id_modulo` INT NOT NULL AUTO_INCREMENT,
+  `nombre` VARCHAR(45) NULL,
+  PRIMARY KEY (`id_modulo`))
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `Hospital`.`Area`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `Hospital`.`Area` ;
+
+CREATE TABLE IF NOT EXISTS `Hospital`.`Area` (
+  `id_area` INT NOT NULL AUTO_INCREMENT,
+  `descripcion` VARCHAR(45) NULL,
+  `id_modulo` INT NOT NULL,
+  PRIMARY KEY (`id_area`),
+  INDEX `fk_Area_Modulo1_idx` (`id_modulo` ASC) ,
+  CONSTRAINT `fk_Area_Modulo1`
+    FOREIGN KEY (`id_modulo`)
+    REFERENCES `Hospital`.`Modulo` (`id_modulo`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `Hospital`.`Empleado`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `Hospital`.`Empleado` ;
+
+CREATE TABLE IF NOT EXISTS `Hospital`.`Empleado` (
+  `id_empleado` INT NOT NULL AUTO_INCREMENT,
+  `porcentaje_igss` VARCHAR(45) NULL DEFAULT 0,
+  `porcentaje_irtra` VARCHAR(45) NULL DEFAULT 0,
+  `activo` TINYINT NOT NULL DEFAULT 1,
+  `fecha_de_vacaciones` DATE NULL,
+  `ejecucion_de_vacaciones` TINYINT NOT NULL DEFAULT 0,
+  `cui_persona` VARCHAR(13) NOT NULL,
+  `id_periodo_laboral_actual` INT NOT NULL,
+  `id_area` INT NOT NULL,
+  PRIMARY KEY (`id_empleado`, `cui_persona`, `id_periodo_laboral_actual`),
+  UNIQUE INDEX `idEmpleado_UNIQUE` (`id_empleado` ASC) ,
+  INDEX `fk_Empleado_Persona1_idx` (`cui_persona` ASC) ,
+  INDEX `fk_Empleado_PeriodoLaboral1_idx` (`id_periodo_laboral_actual` ASC) ,
+  INDEX `fk_Empleado_Area1_idx` (`id_area` ASC) ,
+  CONSTRAINT `FK_PERSONA`
+    FOREIGN KEY (`cui_persona`)
+    REFERENCES `Hospital`.`Persona` (`cui`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `FK_PERIODO_LABORAL`
+    FOREIGN KEY (`id_periodo_laboral_actual`)
+    REFERENCES `Hospital`.`Contrato` (`id_contrato`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `FK_AREA_EMPLEADO`
+    FOREIGN KEY (`id_area`)
+    REFERENCES `Hospital`.`Area` (`id_area`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `Hospital`.`Credenciales`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `Hospital`.`Credenciales` ;
+
+CREATE TABLE IF NOT EXISTS `Hospital`.`Credenciales` (
+  `id_credenciales` INT NOT NULL AUTO_INCREMENT,
+  `correo_electronico` VARCHAR(45) NOT NULL,
+  `password` TEXT NOT NULL,
+  `id_empleado` INT NOT NULL,
+  `id_area` INT NOT NULL,
+  PRIMARY KEY (`id_credenciales`, `id_empleado`, `id_area`),
+  UNIQUE INDEX `correo_electronico_UNIQUE` (`correo_electronico` ASC) ,
+  INDEX `fk_Credenciales_Empleado1_idx` (`id_empleado` ASC) ,
+  INDEX `fk_Credenciales_Area1_idx` (`id_area` ASC) ,
+  CONSTRAINT `fk_Credenciales_Empleado1`
+    FOREIGN KEY (`id_empleado`)
+    REFERENCES `Hospital`.`Empleado` (`id_empleado`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_Credenciales_Area1`
+    FOREIGN KEY (`id_area`)
+    REFERENCES `Hospital`.`Area` (`id_area`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `Hospital`.`TarifaDeEspecialista`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `Hospital`.`TarifaDeEspecialista` ;
+
+CREATE TABLE IF NOT EXISTS `Hospital`.`TarifaDeEspecialista` (
+  `id_tarfia` INT NOT NULL AUTO_INCREMENT,
+  `descripcion` VARCHAR(45) NOT NULL,
+  `costo_al_hospital` DOUBLE NOT NULL,
+  `tarifa_de_especialista` DOUBLE NOT NULL DEFAULT 0,
+  `precio_al_cliente` DOUBLE NOT NULL,
+  PRIMARY KEY (`id_tarfia`))
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `Hospital`.`Cirugia`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `Hospital`.`Cirugia` ;
+
+CREATE TABLE IF NOT EXISTS `Hospital`.`Cirugia` (
+  `id_cirugia` INT NOT NULL AUTO_INCREMENT,
+  `descripcion` VARCHAR(45) NOT NULL,
+  `fecha` DATE NOT NULL,
+  `id_tarifa` INT NOT NULL,
+  `id_paciente` INT NOT NULL,
+  PRIMARY KEY (`id_cirugia`, `id_paciente`),
+  INDEX `fk_Cirugia_TarifasDeCirugias1_idx` (`id_tarifa` ASC) ,
+  INDEX `fk_Cirugia_Paciente1_idx` (`id_paciente` ASC) ,
+  CONSTRAINT `fk_Cirugia_TarifasDeCirugias1`
+    FOREIGN KEY (`id_tarifa`)
+    REFERENCES `Hospital`.`TarifaDeEspecialista` (`id_tarfia`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_Cirugia_Paciente1`
+    FOREIGN KEY (`id_paciente`)
+    REFERENCES `Hospital`.`Paciente` (`id_paciente`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `Hospital`.`MedicoEspecialista`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `Hospital`.`MedicoEspecialista` ;
+
+CREATE TABLE IF NOT EXISTS `Hospital`.`MedicoEspecialista` (
+  `id_medico_especialista` INT NOT NULL AUTO_INCREMENT,
+  `no_de_colegiado` INT NOT NULL,
+  `cui_persona` VARCHAR(13) NOT NULL,
+  `id_cirugia` INT NULL,
+  PRIMARY KEY (`id_medico_especialista`, `cui_persona`),
+  INDEX `fk_MedicoEspecialista_Persona1_idx` (`cui_persona` ASC) ,
+  INDEX `fk_MedicoEspecialista_Cirugia1_idx` (`id_cirugia` ASC) ,
+  CONSTRAINT `fk_MedicoEspecialista_Persona1`
+    FOREIGN KEY (`cui_persona`)
+    REFERENCES `Hospital`.`Persona` (`cui`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_MedicoEspecialista_Cirugia1`
+    FOREIGN KEY (`id_cirugia`)
+    REFERENCES `Hospital`.`Cirugia` (`id_cirugia`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `Hospital`.`Constantes`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `Hospital`.`Constantes` ;
+
+CREATE TABLE IF NOT EXISTS `Hospital`.`Constantes` (
+  `id_constante` INT NOT NULL AUTO_INCREMENT,
+  `nombre` VARCHAR(45) NULL,
+  PRIMARY KEY (`id_constante`))
+ENGINE = InnoDB
+COMMENT = 'Aca se puede agregar la cantidad de dias de vacaciones de empleado\n';
+
+
+-- -----------------------------------------------------
+-- Table `Hospital`.`Medicamento`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `Hospital`.`Medicamento` ;
+
+CREATE TABLE IF NOT EXISTS `Hospital`.`Medicamento` (
+  `id_medicamento` INT NOT NULL AUTO_INCREMENT,
+  `nombre` VARCHAR(45) NOT NULL,
+  `costo` DOUBLE NOT NULL,
+  `precio` DOUBLE NOT NULL,
+  `cant_existencia` INT NOT NULL,
+  `cant_minima` INT NOT NULL DEFAULT 10,
+  PRIMARY KEY (`id_medicamento`))
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `Hospital`.`Medico`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `Hospital`.`Medico` ;
+
+CREATE TABLE IF NOT EXISTS `Hospital`.`Medico` (
+  `id_medico` INT NOT NULL AUTO_INCREMENT,
+  `id_empleado` INT NOT NULL,
+  PRIMARY KEY (`id_medico`, `id_empleado`),
+  INDEX `fk_Medico_Empleado1_idx` (`id_empleado` ASC) ,
+  CONSTRAINT `fk_Medico_Empleado1`
+    FOREIGN KEY (`id_empleado`)
+    REFERENCES `Hospital`.`Empleado` (`id_empleado`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `Hospital`.`Habitacion`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `Hospital`.`Habitacion` ;
+
+CREATE TABLE IF NOT EXISTS `Hospital`.`Habitacion` (
+  `id_habitacion` INT NOT NULL AUTO_INCREMENT,
+  `esta_ocupada` TINYINT NULL DEFAULT 0,
+  `esta_habilitada` TINYINT NULL DEFAULT 0,
+  `precio_de_mantenimiento` DOUBLE NULL,
+  PRIMARY KEY (`id_habitacion`))
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `Hospital`.`Registro_Monetario`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `Hospital`.`Registro_Monetario` ;
+
+CREATE TABLE IF NOT EXISTS `Hospital`.`Registro_Monetario` (
+  `id_registro` INT NOT NULL AUTO_INCREMENT,
+  `descripcion` VARCHAR(50) NOT NULL,
+  `monto` DOUBLE NOT NULL COMMENT 'Si es Verdadero, es un ingreso, si es falso, es un egreso. ',
+  `fecha` DATE NOT NULL,
+  `tipo` TINYINT NOT NULL,
+  `id_area` INT NOT NULL,
+  PRIMARY KEY (`id_registro`),
+  INDEX `fk_Registro_Monetario_Area1_idx` (`id_area` ASC) ,
+  CONSTRAINT `fk_Registro_Monetario_Area1`
+    FOREIGN KEY (`id_area`)
+    REFERENCES `Hospital`.`Area` (`id_area`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `Hospital`.`VentaDeMedicamento`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `Hospital`.`VentaDeMedicamento` ;
+
+CREATE TABLE IF NOT EXISTS `Hospital`.`VentaDeMedicamento` (
+  `id_venta` INT NOT NULL AUTO_INCREMENT,
+  `fecha` VARCHAR(45) NOT NULL,
+  `costo_actual_medicamento` DOUBLE NOT NULL,
+  `precio_actual_medicamento` DOUBLE NOT NULL,
+  `cantidad_vendida` INT NOT NULL,
+  `id_medicamento` INT NOT NULL,
+  `id_empleado` INT NOT NULL,
+  `id_registro` INT NOT NULL,
+  PRIMARY KEY (`id_venta`, `id_registro`),
+  INDEX `fk_VentaDeMedicamento_Medicamento1_idx` (`id_medicamento` ASC) ,
+  INDEX `fk_VentaDeMedicamento_Empleado1_idx` (`id_empleado` ASC) ,
+  INDEX `fk_VentaDeMedicamento_Pago1_idx` (`id_registro` ASC) ,
+  CONSTRAINT `fk_VentaDeMedicamento_Medicamento1`
+    FOREIGN KEY (`id_medicamento`)
+    REFERENCES `Hospital`.`Medicamento` (`id_medicamento`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_VentaDeMedicamento_Empleado1`
+    FOREIGN KEY (`id_empleado`)
+    REFERENCES `Hospital`.`Empleado` (`id_empleado`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_VentaDeMedicamento_Pago1`
+    FOREIGN KEY (`id_registro`)
+    REFERENCES `Hospital`.`Registro_Monetario` (`id_registro`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `Hospital`.`Consulta`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `Hospital`.`Consulta` ;
+
+CREATE TABLE IF NOT EXISTS `Hospital`.`Consulta` (
+  `id_consulta` INT NOT NULL AUTO_INCREMENT,
+  `precio_de_consulta` DOUBLE NOT NULL,
+  `Pago_id_pago` INT NOT NULL,
+  `id_paciente` INT NOT NULL,
+  `id_habitacion` INT NOT NULL,
+  `id_medico` INT NOT NULL,
+  PRIMARY KEY (`id_consulta`, `Pago_id_pago`),
+  INDEX `fk_Consulta_Paciente1_idx` (`id_paciente` ASC, `id_habitacion` ASC) ,
+  INDEX `fk_Consulta_Medico1_idx` (`id_medico` ASC) ,
+  INDEX `fk_Consulta_Pago1_idx` (`Pago_id_pago` ASC) ,
+  CONSTRAINT `fk_Consulta_Paciente1`
+    FOREIGN KEY (`id_paciente`)
+    REFERENCES `Hospital`.`Paciente` (`id_paciente`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_Consulta_Medico1`
+    FOREIGN KEY (`id_medico`)
+    REFERENCES `Hospital`.`Medico` (`id_medico`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_Consulta_Pago1`
+    FOREIGN KEY (`Pago_id_pago`)
+    REFERENCES `Hospital`.`Registro_Monetario` (`id_registro`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `Hospital`.`Consulta_tiene_Medicamentos`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `Hospital`.`Consulta_tiene_Medicamentos` ;
+
+CREATE TABLE IF NOT EXISTS `Hospital`.`Consulta_tiene_Medicamentos` (
+  `Consulta_id_consulta` INT NOT NULL AUTO_INCREMENT,
+  `Medicamento_id_medicamento` INT NOT NULL,
+  INDEX `fk_Consulta_has_Medicamento_Medicamento1_idx` (`Medicamento_id_medicamento` ASC) ,
+  INDEX `fk_Consulta_has_Medicamento_Consulta1_idx` (`Consulta_id_consulta` ASC) ,
+  CONSTRAINT `fk_Consulta_has_Medicamento_Consulta1`
+    FOREIGN KEY (`Consulta_id_consulta`)
+    REFERENCES `Hospital`.`Consulta` (`id_consulta`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_Consulta_has_Medicamento_Medicamento1`
+    FOREIGN KEY (`Medicamento_id_medicamento`)
+    REFERENCES `Hospital`.`Medicamento` (`id_medicamento`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `Hospital`.`Internado`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `Hospital`.`Internado` ;
+
+CREATE TABLE IF NOT EXISTS `Hospital`.`Internado` (
+  `id_internado` INT NOT NULL AUTO_INCREMENT,
+  `id_paciente` INT NOT NULL,
+  `inicio` DATETIME NOT NULL,
+  `fin` DATETIME NULL,
+  `id_pago` INT NULL,
+  `id_habitacion` INT NOT NULL,
+  PRIMARY KEY (`id_internado`, `id_paciente`, `id_pago`, `id_habitacion`),
+  INDEX `fk_Internados_Paciente1_idx` (`id_paciente` ASC) ,
+  INDEX `fk_Internados_Pago1_idx` (`id_pago` ASC) ,
+  INDEX `fk_Internado_Habitacion1_idx` (`id_habitacion` ASC) ,
+  CONSTRAINT `fk_Internados_Paciente1`
+    FOREIGN KEY (`id_paciente`)
+    REFERENCES `Hospital`.`Paciente` (`id_paciente`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_Internados_Pago1`
+    FOREIGN KEY (`id_pago`)
+    REFERENCES `Hospital`.`Registro_Monetario` (`id_registro`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_Internado_Habitacion1`
+    FOREIGN KEY (`id_habitacion`)
+    REFERENCES `Hospital`.`Habitacion` (`id_habitacion`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `Hospital`.`Internado_has_Medicamento`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `Hospital`.`Internado_has_Medicamento` ;
+
+CREATE TABLE IF NOT EXISTS `Hospital`.`Internado_has_Medicamento` (
+  `id_internado` INT NOT NULL,
+  `id_paciente` INT NOT NULL,
+  `id_medicamento` INT NOT NULL,
+  INDEX `fk_Internado_has_Medicamento_Medicamento1_idx` (`id_medicamento` ASC) ,
+  INDEX `fk_Internado_has_Medicamento_Internado1_idx` (`id_internado` ASC, `id_paciente` ASC) ,
+  CONSTRAINT `fk_Internado_has_Medicamento_Internado1`
+    FOREIGN KEY (`id_internado` , `id_paciente`)
+    REFERENCES `Hospital`.`Internado` (`id_internado` , `id_paciente`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_Internado_has_Medicamento_Medicamento1`
+    FOREIGN KEY (`id_medicamento`)
+    REFERENCES `Hospital`.`Medicamento` (`id_medicamento`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `Hospital`.`Internado_tiene_Empleado`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `Hospital`.`Internado_tiene_Empleado` ;
+
+CREATE TABLE IF NOT EXISTS `Hospital`.`Internado_tiene_Empleado` (
+  `id_internado` INT NOT NULL,
+  `id_paciente` INT NOT NULL,
+  `id_empleado` INT NOT NULL,
+  INDEX `fk_Internado_has_Empleado_Empleado1_idx` (`id_empleado` ASC) ,
+  INDEX `fk_Internado_has_Empleado_Internado1_idx` (`id_internado` ASC, `id_paciente` ASC) ,
+  CONSTRAINT `fk_Internado_has_Empleado_Internado1`
+    FOREIGN KEY (`id_internado` , `id_paciente`)
+    REFERENCES `Hospital`.`Internado` (`id_internado` , `id_paciente`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_Internado_has_Empleado_Empleado1`
+    FOREIGN KEY (`id_empleado`)
+    REFERENCES `Hospital`.`Empleado` (`id_empleado`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `Hospital`.`Internado_tiene_Medico`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `Hospital`.`Internado_tiene_Medico` ;
+
+CREATE TABLE IF NOT EXISTS `Hospital`.`Internado_tiene_Medico` (
+  `id_internado` INT NOT NULL,
+  `id_paciente` INT NOT NULL,
+  `id_medico` INT NOT NULL,
+  INDEX `fk_Internado_has_Medico_Medico1_idx` (`id_medico` ASC) ,
+  INDEX `fk_Internado_has_Medico_Internado1_idx` (`id_internado` ASC, `id_paciente` ASC) ,
+  CONSTRAINT `fk_Internado_has_Medico_Internado1`
+    FOREIGN KEY (`id_internado` , `id_paciente`)
+    REFERENCES `Hospital`.`Internado` (`id_internado` , `id_paciente`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_Internado_has_Medico_Medico1`
+    FOREIGN KEY (`id_medico`)
+    REFERENCES `Hospital`.`Medico` (`id_medico`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `Hospital`.`Cirugia_tiene_Medico`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `Hospital`.`Cirugia_tiene_Medico` ;
+
+CREATE TABLE IF NOT EXISTS `Hospital`.`Cirugia_tiene_Medico` (
+  `id_cirugia` INT NOT NULL,
+  `id_medico` INT NOT NULL,
+  INDEX `fk_Cirugia_has_Medico_Medico1_idx` (`id_medico` ASC) ,
+  INDEX `fk_Cirugia_has_Medico_Cirugia1_idx` (`id_cirugia` ASC) ,
+  CONSTRAINT `fk_Cirugia_has_Medico_Cirugia1`
+    FOREIGN KEY (`id_cirugia`)
+    REFERENCES `Hospital`.`Cirugia` (`id_cirugia`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_Cirugia_has_Medico_Medico1`
+    FOREIGN KEY (`id_medico`)
+    REFERENCES `Hospital`.`Medico` (`id_medico`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `Hospital`.`Cirugia_has_MedicoEspecialista`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `Hospital`.`Cirugia_has_MedicoEspecialista` ;
+
+CREATE TABLE IF NOT EXISTS `Hospital`.`Cirugia_has_MedicoEspecialista` (
+  `Cirugia_id_cirugia` INT NOT NULL,
+  `MedicoEspecialista_id_medico_especialista` INT NOT NULL,
+  `MedicoEspecialista_cui_persona` VARCHAR(13) NOT NULL,
+  PRIMARY KEY (`Cirugia_id_cirugia`, `MedicoEspecialista_id_medico_especialista`, `MedicoEspecialista_cui_persona`),
+  INDEX `fk_Cirugia_has_MedicoEspecialista_MedicoEspecialista1_idx` (`MedicoEspecialista_id_medico_especialista` ASC, `MedicoEspecialista_cui_persona` ASC) ,
+  INDEX `fk_Cirugia_has_MedicoEspecialista_Cirugia1_idx` (`Cirugia_id_cirugia` ASC) ,
+  CONSTRAINT `fk_Cirugia_has_MedicoEspecialista_Cirugia1`
+    FOREIGN KEY (`Cirugia_id_cirugia`)
+    REFERENCES `Hospital`.`Cirugia` (`id_cirugia`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_Cirugia_has_MedicoEspecialista_MedicoEspecialista1`
+    FOREIGN KEY (`MedicoEspecialista_id_medico_especialista` , `MedicoEspecialista_cui_persona`)
+    REFERENCES `Hospital`.`MedicoEspecialista` (`id_medico_especialista` , `cui_persona`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+SET SQL_MODE=@OLD_SQL_MODE;
+SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
+SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
+
