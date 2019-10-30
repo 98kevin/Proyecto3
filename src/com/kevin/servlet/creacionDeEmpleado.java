@@ -1,4 +1,4 @@
-package servlet;
+package com.kevin.servlet;
 
 import java.io.IOException;
 
@@ -8,19 +8,19 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import backend.Modulo;
+import com.kevin.modelos.Administrador;
 
 /**
- * Servlet implementation class creacionDeModulo
+ * Servlet implementation class creacionDeEmpleado
  */
-@WebServlet("/admin/creacionDeModulo")
-public class creacionDeModulo extends HttpServlet {
+@WebServlet( "/administrador/creacionDeEmpleado")
+public class creacionDeEmpleado extends HttpServlet {
 	private static final long serialVersionUID = 1L;
        
     /**
      * @see HttpServlet#HttpServlet()
      */
-    public creacionDeModulo() {
+    public creacionDeEmpleado() {
         super();
         // TODO Auto-generated constructor stub
     }
@@ -29,6 +29,7 @@ public class creacionDeModulo extends HttpServlet {
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		// TODO Auto-generated method stub
 		response.getWriter().append("Served at: ").append(request.getContextPath());
 	}
 
@@ -36,8 +37,7 @@ public class creacionDeModulo extends HttpServlet {
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-	    Modulo modulo = new Modulo(request.getParameter("modulo"));
-	    modulo.registrar();
+	    Administrador admin = new Administrador(request);
 	}
 
 }

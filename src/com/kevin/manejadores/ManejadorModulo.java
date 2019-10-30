@@ -1,45 +1,23 @@
-package backend;
+package com.kevin.manejadores;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.util.ArrayList;
 
+import com.kevin.modelos.Modulo;
+import com.kevin.servicio.DBConnection;
 
-/**
- * Clase encargada del manejo de Modulos
- * @author kevin
- *
- */
-public class Modulo {
-    private String nombre; 
-    
-    /**
-     * Crea un nuevo modulo vacio
-     */
-    public Modulo() {
-	super();
-    }
-    
-    /**
-     * Crea un nuevo modulo con nombre
-     * @param nombre El nombre del nuevo modulo
-     */
-    public Modulo(String nombre) {
-	this.nombre=nombre;
-    }
-    
+public class ManejadorModulo extends DBConnection{
     /**
      * Registra el modulo en la base de datos
      */
-    public void registrar() {
-	Connection conexion = new SqlConection().getConexion();
+    public void registrarModulo(Modulo modulo) {
+	Connection conexion = conexion();
 	String sql = "INSERT INTO Modulo (nombre) values (?);";
 	try {
 	    PreparedStatement stm = conexion.prepareStatement(sql);
-	    stm.setString(1, this.nombre);
+	    stm.setString(1, modulo.getNombre());
 	    stm.execute();
 	} catch (SQLException e) {
 	    e.printStackTrace();
@@ -48,10 +26,10 @@ public class Modulo {
     
     public String [][] modulosRegistrados() {
 	String [][] resultados= null;
-	SqlConection sqlConn = new SqlConection(); 
-	Connection conexion = sqlConn.getConexion();
+	DBConnection sqlConn = new DBConnection(); 
+	Connection conexion =conexion(); 
 	String sql = "SELECT * FROM Modulo";
-	String sqlCount = "SELECT COUNT(*) FROM Modulo";
+	//String sqlCount = "SELECT COUNT(*) FROM Modulo";
         	try {
             	    PreparedStatement stm = conexion.prepareStatement(sql);
             	    ResultSet modulos = stm.executeQuery();
@@ -67,22 +45,4 @@ public class Modulo {
         	}
 	return resultados;
     }
-
-
-	
-    /**
-     * @return the nombre
-     */
-    public String getNombre() {
-        return nombre;
-    }
-
-    /**
-     * @param nombre the nombre to set
-     */
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
-    }
-    
-    
 }

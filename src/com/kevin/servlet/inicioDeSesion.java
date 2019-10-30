@@ -1,4 +1,4 @@
-package servlet;
+package com.kevin.servlet;
 
 import java.io.IOException;
 import javax.servlet.ServletException;
@@ -8,16 +8,16 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
- * Servlet implementation class creacionDeEmpleado
+ * Servlet implementation class inicioDeSesion
  */
-@WebServlet(description = "Servlet controlador de la creacion de empleados", urlPatterns = { "/admin/creacionDeEmpleado" })
-public class creacionDeEmpleado extends HttpServlet {
+@WebServlet("/general/inicioDeSesion")
+public class inicioDeSesion extends HttpServlet {
 	private static final long serialVersionUID = 1L;
        
     /**
      * @see HttpServlet#HttpServlet()
      */
-    public creacionDeEmpleado() {
+    public inicioDeSesion() {
         super();
         // TODO Auto-generated constructor stub
     }
@@ -34,7 +34,9 @@ public class creacionDeEmpleado extends HttpServlet {
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-	    System.out.println("creacion del empleado");
+	    	String mail = request.getParameter("correo");
+	    	String password= request.getParameter("password");
+	    	System.out.println(mail + " " + password);
 	}
 
 }

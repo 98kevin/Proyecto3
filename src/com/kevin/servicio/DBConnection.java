@@ -1,4 +1,4 @@
-package backend;
+package com.kevin.servicio;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -7,31 +7,26 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 
-public class SqlConection {
-    
-    private static Connection conexion;
-    
+public class DBConnection {
+        
     private final static String SQL_USER="admin";
     private final static String PASSWORD="admin";
     private final static String SQL_PORT="jdbc:mysql://localhost:3306/";
     private final static String DATABASE_NAME="Hospital";
     
-    public SqlConection() {
+    protected Connection conexion() {
+	  Connection conexion =null;
 	try {
-	    if(conexion==null) {
 		Class.forName("org.mariadb.jdbc.Driver"); 
 		conexion = DriverManager.getConnection(SQL_PORT+DATABASE_NAME, SQL_USER, PASSWORD);
-	    }
 	} catch (SQLException e) {
 	    e.printStackTrace();
 	} catch (ClassNotFoundException e) {
 	    e.printStackTrace();
 	}
-    }
-    
-    public Connection getConexion() {
 	return conexion;
     }
+    
     
     
     /**
@@ -42,6 +37,7 @@ public class SqlConection {
     public int contadorDeRegistros(String sql) {
 	int registros = 0 ; 
 	try {
+	    Connection conexion = conexion(); 
 	    PreparedStatement stm = conexion.prepareStatement(sql);
 	    ResultSet contador = stm.executeQuery();
 	    if(contador.next()) {
@@ -52,5 +48,7 @@ public class SqlConection {
 	}
 	return registros;
     }
+
+
     
 }

@@ -1,0 +1,22 @@
+	<!-- Formulario de creacion de empleado -->
+	<form id="form-empleado">
+	CUI <input id="cui" class="form-control"  type="text"  placeholder="codigo unico de identificacion" required  /><br>
+	Nombre <input id="nombre" class="form-control"  type="text" placeholder="nombre" required  /><br>
+	Correo Electronico <input id="email" class="form-control"  type="email" placeholder=" correo electronico" required  /><br>
+	Password <input id="pass1" class="form-control"  type="password" placeholder="contraseña" required  /><br>
+	Repetir Password <input id="pass2" class="form-control"  type="password" placeholder="repetir contraseña" required  /><br>
+	Direccion <input id="direccion" class="form-control"  type="text"  placeholder="direccion" required  /><br>
+	IGGS <input id="iggs" class="form-control"  type="number"  placeholder="porcentaje de descuento, solo enteros" /><br>
+	IRTRA <input id="irtra" class="form-control"  type="number"  placeholder="porcentaje de descuento, solo enteros"  /><br>
+	fecha de vacaciones <input id="vacaciones" class="form-control"  type="date"  required  /><br>
+	Inicio de contrato <input id="contrato" class="form-control"  type="date"  required  /><br>
+	Salario <input id="salario" class="form-control"  type="number" step="0.01" placeholder="salario" required  /><br>
+	Area de trabajo
+	<select id="area" class="form-control" >
+			<option value="1">Administracion</option> 
+		  	<option value="2" selected>Recursos Humanos</option>
+	</select><br>
+	<button id="enviarEmpleado" class="btn btn-primary">Aceptar</button>
+	</form><br>
+	
+	<script src="../scripts/script-registro.js"></script>

@@ -1,8 +1,4 @@
-package backend;
-
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+package com.kevin.modelos;
 
 public class Area {
     private int modulo; 
@@ -53,17 +49,6 @@ public class Area {
         this.descripcion = descripcion;
     } 
      
-    public void registrar() {
-	Connection conexion = new SqlConection().getConexion();
-	String sql = "INSERT INTO Area (descripcion, id_modulo) values (?,?)";
-	try {
-	    PreparedStatement stm = conexion.prepareStatement(sql);
-	    stm.setString(1, this.descripcion);
-	    stm.setInt(2, this.modulo);
-	    stm.execute();
-	} catch (SQLException e) {
-	    e.printStackTrace();
-	}
-    }
+
 
 }

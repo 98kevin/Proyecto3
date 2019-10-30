@@ -12,5 +12,4 @@ function iniciarSession(){
 	}, function(responseText) {
 		$('#tablaDeResultados').html(responseText);
 	});
-} 
-
+}

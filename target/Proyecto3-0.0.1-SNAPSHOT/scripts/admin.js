@@ -109,8 +109,8 @@ function enviarEmpleado(){
 		direccion : varDireccion.value,
 		iggs : varIggs.value,
 		irtra : varIrtra.value,
-		vacaciones : varFechaVacaciones.getTime(),
-		contrato : varFechaDeContrato.getTime(),
+		vacaciones : varFechaVacaciones.value,
+		contrato : varFechaDeContrato.value,
 		salario : varSalario.value,
 		area : varArea.value
 	}, function(responseText) {
