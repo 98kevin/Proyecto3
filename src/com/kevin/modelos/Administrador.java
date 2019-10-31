@@ -4,14 +4,14 @@ import java.sql.Date;
 
 import javax.servlet.http.HttpServletRequest;
 
-import com.kevin.manejadores.ManejadorAdministrador;
-
 public class Administrador extends Empleado{
     
     private String email; 
     private String password;
     
-    private static long unDia = 86400000;
+    private static final int AREA_ADMINISTRADOR= 1; 
+    
+    private static long MILIS_DIA = 86400000;
 
     public Administrador(String cui, String nombre, String direccion, double salario, int iggs, int irtra,
 	    Date fechaDeVacaciones, Date fechaDeInicio, Date fechaDeFin, int areaDeTrabajo) {
@@ -25,14 +25,12 @@ public class Administrador extends Empleado{
 	super.direccion=req.getParameter("direccion");
 	super.iggs = Integer.parseInt(req.getParameter("iggs"));
 	super.irtra = Integer.parseInt(req.getParameter("irtra"));
-	super.fechaDeVacaciones = new Date(Long.parseLong(req.getParameter("vacaciones"))+ unDia);  //se le suma un dia 
-	super.fechaDeInicio= new Date(Long.parseLong(req.getParameter("contrato"))+ unDia);  //se le suma un dia 
+	super.fechaDeVacaciones = new Date(Long.parseLong(req.getParameter("vacaciones"))+ MILIS_DIA);  //se le suma un dia 
+	super.fechaDeInicio= new Date(Long.parseLong(req.getParameter("contrato"))+ MILIS_DIA);  //se le suma un dia 
 	super.fechaDeFin = null;
 	super.salario = Double.parseDouble(req.getParameter("salario"));
-	super.areaDeTrabajo = Integer.parseInt(req.getParameter("area"));
-	this.password= req.getParameter("cui");
-	ManejadorAdministrador manejador = new ManejadorAdministrador();
-	manejador.registrarAdministador(this);
+	super.areaDeTrabajo = AREA_ADMINISTRADOR; 
+	this.password= req.getParameter("password");
     }
 
 

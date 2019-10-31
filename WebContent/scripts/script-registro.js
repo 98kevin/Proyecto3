@@ -1,6 +1,9 @@
 
-var box1 = document.getElementById("pass1").focusout(evaluarPassword());
-var box2 = document.getElementById("pass2").focusout(evaluarPassword());
+var box1 = document.getElementById("pass1");
+var box2 = document.getElementById("pass2");
+
+
+box2.addEventListener('onWrite',evaluarPassword());
 
 function evaluarPassword(){
 	var p1 = box1.value;

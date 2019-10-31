@@ -14,7 +14,7 @@ import com.kevin.modelos.Modulo;
 /**
  * Servlet implementation class creacionDeModulo
  */
-@WebServlet("/admin/creacionDeModulo")
+@WebServlet("/administrador/creacionDeModulo")
 public class creacionDeModulo extends HttpServlet {
 	private static final long serialVersionUID = 1L;
        

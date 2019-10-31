@@ -91,6 +91,7 @@ function enviarEmpleado(){
 	let varCui = document.getElementById('cui');
 	let varNombre = document.getElementById('nombre');
 	let varEmail = document.getElementById('email');
+	let varPassword1 = document.getElementById('pass1');
 	let varDireccion = document.getElementById('direccion');
 	let varIggs = document.getElementById('iggs');
 	let varIrtra = document.getElementById('irtra');
@@ -99,8 +100,6 @@ function enviarEmpleado(){
 	let contratoValue = document.getElementById('contrato').value; //fecha de contrato
 	let varFechaDeContrato = new Date(contratoValue);
 	let varSalario = document.getElementById('salario');
-	let controlArea = document.getElementById('area');
-	let varArea= controlArea.options[controlArea.selectedIndex].value; 
 
 	$.post('creacionDeEmpleado', {
 		cui : varCui.value,
@@ -112,9 +111,14 @@ function enviarEmpleado(){
 		vacaciones : varFechaVacaciones.getTime(),
 		contrato : varFechaDeContrato.getTime(),
 		salario : varSalario.value,
-		area : varArea.value
-	}, function(responseText) {
-        alert('Creacion del empleado realizada exitosamente');
-		formEmpleado.hidden='true';
-	});
+		password1 : varPassword1.value
+	}).done(
+		function(msg){
+		alert(msg);
+	}).fail(
+		function(xhr, status, error){
+			alert('estado del registro '+ status + '\n'+ error);
+		}
+    );
+	
 }

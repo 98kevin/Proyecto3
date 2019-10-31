@@ -29,7 +29,6 @@ public class ManejadorModulo extends DBConnection{
 	DBConnection sqlConn = new DBConnection(); 
 	Connection conexion =conexion(); 
 	String sql = "SELECT * FROM Modulo";
-	//String sqlCount = "SELECT COUNT(*) FROM Modulo";
         	try {
             	    PreparedStatement stm = conexion.prepareStatement(sql);
             	    ResultSet modulos = stm.executeQuery();
@@ -38,7 +37,7 @@ public class ManejadorModulo extends DBConnection{
             	    for(int i=0; i<registros; i++) {
             		modulos.next();
             		resultados[i][0]=modulos.getString(1);
-            		resultados[i][1]=String.valueOf(modulos.getInt(2));
+            		resultados[i][1]=String.valueOf(modulos.getString(2));
             	    }
         	} catch (SQLException e) {
         	    e.printStackTrace();

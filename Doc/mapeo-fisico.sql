@@ -114,21 +114,14 @@ CREATE TABLE IF NOT EXISTS `Hospital`.`Empleado` (
   `fecha_de_vacaciones` DATE NULL,
   `ejecucion_de_vacaciones` TINYINT NOT NULL DEFAULT 0,
   `cui_persona` VARCHAR(13) NOT NULL,
-  `id_periodo_laboral_actual` INT NOT NULL,
   `id_area` INT NOT NULL,
-  PRIMARY KEY (`id_empleado`, `cui_persona`, `id_periodo_laboral_actual`),
+  PRIMARY KEY (`id_empleado`, `cui_persona`),
   UNIQUE INDEX `idEmpleado_UNIQUE` (`id_empleado` ASC) ,
   INDEX `fk_Empleado_Persona1_idx` (`cui_persona` ASC) ,
-  INDEX `fk_Empleado_PeriodoLaboral1_idx` (`id_periodo_laboral_actual` ASC) ,
   INDEX `fk_Empleado_Area1_idx` (`id_area` ASC) ,
   CONSTRAINT `FK_PERSONA`
     FOREIGN KEY (`cui_persona`)
     REFERENCES `Hospital`.`Persona` (`cui`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
-  CONSTRAINT `FK_PERIODO_LABORAL`
-    FOREIGN KEY (`id_periodo_laboral_actual`)
-    REFERENCES `Hospital`.`Contrato` (`id_contrato`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
   CONSTRAINT `FK_AREA_EMPLEADO`

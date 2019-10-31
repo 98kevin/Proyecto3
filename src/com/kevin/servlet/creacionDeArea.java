@@ -33,9 +33,7 @@ public class creacionDeArea extends HttpServlet {
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 	    ManejadorModulo modulo = new ManejadorModulo(); 
 	    	String [][] modulos = modulo.modulosRegistrados();
-	    	int contador=0;
-	    	int a = modulos.length;
-	    	for(int i=0; i<a; i++) {
+	    	for(int i=0; i<modulos.length; i++) {
 	    		 response.getWriter().append("<option value=\""+modulos[i][0]+"\">"+modulos[i][1]+"</option>");		   
 		}
 	}
@@ -44,7 +42,6 @@ public class creacionDeArea extends HttpServlet {
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-	    System.out.println("Metodo post");
 	  int   codigoModulo= Integer.parseInt(request.getParameter("codigo"));
 	  String descripcion = request.getParameter("desc");
 	  Area area = new Area(codigoModulo, descripcion);

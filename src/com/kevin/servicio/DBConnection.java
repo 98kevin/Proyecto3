@@ -5,6 +5,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 
 public class DBConnection {
@@ -28,7 +29,6 @@ public class DBConnection {
     }
     
     
-    
     /**
      * Cuenta el total de registros de una tabla
      * @param sql
@@ -48,7 +48,24 @@ public class DBConnection {
 	}
 	return registros;
     }
-
-
     
+    
+    public int maximo(String tabla, String campo) {
+	int max=0; 
+	try {
+	    Connection conexion = conexion(); 
+	    Statement stm = conexion.createStatement();
+	    ResultSet rs = stm.executeQuery("SELECT MAX("+campo+") FROM " +tabla);
+	    if(rs.next()) {
+		max = rs.getInt(1);
+	    }
+	} catch (SQLException e ) {
+	    e.printStackTrace();
+	}
+	return max;
+    }
+    
+    
+    
+    	
 }

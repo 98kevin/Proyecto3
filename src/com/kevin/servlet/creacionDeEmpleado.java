@@ -7,7 +7,9 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.swing.JOptionPane;
 
+import com.kevin.manejadores.ManejadorAdministrador;
 import com.kevin.modelos.Administrador;
 
 /**
@@ -29,7 +31,6 @@ public class creacionDeEmpleado extends HttpServlet {
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		// TODO Auto-generated method stub
 		response.getWriter().append("Served at: ").append(request.getContextPath());
 	}
 
@@ -38,6 +39,9 @@ public class creacionDeEmpleado extends HttpServlet {
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 	    Administrador admin = new Administrador(request);
+	    ManejadorAdministrador manejador = new ManejadorAdministrador(); 
+	    String mensaje = manejador.registrarAdministador(admin); 
+	    response.getWriter().append(mensaje);
 	}
 
 }

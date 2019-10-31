@@ -9,22 +9,85 @@ import com.kevin.servicio.DBConnection;
 
 public class ManejadorAdministrador extends DBConnection{
 
-    
-    public void registrarAdministador(Administrador administrador) {
-	
-	String sqlPersona = "INSERT INTO Persona (cui, nombre, direccion) VALUES (?,?,?)";
-	
-	String sqlPeriodoLaboral = "INSERT INTO Contrato (salario, fecha_inicial,id_empleado) VALUES (?,?,?)";
-	
-	String sqlEmpleado = "INSERT INTO Empleado(porcentaje_igss, porcentajeIrtra,fecha_de_vacaciones, cui_persona, id_area)  VALUES (?,?,?,?,?)";
-	
+    /**
+     * Registra un nuevo administrador en la base de datos
+     * @param administrador
+     */
+    public String registrarAdministador(Administrador administrador) {
+	Connection conexion = conexion(); 
+	String msj= "";
 	try {
-	    Connection conexion = conexion();
-	    PreparedStatement stmPersona = conexion.prepareStatement(sqlPersona);
-	    
+	    conexion.setAutoCommit(false);
+	    registrarPersona(administrador,conexion); 
+	    registrarEmpleado(administrador, conexion);
+	    conexion.commit();
+	    registrarPeriodo(administrador, conexion);
+	    conexion.commit();
+	    msj += "Creacion de administrador exitosa"; 
 	} catch (SQLException e) {
-	    // TODO Auto-generated catch block
 	    e.printStackTrace();
+	    msj += "Error de intregridad de base de datos.  \n codigo de error" + e.getErrorCode();
+	    System.out.println(msj);
+	    try {
+		conexion.rollback();
+	    } catch (SQLException e1) {
+		e1.printStackTrace();
+	    }
+	} finally {
+	    try {
+		conexion.setAutoCommit(true);
+	    } catch (SQLException e) {
+		e.printStackTrace();
+	    }
 	}
+	return msj;
     }
+    
+    /**enviarEmpleado
+     * Registro de la pers		// TODO Auto-generated catch blockona del administrador
+     * @param administrador
+     * @throws SQLException 
+     */
+    public void registrarPersona(Administrador administrador, Connection conexion) throws SQLException {
+	String sqlPersona = "INSERT INTO Persona (cui, nombre, direccion) VALUES (?,?,?)";
+	    PreparedStatement stmPersona = conexion.prepareStatement(sqlPersona);
+	    stmPersona.setString(1, administrador.getCui());
+	    stmPersona.setString(2, administrador.getNombre());
+	    stmPersona.setString(3, administrador.getDireccion());
+	    stmPersona.execute();
+    }
+    
+    /**
+     * registro del periodo del administrador
+     * @param administrador
+     * @throws SQLException 
+     */
+    public void registrarPeriodo(Administrador administrador, Connection conexion) throws SQLException {
+	String sqlPeriodoLaboral = "INSERT INTO Contrato (salario, fecha_inicial,id_empleado) VALUES (?,?,?)";
+	PreparedStatement stmPeriodo;
+	    	stmPeriodo = conexion.prepareStatement(sqlPeriodoLaboral);
+		stmPeriodo.setDouble(1, administrador.getSalario());
+		stmPeriodo.setDate(2, administrador.getFechaDeInicio());
+		//el utlimo valor en la tabla empleado
+		stmPeriodo.setInt(3, maximo("Empleado", "id_empleado"));
+		stmPeriodo.execute();
+    }
+    
+    /**
+     * Registro del empleado Administrador
+     * @throws SQLException 
+     */
+    public void registrarEmpleado(Administrador administrador, Connection conexion) throws SQLException {
+	String sqlEmpleado = "INSERT INTO Empleado (porcentaje_igss, porcentaje_irtra,fecha_de_vacaciones, cui_persona, id_area)  VALUES (?,?,?,?,?)";
+	PreparedStatement stmEmpleado;
+	    stmEmpleado = conexion.prepareStatement(sqlEmpleado);
+	    stmEmpleado.setInt(1, administrador.getIggs());
+	    stmEmpleado.setInt(2, administrador.getIrtra());
+	    stmEmpleado.setDate(3, administrador.getFechaDeVacaciones());
+	    stmEmpleado.setString(4, administrador.getCui());
+	    stmEmpleado.setInt(5, administrador.getAreaDeTrabajo());
+	    stmEmpleado.execute();
+    }
+    
+    
 }
