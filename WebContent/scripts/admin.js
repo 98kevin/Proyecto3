@@ -27,6 +27,7 @@ botonCrearEmpleado.addEventListener('click', enviarEmpleado);
 mostrarFormNuevoEmpleado.addEventListener('click', mostrarFormEmpleado);
 
 
+
 //muestra los componentes de creacion de modulo
 function crearModulo(){
     campoNombre.hidden=false;
@@ -100,6 +101,7 @@ function enviarEmpleado(){
 	let contratoValue = document.getElementById('contrato').value; //fecha de contrato
 	let varFechaDeContrato = new Date(contratoValue);
 	let varSalario = document.getElementById('salario');
+	let varTipoEmpleado = document.getElementById('tipoEmpleado').value;
 
 	$.post('creacionDeEmpleado', {
 		cui : varCui.value,
@@ -111,7 +113,8 @@ function enviarEmpleado(){
 		vacaciones : varFechaVacaciones.getTime(),
 		contrato : varFechaDeContrato.getTime(),
 		salario : varSalario.value,
-		password1 : varPassword1.value
+		tipoEmpleado: varTipoEmpleado,
+		password : varPassword1.value
 	}).done(
 		function(msg){
 		alert(msg);

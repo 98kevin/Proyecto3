@@ -7,19 +7,20 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.kevin.manejadores.ManejadorSession;
+import com.kevin.manejadores.ManejadorHabitacion;
+import com.kevin.modelos.Habitacion;
 
 /**
- * Servlet implementation class inicioDeSesion
+ * Servlet implementation class Habitacion
  */
-@WebServlet("/general/inicioDeSesion")
-public class inicioDeSesion extends HttpServlet {
+@WebServlet("/administrador/habitacion")
+public class ServletHabitacion extends HttpServlet {
 	private static final long serialVersionUID = 1L;
        
     /**
      * @see HttpServlet#HttpServlet()
      */
-    public inicioDeSesion() {
+    public ServletHabitacion() {
         super();
         // TODO Auto-generated constructor stub
     }
@@ -28,7 +29,6 @@ public class inicioDeSesion extends HttpServlet {
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		// TODO Auto-generated method stub
 		response.getWriter().append("Served at: ").append(request.getContextPath());
 	}
 
@@ -36,18 +36,14 @@ public class inicioDeSesion extends HttpServlet {
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-	    	String mail = request.getParameter("correo");
-	    	String password= request.getParameter("password");
-	    	ManejadorSession manejador = new ManejadorSession(); 
-	    	boolean aceptado = manejador.verificarPassword(mail, password);
-	    	if (aceptado) {    
-	    	int area = manejador.consultarArea(mail); 
-	    	response.getWriter().append(manejador.obtenerDireccion(area));
-	    	}
-	    	else {
-	    	response.setStatus(405);
-	    	response.sendError(405);
-	    	}
+		int operacion = Integer.parseInt(request.getParameter("operacion"));
+		switch(operacion) {
+		case Habitacion.CREAR:
+		    Habitacion habitacion = new Habitacion(request);
+		    ManejadorHabitacion manjeador = new ManejadorHabitacion(); 
+		    String resultado = manjeador.registrarHabitacion(habitacion);
+		    response.getWriter().append(resultado); 
+		}
 	}
 
 }

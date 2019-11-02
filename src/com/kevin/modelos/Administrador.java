@@ -8,8 +8,7 @@ public class Administrador extends Empleado{
     
     private String email; 
     private String password;
-    
-    private static final int AREA_ADMINISTRADOR= 1; 
+
     
     private static long MILIS_DIA = 86400000;
 
@@ -19,18 +18,23 @@ public class Administrador extends Empleado{
     }
     
     public Administrador(HttpServletRequest req) {
-	super.cui= req.getParameter("cui");
-	super.nombre=req.getParameter("nombre");
-	this.email= req.getParameter("mail");
-	super.direccion=req.getParameter("direccion");
-	super.iggs = Integer.parseInt(req.getParameter("iggs"));
-	super.irtra = Integer.parseInt(req.getParameter("irtra"));
-	super.fechaDeVacaciones = new Date(Long.parseLong(req.getParameter("vacaciones"))+ MILIS_DIA);  //se le suma un dia 
-	super.fechaDeInicio= new Date(Long.parseLong(req.getParameter("contrato"))+ MILIS_DIA);  //se le suma un dia 
-	super.fechaDeFin = null;
-	super.salario = Double.parseDouble(req.getParameter("salario"));
-	super.areaDeTrabajo = AREA_ADMINISTRADOR; 
-	this.password= req.getParameter("password");
+	try {
+		super.cui= req.getParameter("cui");
+		super.nombre=req.getParameter("nombre");
+		this.email= req.getParameter("mail");
+		super.direccion=req.getParameter("direccion");
+		super.iggs = Integer.parseInt(req.getParameter("iggs"));
+		super.irtra = Integer.parseInt(req.getParameter("irtra"));
+		super.fechaDeVacaciones = new Date(Long.parseLong(req.getParameter("vacaciones"))+ MILIS_DIA);  //se le suma un dia 
+		super.fechaDeInicio= new Date(Long.parseLong(req.getParameter("contrato"))+ MILIS_DIA);  //se le suma un dia 
+		super.fechaDeFin = null;
+		super.salario = Double.parseDouble(req.getParameter("salario"));
+		super.areaDeTrabajo = Integer.parseInt(req.getParameter("tipoEmpleado")); 
+		this.password= req.getParameter("password");
+	} catch(NumberFormatException e) {
+	    e.printStackTrace();
+	}
+
     }
 
 

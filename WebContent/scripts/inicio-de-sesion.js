@@ -5,12 +5,15 @@ const correoVar = document.getElementById("email");
 const passwordVar = document.getElementById("password");
 
 function iniciarSession(){
-	alert(correoVar.value + passwordVar.value);
 	$.post('inicioDeSesion', {
 		correo : correoVar.value,
 		password: passwordVar.value
-	}, function(responseText) {
-		$('#tablaDeResultados').html(responseText);
-	});
-} 
-
+	}).done(
+		function(response){
+		window.location = response;
+	}).fail(
+		function(xhr, status, error){
+			alert('estado del registro '+ status + '\n'+ error);
+		}
+	);
+}

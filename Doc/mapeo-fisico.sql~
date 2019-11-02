@@ -24,8 +24,7 @@ CREATE TABLE IF NOT EXISTS `Hospital`.`Persona` (
   `cui` VARCHAR(13) NOT NULL,
   `nombre` VARCHAR(45) NOT NULL,
   `direccion` MEDIUMTEXT NULL,
-  PRIMARY KEY (`cui`),
-  UNIQUE INDEX `nombreDeUsuario_UNIQUE` (`nombre` ASC))
+  PRIMARY KEY (`cui`))
 ENGINE = InnoDB;
 
 

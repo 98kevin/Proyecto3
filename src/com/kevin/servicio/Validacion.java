@@ -11,11 +11,6 @@ package com.kevin.servicio;
  */
 public class Validacion {
 
-    /**
-     * 
-     */
-    public Validacion() {
-	super();
-    }
+
 
 }
