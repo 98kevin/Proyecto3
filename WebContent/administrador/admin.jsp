@@ -34,7 +34,11 @@
 	<c:import var = "formHabitacion" url = "form-creacion-habitacion.html" charEncoding="UTF-8" scope="page"></c:import>
 	${formHabitacion}
 	
+	<c:import var= "fromTarifa"  url= "from-tarifa.html" charEncoding= "UTF-8" scope= "page"> </c:import>
+	${fromTarifa}
+	
 	${foother}
+	
 	<script src="../scripts/admin.js"></script>
 	<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
 </body>
