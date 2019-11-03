@@ -7,9 +7,15 @@ import java.sql.SQLException;
 
 import com.kevin.modelos.Area;
 import com.kevin.servicio.DBConnection;
+import com.kevin.servicio.GeneradorHTML;
 
 public class ManejadorArea extends DBConnection{
 
+    
+    /**
+     * Registra el area en la base de datos
+     * @param area
+     */
     public void registrarArea(Area area) {
 	Connection conexion = conexion();
 	//codigo sql para el registro
@@ -24,6 +30,12 @@ public class ManejadorArea extends DBConnection{
 	}
     }
     
+    
+    /**
+     * Consulta las areas de trabajo junto a su modulo, y las agrega a un select, individualmetne como un <option> 
+     * @return Un Arreglo de <option>
+     * @throws SQLException
+     */
     public String consultarAreasDeTrabajo() throws SQLException {
 	StringBuffer areas = new StringBuffer(); 
 	Connection conexion = conexion();
@@ -34,6 +46,14 @@ public class ManejadorArea extends DBConnection{
 	    areas.append("<option value=\""+resultado.getInt(1)+"\">"+resultado.getString(2) +" - " +resultado.getString(3));
 	}
 	return areas.toString();
+    }
+    
+    public String consutarAreas() throws SQLException {
+	Connection conexion = conexion();
+	String sql = "Select Area.id_area, Area.descripcion, Modulo.nombre FROM Area INNER JOIN Modulo ON Area.id_modulo= Modulo.id_modulo";
+	PreparedStatement stm = conexion.prepareStatement(sql); 
+	ResultSet resultado = stm.executeQuery(); 
+	return GeneradorHTML.convertirTabla(resultado); 
     }
     
     

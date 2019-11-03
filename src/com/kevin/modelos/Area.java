@@ -1,6 +1,8 @@
 package com.kevin.modelos;
 
 public class Area {
+    
+    
     private int modulo; 
     private String descripcion;
     

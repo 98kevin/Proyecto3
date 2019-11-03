@@ -37,6 +37,8 @@
 	<c:import var= "fromTarifa"  url= "from-tarifa.html" charEncoding= "UTF-8" scope= "page"> </c:import>
 	${fromTarifa}
 	
+	<div id="tablaResultados" class= "table"></div>
+	
 	${foother}
 	
 	<script src="../scripts/admin.js"></script>

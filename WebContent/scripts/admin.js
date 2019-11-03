@@ -1,3 +1,8 @@
+const CONSULTAR_AREAS = 1;
+const CONSULTAR_MODULOS = 2;
+const CONSULTAR_EMPLEADOS = 3;
+const CONSULTAR_TARIFAS = 4;
+
 
 //botones del panel superior
 let botonCrear =  document.getElementById('crearModulo');
@@ -22,9 +27,26 @@ formEmpleado.style.display="none";
 botonCrear.addEventListener('click',crearModulo);
 botonEnvio.addEventListener('click', enviarDatos); 
 botonArea.addEventListener('click', mostrarFormArea);
+botonArea.addEventListener('click', mostrarAreas); 
 botonCrearArea.addEventListener('click', enviarArea);
 botonCrearEmpleado.addEventListener('click', enviarEmpleado);
 mostrarFormNuevoEmpleado.addEventListener('click', mostrarFormEmpleado);
+
+
+
+function mostrarAreas (){
+	let tablaResultados = document.getElementById('tablaResultados');
+	$.post('consultar', {
+		operacion : CONSULTAR_AREAS
+	}).done(
+		function(responseText){
+		tablaResultados.innerHTML= responseText;
+	}).fail(
+		function(xhr, status, error){
+			alert('estado del registro '+ status + '\n'+ error);
+		}
+    );
+}
 
 
 
@@ -56,12 +78,9 @@ function mostrarFormArea(){
 		url: "creacionDeArea",
 		success: function(responseText){
 			modulosDeArea.innerHTML = responseText; 
-			console.log(responseText);
 		},
 		error: function(XMLHttpRequest, textStatus, errorThrown) {
-			console.log(XMLHttpRequest);
-			console.log(textStatus);
-			console.log(errorThrown);
+			alert('estado del registro '+ textStatus + '\n'+ errorThrown);
 		}
 	});
 }
