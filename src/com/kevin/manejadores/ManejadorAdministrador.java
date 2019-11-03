@@ -18,7 +18,8 @@ public class ManejadorAdministrador extends DBConnection{
 	String msj= "";
 	try {
 	    conexion.setAutoCommit(false);
-	    registrarPersona(administrador,conexion); 
+	    ManjeadorPersona persona = new ManjeadorPersona(); 
+	    persona.registrarPersona(administrador,conexion); 
 	    registrarEmpleado(administrador, conexion);
 	    registrarCredenciales(administrador, conexion);
 	    conexion.commit();
@@ -56,19 +57,7 @@ public class ManejadorAdministrador extends DBConnection{
 	stmCredenciales.execute();
     }
 
-    /**enviarEmpleado
-     * Registro de la pers		// TODO Auto-generated catch blockona del administrador
-     * @param administrador
-     * @throws SQLException 
-     */
-    public void registrarPersona(Administrador administrador, Connection conexion) throws SQLException {
-	String sqlPersona = "INSERT INTO Persona (cui, nombre, direccion) VALUES (?,?,?)";
-	    PreparedStatement stmPersona = conexion.prepareStatement(sqlPersona);
-	    stmPersona.setString(1, administrador.getCui());
-	    stmPersona.setString(2, administrador.getNombre());
-	    stmPersona.setString(3, administrador.getDireccion());
-	    stmPersona.execute();
-    }
+
     
     /**
      * registro del periodo del administrador
