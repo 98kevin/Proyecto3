@@ -42,6 +42,8 @@ public class inicioDeSesion extends HttpServlet {
 	    	boolean aceptado = manejador.verificarPassword(mail, password);
 	    	if (aceptado) {    
 	    	int area = manejador.consultarArea(mail); 
+	    	int codigoUsuario= manejador.getCodigoUsuario(mail);
+	    	request.getSession().setAttribute("user", codigoUsuario);
 	    	response.getWriter().append(manejador.obtenerDireccion(area));
 	    	}
 	    	else {

@@ -16,7 +16,7 @@ public class DBConnection {
     private final static String DATABASE_NAME="Hospital";
     
     protected Connection conexion() {
-	  Connection conexion =null;
+	Connection conexion =null;
 	try {
 		Class.forName("org.mariadb.jdbc.Driver"); 
 		conexion = DriverManager.getConnection(SQL_PORT+DATABASE_NAME, SQL_USER, PASSWORD);

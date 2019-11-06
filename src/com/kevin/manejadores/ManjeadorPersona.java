@@ -8,7 +8,6 @@ import com.kevin.modelos.Persona;
 
 public class ManjeadorPersona {
 
-    
 /**
  * 
  * @param persona

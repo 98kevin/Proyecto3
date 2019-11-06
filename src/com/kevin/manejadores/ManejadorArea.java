@@ -43,7 +43,7 @@ public class ManejadorArea extends DBConnection{
 	PreparedStatement stm = conexion.prepareStatement(sql); 
 	ResultSet resultado = stm.executeQuery(); 
 	while(resultado.next()) {
-	    areas.append("<option value=\""+resultado.getInt(1)+"\">"+resultado.getString(2) +" - " +resultado.getString(3));
+	    areas.append("<option value=\""+resultado.getInt(1)+"\">"+resultado.getString(2) +" - " +resultado.getString(3)+"</option>");
 	}
 	return areas.toString();
     }

@@ -8,6 +8,11 @@ import java.sql.SQLException;
 import com.kevin.servicio.DBConnection;
 
 public class ManejadorSession extends DBConnection {
+    
+    public static final int AREA_ADMINISTRACION= 1;
+    public static final int AREA_RECURSOS_HUMANOS= 2;
+    public static final int AREA_FARMACIA= 3;
+    
 
     public boolean verificarPassword(String email, String password) {
 	String passwordEnDB = null; 
@@ -17,7 +22,6 @@ public class ManejadorSession extends DBConnection {
 	    e.printStackTrace();
 	}
 	return (password.equals(passwordEnDB));
-
     }
 
     private String consultarPassword(String email, String password) throws SQLException {
@@ -55,10 +59,31 @@ public class ManejadorSession extends DBConnection {
 	String direccion= null; 
 	String socket = "http://localhost:8080/Proyecto3";
 	switch(area) {
-	case 1: 
+	case AREA_ADMINISTRACION: 
 	    direccion= socket + "/administrador/admin.jsp";
+	    break;
+	case AREA_FARMACIA: 
+	    direccion= socket + "/farmacia/farmacia.jsp";
+	    break;
 	}
 	return direccion;
+    }
+
+    public int getCodigoUsuario(String mail) {
+	Connection conexion = conexion();
+	int codigoUsuario = 0;
+	String consultaSQL = "SELECT id_empleado FROM Credenciales WHERE correo_electronico=?"; 
+	PreparedStatement stm;
+	try {
+	    stm = conexion.prepareStatement(consultaSQL);
+	    stm.setString(1, mail);
+	    ResultSet consulta = stm.executeQuery(); 
+	    consulta.next();
+	    codigoUsuario = consulta.getInt(1);
+	} catch (SQLException e) {
+	    e.printStackTrace();
+	}
+	return codigoUsuario;
     }
     
 }
