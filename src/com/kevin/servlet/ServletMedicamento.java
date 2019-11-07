@@ -17,10 +17,13 @@ import com.kevin.modelos.Medicamento;
  */
 @WebServlet("/farmacia/medicamento")
 public class ServletMedicamento extends HttpServlet {
-	private static final long serialVersionUID = 1L;
+    	private static final long serialVersionUID = 1L;
 	private static final int REGISTRO_MEDICAMENTO = 1;
 	private static final int CONSULTAR_MEDICAMENTOS = 2;
 	private static final int COMPRAR_MEDICAMENTOS = 3;
+	private static final int CONSULTAR_INVENTARIO = 4;
+	private static final int REGISTRAR_ACTUALIZACION = 5;
+	
 	
 	       
     /**
@@ -55,6 +58,16 @@ public class ServletMedicamento extends HttpServlet {
 		break;
 	    case COMPRAR_MEDICAMENTOS:
 		response.getWriter().append(farmacia.comprarMedicamento(request));
+		break;
+	    case CONSULTAR_INVENTARIO:
+		response.getWriter().append(farmacia.consultarInventario());
+		break;
+	    case REGISTRAR_ACTUALIZACION:
+		try {
+		    response.getWriter().append(farmacia.registrarActualizacion(request));
+		} catch (NumberFormatException | SQLException e) {
+		    e.printStackTrace();
+		}
 		break;
 	    default:
 		break;

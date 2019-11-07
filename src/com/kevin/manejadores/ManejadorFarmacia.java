@@ -75,7 +75,7 @@ public class ManejadorFarmacia extends DBConnection{
 	try {
 	    ResultSet medicamentos = consultarMedicamentos();
 	    while(medicamentos.next()) {
-	        registros.append("<tr>");
+	        registros.append("<tr class=\""+colorearTexto(medicamentos)+"\">");
 	        registros.append("<td>"+medicamentos.getInt(1)+"</td>");
 	        registros.append("<td>"+medicamentos.getString(2)+"</td>");
 	        registros.append("<td>"+medicamentos.getDouble(3)+"</td>");
@@ -105,7 +105,7 @@ public class ManejadorFarmacia extends DBConnection{
 		registrarTransaccion(idUsuario,medicamento,false, cantidad,
 			ManejadorSession.AREA_FARMACIA,conexion);
 		registrarVenta(medicamento, cantidad, idUsuario,conexion, false);
-		actualizarCantidades(medicamento, cantidad, conexion);
+		actualizarCantidades(medicamento, medicamento.getCantidadExistente()+ cantidad, conexion);
 		conexion.commit();
 		mensaje.append("Registro realizado con exito");
 	} catch (SQLException e) {
@@ -121,10 +121,10 @@ public class ManejadorFarmacia extends DBConnection{
 	return mensaje.toString();
     }
 
-    private void actualizarCantidades(Medicamento medicamento, int cantidad, Connection conexion) throws SQLException {
+    private void actualizarCantidades(Medicamento medicamento, int nuevaCantidad, Connection conexion) throws SQLException {
 	String sql = "UPDATE Medicamento set cant_existencia=?  WHERE id_medicamento=?";
 	    PreparedStatement stm = conexion.prepareStatement(sql);
-	    stm.setInt(1, medicamento.getCantidadExistente()+ cantidad);
+	    stm.setInt(1, nuevaCantidad);
 	    stm.setInt(2, medicamento.getCodigo());
 	    stm.execute();
     }
@@ -179,5 +179,50 @@ public class ManejadorFarmacia extends DBConnection{
 		resultado.getDouble(4),
 		resultado.getInt(5),
 		resultado.getInt(6));
+    }
+
+    public String consultarInventario() {
+	StringBuffer registros= new StringBuffer(); 
+	registros.append("<input type=\"text\" id=\"cajaFiltro\" class=\"form-control\" onkeyup=\"filtrarTabla()\" placeholder=\"Filtrar por medicamento..\">");
+	registros.append("<table id=\"tabla\">");
+	registros.append("<tr>").append("<th>Codigo</th>");
+	registros.append("<th>Nombre</th>");
+	registros.append("<th>Precio Compra</th>");
+	registros.append("<th>Existencia</th>");
+	registros.append("<th>Cantidad Minima</th>");
+	registros.append("<th>Nueva Cantidad</th>").append("</tr>");
+	try {
+	    ResultSet medicamentos = consultarMedicamentos();
+	    while(medicamentos.next()) {
+	        registros.append("<tr class=\""+colorearTexto(medicamentos)+"\">");
+	        registros.append("<td>"+medicamentos.getInt(1)+"</td>");
+	        registros.append("<td>"+medicamentos.getString(2)+"</td>");
+	        registros.append("<td>"+medicamentos.getDouble(3)+"</td>");
+	        registros.append("<td>"+medicamentos.getInt(4)+"</td>");
+	        registros.append("<td>"+medicamentos.getInt(5)+"</td>");
+	        registros.append("<td ><input id=\"cant"+medicamentos.getInt(1)+"\"  class = \"form-control\" min=\"0\" placeholder=\"nueva cantidad...\"></input></td>");
+	        registros.append("<td><button id=\""+medicamentos.getInt(1)+"\" onClick=\"botonActualizar(this)\" class=\"botonActualizar\">Actualizar</button></td>");
+	        registros.append("</tr>");
+	    }
+    } catch(SQLException e ) {
+	e.printStackTrace();
+	}
+	return registros.toString();
+    }
+
+    private String colorearTexto(ResultSet medicamentos) throws SQLException {
+	String clase="";
+	//cantidad existente es menor que la cantidad actual
+	if (medicamentos.getInt(4) < medicamentos.getInt(5))
+	    clase = "text-danger";
+	return clase;
+    }
+
+    public String registrarActualizacion(HttpServletRequest request) throws NumberFormatException, SQLException {
+	Medicamento medicamento = leerMedicamento(Integer.parseInt(request.getParameter("idMedicamento")));
+	int nuevaCantidad = Integer.parseInt(request.getParameter("cantidad")); 
+	Connection conexion  = conexion(); 
+	actualizarCantidades(medicamento, nuevaCantidad, conexion);
+	return consultarInventario();
     }
 }
