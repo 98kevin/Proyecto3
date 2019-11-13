@@ -23,6 +23,7 @@
 	${foother}
 	
 <script src="farmacia.js"></script>
-<script src="filtro-tabla.js"></script>
+<script src="../scripts/filtro-tabla.js"></script>
+
 	<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
 </body>

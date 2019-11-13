@@ -9,7 +9,7 @@ import com.kevin.modelos.Area;
 import com.kevin.servicio.DBConnection;
 import com.kevin.servicio.GeneradorHTML;
 
-public class ManejadorArea extends DBConnection{
+public class ManejadorArea{
 
     
     /**
@@ -17,7 +17,7 @@ public class ManejadorArea extends DBConnection{
      * @param area
      */
     public void registrarArea(Area area) {
-	Connection conexion = conexion();
+	Connection conexion = DBConnection.getInstanceConnection().getConexion();
 	//codigo sql para el registro
 	String sql = "INSERT INTO Area (descripcion, id_modulo) values (?,?)";
 	try {
@@ -38,7 +38,7 @@ public class ManejadorArea extends DBConnection{
      */
     public String consultarAreasDeTrabajo() throws SQLException {
 	StringBuffer areas = new StringBuffer(); 
-	Connection conexion = conexion();
+	Connection conexion = DBConnection.getInstanceConnection().getConexion();
 	String sql = "Select Area.id_area, Area.descripcion, Modulo.nombre FROM Area INNER JOIN Modulo ON Area.id_modulo= Modulo.id_modulo WHERE Area.id_area>2";
 	PreparedStatement stm = conexion.prepareStatement(sql); 
 	ResultSet resultado = stm.executeQuery(); 
@@ -49,7 +49,7 @@ public class ManejadorArea extends DBConnection{
     }
     
     public String consutarAreas() throws SQLException {
-	Connection conexion = conexion();
+	Connection conexion = DBConnection.getInstanceConnection().getConexion();
 	String sql = "Select Area.id_area, Area.descripcion, Modulo.nombre FROM Area INNER JOIN Modulo ON Area.id_modulo= Modulo.id_modulo";
 	PreparedStatement stm = conexion.prepareStatement(sql); 
 	ResultSet resultado = stm.executeQuery(); 

@@ -7,14 +7,14 @@ import java.sql.SQLException;
 import com.kevin.modelos.Administrador;
 import com.kevin.servicio.DBConnection;
 
-public class ManejadorAdministrador extends DBConnection{
+public class ManejadorAdministrador {
 
     /**
      * Registra un nuevo administrador en la base de datos
      * @param administrador
      */
     public String registrarAdministador(Administrador administrador) {
-	Connection conexion = conexion(); 
+	Connection conexion = DBConnection.getInstanceConnection().getConexion();
 	String msj= "";
 	try {
 	    conexion.setAutoCommit(false);
@@ -52,7 +52,7 @@ public class ManejadorAdministrador extends DBConnection{
 	stmCredenciales.setString(1, administrador.getEmail());
 	stmCredenciales.setString(2, administrador.getPassword());
 		//el utlimo valor en la tabla empleado
-	stmCredenciales.setInt(3, maximo("Empleado", "id_empleado"));
+	stmCredenciales.setInt(3, DBConnection.getInstanceConnection().maximo("Empleado", "id_empleado"));
 	stmCredenciales.setInt(4, administrador.getAreaDeTrabajo());
 	stmCredenciales.execute();
     }
@@ -71,7 +71,7 @@ public class ManejadorAdministrador extends DBConnection{
 		stmPeriodo.setDouble(1, administrador.getSalario());
 		stmPeriodo.setDate(2, administrador.getFechaDeInicio());
 		//el utlimo valor en la tabla empleado
-		stmPeriodo.setInt(3, maximo("Empleado", "id_empleado"));
+		stmPeriodo.setInt(3, DBConnection.getInstanceConnection().maximo("Empleado", "id_empleado"));
 		stmPeriodo.execute();
     }
     

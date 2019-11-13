@@ -10,7 +10,7 @@ public class Administrador extends Empleado{
     private String password;
 
     
-    private static long MILIS_DIA = 86400000;
+    public static long MILIS_DIA = 86400000;
 
     public Administrador(String cui, String nombre, String direccion, double salario, int iggs, int irtra,
 	    Date fechaDeVacaciones, Date fechaDeInicio, Date fechaDeFin, int areaDeTrabajo) {

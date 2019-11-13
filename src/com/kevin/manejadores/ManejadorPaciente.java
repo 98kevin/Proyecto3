@@ -2,15 +2,17 @@ package com.kevin.manejadores;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 import com.kevin.modelos.Paciente;
 import com.kevin.servicio.DBConnection;
 
-public class ManejadorPaciente extends DBConnection{
+public class ManejadorPaciente {
 
     public String registrarPaciente(Paciente paciente) {
-	Connection conexion = conexion();
+	Connection conexion = DBConnection.getInstanceConnection().getConexion();
 	StringBuffer mensaje= new StringBuffer();
 	try {
 	    conexion.setAutoCommit(false);
@@ -48,4 +50,45 @@ public class ManejadorPaciente extends DBConnection{
     }
     
     
+    public String pacientesRegistrados() {
+	StringBuffer registros= new StringBuffer(); 
+	registros.append("<input type=\"text\" id=\"cajaFiltro\" class=\"form-control\" onkeyup=\"filtrarTabla()\""
+		+ " placeholder=\"Filtrar por nombre..\">");
+	registros.append("<table id=\"tabla\">");
+	registros.append("<tr>").append("<th>Cui</th>");
+	registros.append("<th>Nombre</th>");
+	registros.append("<th>Direccion</th>");
+	try {
+	    ResultSet pacientes = consultarPacientes();
+	    while(pacientes.next()) {
+	        registros.append("<tr class=\"\">");
+	        registros.append("<td>"+pacientes.getInt(1)+"</td>");
+	        registros.append("<td>"+pacientes.getString(2)+"</td>");
+	        registros.append("<td>"+pacientes.getString(3)+"</td>");
+	        registros.append("<td><button id=\""+pacientes.getInt(4)+"\" onClick=\"seleccionarPaciente(this)\" "
+	        	+ "class=\"botonSeleccionar btn btn-info \">Seleccionar Paciente</button></td>");
+	        registros.append("</tr>");
+	    }
+	} catch (SQLException e) {
+	    e.printStackTrace();
+	}
+	registros.append("</table>");
+	return registros.toString(); 
+    }
+
+
+    private ResultSet consultarPacientes() {
+	ResultSet pacientes = null; 
+	Connection conexion = DBConnection.getInstanceConnection().getConexion();
+	String sql = "SELECT p.cui, p.nombre, p.direccion, q.id_paciente FROM Persona p INNER JOIN Paciente q ON p.cui=q.cui";
+	Statement stm;
+	try {
+	    stm = conexion.createStatement();
+		pacientes = stm.executeQuery(sql);
+	} catch (SQLException e) {
+	    e.printStackTrace();
+	}
+	return pacientes;
+    }
+   
 }

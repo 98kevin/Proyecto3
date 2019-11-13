@@ -8,12 +8,12 @@ import java.sql.SQLException;
 import com.kevin.modelos.Modulo;
 import com.kevin.servicio.DBConnection;
 
-public class ManejadorModulo extends DBConnection{
+public class ManejadorModulo {
     /**
      * Registra el modulo en la base de datos
      */
     public void registrarModulo(Modulo modulo) {
-	Connection conexion = conexion();
+	Connection conexion =DBConnection.getInstanceConnection().getConexion();
 	String sql = "INSERT INTO Modulo (nombre) values (?);";
 	try {
 	    PreparedStatement stm = conexion.prepareStatement(sql);
@@ -26,13 +26,12 @@ public class ManejadorModulo extends DBConnection{
     
     public String [][] modulosRegistrados() {
 	String [][] resultados= null;
-	DBConnection sqlConn = new DBConnection(); 
-	Connection conexion =conexion(); 
+	Connection conexion =DBConnection.getInstanceConnection().getConexion();
 	String sql = "SELECT * FROM Modulo";
         	try {
             	    PreparedStatement stm = conexion.prepareStatement(sql);
             	    ResultSet modulos = stm.executeQuery();
-            	    int registros= sqlConn.contadorDeRegistros("SELECT COUNT(*) FROM Modulo");
+            	    int registros= DBConnection.getInstanceConnection().contadorDeRegistros("SELECT COUNT(*) FROM Modulo");
             	    resultados = new String[registros][2];
             	    for(int i=0; i<registros; i++) {
             		modulos.next();

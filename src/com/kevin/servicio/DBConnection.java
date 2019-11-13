@@ -8,26 +8,39 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 
-public class DBConnection {
-        
+public class DBConnection {    
+    
     private final static String SQL_USER="admin";
     private final static String PASSWORD="admin";
     private final static String SQL_PORT="jdbc:mysql://localhost:3306/";
     private final static String DATABASE_NAME="Hospital";
+    private static DBConnection dbConnection;
     
-    protected Connection conexion() {
-	Connection conexion =null;
+    private Connection conexion;
+    
+    /**
+     * @return the conexion
+     */
+    public Connection getConexion() {
+        return conexion;
+    }
+
+
+    // El constructor es privado, no permite que se genere un constructor por defecto.
+    private DBConnection() {
 	try {
 		Class.forName("org.mariadb.jdbc.Driver"); 
-		conexion = DriverManager.getConnection(SQL_PORT+DATABASE_NAME, SQL_USER, PASSWORD);
-	} catch (SQLException e) {
+		this.conexion = DriverManager.getConnection(SQL_PORT+DATABASE_NAME, SQL_USER, PASSWORD);
+	} catch (SQLException | ClassNotFoundException e) {
 	    e.printStackTrace();
-	} catch (ClassNotFoundException e) {
-	    e.printStackTrace();
-	}
-	return conexion;
     }
-    
+    }
+
+    public static DBConnection getInstanceConnection() {
+        if (dbConnection == null)
+            dbConnection = new DBConnection();
+        return dbConnection;
+    }
     
     /**
      * Cuenta el total de registros de una tabla
@@ -37,7 +50,6 @@ public class DBConnection {
     public int contadorDeRegistros(String sql) {
 	int registros = 0 ; 
 	try {
-	    Connection conexion = conexion(); 
 	    PreparedStatement stm = conexion.prepareStatement(sql);
 	    ResultSet contador = stm.executeQuery();
 	    if(contador.next()) {
@@ -49,11 +61,16 @@ public class DBConnection {
 	return registros;
     }
     
-    
+
+    /**
+     * Obtiene el ultimo registro de un campo en una tabla de la base de datos
+     * @param tabla
+     * @param campo
+     * @return
+     */
     public int maximo(String tabla, String campo) {
 	int max=0; 
 	try {
-	    Connection conexion = conexion(); 
 	    Statement stm = conexion.createStatement();
 	    ResultSet rs = stm.executeQuery("SELECT MAX("+campo+") FROM " +tabla);
 	    if(rs.next()) {
@@ -64,8 +81,5 @@ public class DBConnection {
 	}
 	return max;
     }
-    
-    
-    
     	
 }

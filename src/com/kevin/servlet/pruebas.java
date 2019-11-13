@@ -7,26 +7,26 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.kevin.manejadores.ManejadorSession;
-
 /**
- * Servlet implementation class inicioDeSesion
+ * Servlet implementation class pruebas
  */
-@WebServlet("/general/inicioDeSesion")
-public class inicioDeSesion extends HttpServlet {
+@WebServlet("/medico/pruebas")
+public class pruebas extends HttpServlet {
 	private static final long serialVersionUID = 1L;
        
     /**
      * @see HttpServlet#HttpServlet()
      */
-    public inicioDeSesion() {
+    public pruebas() {
         super();
+        // TODO Auto-generated constructor stub
     }
 
 	/**
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		// TODO Auto-generated method stub
 		response.getWriter().append("Served at: ").append(request.getContextPath());
 	}
 
@@ -34,20 +34,8 @@ public class inicioDeSesion extends HttpServlet {
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-	    	String mail = request.getParameter("correo");
-	    	String password= request.getParameter("password");
-	    	ManejadorSession manejador = new ManejadorSession(); 
-	    	boolean aceptado = manejador.verificarPassword(mail, password);
-	    	if (aceptado) {    
-	    	int area = manejador.consultarArea(mail); 
-	    	int codigoUsuario= manejador.getCodigoUsuario(mail);
-	    	request.getSession().setAttribute("user", codigoUsuario);
-	    	response.getWriter().append(manejador.obtenerDireccion(area));
-	    	}
-	    	else {
-	    	response.setStatus(405);
-	    	response.sendError(405);
-	    	}
+	    String[] myJsonData = request.getParameterValues("json[]");
+	    System.out.println("arr: "+myJsonData);
 	}
 
 }
