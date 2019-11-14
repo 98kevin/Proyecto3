@@ -90,5 +90,21 @@ public class ManejadorPaciente {
 	}
 	return pacientes;
     }
+    
+    public boolean isInternadoActualmente(int paciente) {
+	boolean resultado= false;
+	String sql = "SELECT * FROM Internado WHERE id_paciente=? AND fin IS NULL";
+	Connection conexion = DBConnection.getInstanceConnection().getConexion();
+	PreparedStatement stm;
+	try {
+	    stm = conexion.prepareStatement(sql);
+	    stm.setInt(1, paciente);
+	    ResultSet resultados = stm.executeQuery();	
+	    resultado =  (resultados.next()) ? true : false;
+	} catch (SQLException e) {
+	    e.printStackTrace();
+	}
+	return resultado;
+    }
    
 }

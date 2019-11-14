@@ -9,13 +9,14 @@ import java.sql.Statement;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.kevin.exceptions.ConversionDeNumeros;
+import com.kevin.exceptions.ManejoDePaciente;
 import com.kevin.modelos.Administrador;
 import com.kevin.servicio.DBConnection;
 
 public class ManejadorMedico {
     
     private StringBuffer respuesta;
-
     
     /**
      * Lee y ejecuta las transacciones involucradas con una consulta
@@ -37,38 +38,64 @@ public class ManejadorMedico {
 	catch(SQLException e) {
 	    e.printStackTrace();
 	    respuesta.append(e.getErrorCode());
-	    try {
-		conexion.rollback();
-	    } catch (SQLException e1) {
-		e1.printStackTrace();
-	    }
-	} 
+	    rollback(conexion);
+	} catch(ManejoDePaciente exp) {
+	    exp.printStackTrace();
+	    respuesta.append(exp.getMessage());
+	    rollback(conexion);
+	}  catch(NumberFormatException nfe) {
+	    nfe.printStackTrace();
+	    respuesta.append(nfe.getMessage());
+	    rollback(conexion);
+	}
 	finally {
-	    try {
-		conexion.setAutoCommit(true);
-	    } catch (SQLException e) {
-		e.printStackTrace();
-	    }
+	    habilitarCommit(conexion);
 	}
 	return respuesta.toString();
     }
     
     
+    private void habilitarCommit(Connection conexion) {
+	try {
+		conexion.setAutoCommit(true);
+	    } catch (SQLException e) {
+		e.printStackTrace();
+	    }
+    }
+
+
+    private void rollback(Connection conexion) {
+	try {
+		conexion.rollback();
+	    } catch (SQLException e1) {
+		e1.printStackTrace();
+	    }
+    }
+
+
     /**
      * Verifica si el paciente se queda internado. Y le asinga sus medicametnos. 
      * @param request
      * @param conexion
      * @throws SQLException 
+     * @throws ManejoDePaciente 
      */
-    private void asignarMedicamentos(HttpServletRequest request, Connection conexion) throws SQLException {
+    private void asignarMedicamentos(HttpServletRequest request, Connection conexion) throws SQLException, ManejoDePaciente, NumberFormatException {
 	boolean internado = Boolean.parseBoolean(request.getParameter("internado"));
+	int idInternado,paciente,habitacion;
 	if(internado) {
 	    registrarMedicamentos(request, conexion);
 	}
 	else {
-	    int  idInternado = DBConnection.getInstanceConnection().maximo("Internado", "id_internado")+1;  //el ultimo paciente internado
-	    int paciente = Integer.parseInt(request.getParameter("idPaciente"));
-	    registrarInternado(paciente, request,conexion);
+	    try {
+		 idInternado = DBConnection.getInstanceConnection().maximo("Internado", "id_internado")+1;  //el ultimo paciente internado
+		 paciente = Integer.parseInt(request.getParameter("idPaciente"));
+		 habitacion = Integer.parseInt(request.getParameter("habitacion"));
+	    } catch (Exception e) {
+		throw new ConversionDeNumeros ("Error de lectura de datos");
+	    }
+	    registrarInternado(paciente, habitacion, request,conexion);
+	    new ManejadorHabitacion().registrarCambioEnHabitacion(habitacion, true);
 	    registrarMedicosYEnfermeras(paciente, idInternado, request, conexion);
 	    registrarMedicamentos(paciente, idInternado,request,conexion);
 	}
@@ -130,16 +157,22 @@ public class ManejadorMedico {
      * @param request
      * @param conexion
      * @throws SQLException 
+     * @throws ManejoDePaciente 
      */
-    private void registrarInternado(int paciente, HttpServletRequest request, Connection conexion) throws SQLException {
-	  Date fecha= getFechaIngresada(request);
-	  int habitacion = Integer.parseInt(request.getParameter("habitacion"));
-	  String sql = "INSERT INTO Internado(id_paciente, inicio, id_habitacion) VALUES (?,?,?)";
-	  PreparedStatement stm = conexion.prepareStatement(sql);
-	  stm.setInt(1, paciente);
-	  stm.setDate(2, fecha);
-	  stm.setInt(3, habitacion);
-	  stm.execute();
+    private void registrarInternado(int paciente, int habitacion, HttpServletRequest request, Connection conexion)  throws SQLException, ManejoDePaciente {
+	ManejadorPaciente manejador = new ManejadorPaciente();
+	boolean estaInternado = manejador.isInternadoActualmente(paciente);
+	if(estaInternado) {
+	    throw new ManejoDePaciente("El paciente se encuentra internado");
+	}else {
+	    Date fecha= getFechaIngresada(request);
+		  String sql = "INSERT INTO Internado(id_paciente, inicio, id_habitacion) VALUES (?,?,?)";
+		  PreparedStatement stm = conexion.prepareStatement(sql);
+		  stm.setInt(1, paciente);
+		  stm.setDate(2, fecha);
+		  stm.setInt(3, habitacion);
+		  stm.execute();
+	}
     }
 
 

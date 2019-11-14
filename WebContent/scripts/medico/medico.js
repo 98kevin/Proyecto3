@@ -20,6 +20,7 @@ let tablaMedicos = document.getElementById('tablaDeMedicos');
 let tablaEnfermeras = document.getElementById('tablaDeEnfermeras');
 let habitaciones = document.getElementById('habitacion');
 let internado = document.getElementById('internado');
+let controlFecha = document.getElementById('fecha-consulta');
 
 let codigosMedicamentos = []; 
 let cantidadesMedicamentos = []; 
@@ -30,22 +31,35 @@ let enfermerasAsignadas =[];
 let formConsulta = document.getElementById('formConsulta');
 let botonTerminarConsulta = document.getElementById('botonAgregarMedicamento');
 
+window.onload= ocultarComponentes(); 
 
 //al cargar la pagina 
-formConsulta.style.display='none';
-tablaEnfermeras.style.display='none'; 
-tablaMedicos.style.display='none'; 
-habitaciones
+function ocultarComponentes(){
+	tablaResultados.style.display='none';
+	formConsulta.style.display='none';
+	tablaEnfermeras.style.display='none'; 
+	tablaMedicos.style.display='none'; 
+	habitaciones.style.display='none';
+	botonTerminarConsulta.style.display='none';
+	controlFecha.style.display='none';
+}
+
 /*
 *Evento del boton del encabezado Nueva Consulta
 */
 
 btnNuevaConsulta.addEventListener('click', () => {
+    codigosMedicamentos = []; 
+    cantidadesMedicamentos = []; 
+    medicosAsignados = [];
+    enfermerasAsignadas =[]; 
+    controlFecha.style.display='block';
     $.post('medico', {
         operacion: NUEVA_CONSULTA
     }).done(
         function (response){
             tablaResultados.style.display='block';
+            botonTerminarConsulta.style.display='block';
             tablaResultados.innerHTML = response; 
         }
     ).fail(
@@ -109,31 +123,33 @@ function agregarMedicamento(botonAgregar){
 botonTerminarConsulta.addEventListener('click', () => {
     valueFecha = document.getElementById('fecha-consulta').value;
     let fechaActual = new Date(valueFecha);
-    var cantidadesPrueba=[1,2,3,4];
+    let habitacionSeleccionada = document.getElementById('habitaciones').value;
     $.ajax({
-    url:"medico",
-    type:"POST",
-    dataType:'json',
-    data: {
-        operacion: REGISTRAR_CONSULTA, 
-	    cantidades:cantidadesPrueba,
-	    operacion: REGISTRAR_CONSULTA,
-	    idPaciente : idPacienteSeleccionado,
-	    fecha: fechaActual.getTime(),
-	    cantidades: cantidadesMedicamentos,
-	    codigos: codigosMedicamentos,
-	    isInternado: internado.checked,
-	    medicos: medicosAsignados,
-	    enfermeras: enfermerasAsignadas,
-	    habitacion: document.getElementById('habitaciones').value
-   },
-    success:function(data){
-        alertify.success('Consulta realizada con exito', 2); 
-        tablaResultados.style.display='none';
-    }
+        url: 'medico',
+        dataType: 'text',
+        type: 'post',
+        data: {
+            operacion: REGISTRAR_CONSULTA, 
+    	    idPaciente : idPacienteSeleccionado,
+    	    fecha: fechaActual.getTime(),
+    	    cantidades: cantidadesMedicamentos,
+    	    codigos: codigosMedicamentos,
+    	    isInternado: internado.checked,
+    	    medicos: medicosAsignados,
+    	    enfermeras: enfermerasAsignadas,
+    	    habitacion: habitacionSeleccionada
+       },
+       success: function( response){
+        	alertify.message(response, 2);
+        	ocultarComponentes();
+        },
+        error: function( jqXhr, textStatus, errorThrown ){
+        	alertify.error('estado del registros'+ textStatus+ ' error '+ errorThrown); 
+        	console.log('estado del registros'+ textStatus+ ' error '+ errorThrown);
+        }
+    })   
 });
-});
-    
+
 
 /**
  * Manejo del boton check para evaluar si esta internado 
@@ -167,7 +183,7 @@ internado.addEventListener('click', ()=>{
     } else{
         tablaEnfermeras.style.display='none'; 
         tablaMedicos.style.display='none'; 
-        habitaciones.sytle.display='none;'
+        habitaciones.style.display='none'; 
     }
 });
 

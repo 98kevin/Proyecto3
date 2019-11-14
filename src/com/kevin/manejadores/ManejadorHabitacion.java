@@ -47,4 +47,13 @@ public class ManejadorHabitacion {
 	return resultados.toString();
     }
 
+    
+    public void registrarCambioEnHabitacion(int codigo, boolean ocupada) throws SQLException {
+	String sql = "UPDATE Habitacion SET esta_ocupada=? WHERE id_habitacion=?";
+	Connection conexion = DBConnection.getInstanceConnection().getConexion();
+	PreparedStatement stm = conexion.prepareStatement(sql);
+	stm.setInt(1, codigo);
+	stm.setBoolean(2, ocupada);
+	stm.execute();
+    }
 }
