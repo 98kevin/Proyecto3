@@ -19,14 +19,21 @@ import com.kevin.manejadores.ManejadorPaciente;
  */
 @WebServlet("/medico/medico")
 public class ServletMedico extends HttpServlet {
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 3516163412083326515L;
     private static final int NUEVA_CONSULTA= 1;
     private static final int REGISTRAR_CIRUGIA= 2;
     private static final int REGISTRAR_CONSULTA= 3;    
     private static final int CONSULTAR_MEDICAMENTOS= 4;
     private static final int CONSULTAR_ENFERMERAS= 5;
     private static final int CONSULTAR_MEDICOS = 6;
+    private static final int AGREGAR_MEDICAMENTO = 7;
     private static final int CONSULTAR_HABITACIONES = 8;
-	private static final long serialVersionUID = 1L;
+    private static final int CONSULTAR_PACIENTES_INTERNADOS = 9;
+    
+
        
     /**
      * @see HttpServlet#HttpServlet()
@@ -52,6 +59,8 @@ public class ServletMedico extends HttpServlet {
 		break;
 	    case CONSULTAR_HABITACIONES: 
 		response.getWriter().append(new ManejadorHabitacion().consultarHabitacionesLibres());
+	    case CONSULTAR_PACIENTES_INTERNADOS:
+		response.getWriter().append(new ManejadorMedico().consultarTablaPacientesInternadosDeMedico((Integer)(request.getSession().getAttribute("user"))));
 	    }
 	}
 
@@ -71,6 +80,8 @@ public class ServletMedico extends HttpServlet {
 	    case REGISTRAR_CONSULTA: 
 		response.getWriter().append(new ManejadorMedico().nuevaConsulta(request));
 		break;
+	    case AGREGAR_MEDICAMENTO:
+		response.getWriter().append(new ManejadorMedico().asignarMedicamentos(request));
 	    default: 
 		
 	    break;

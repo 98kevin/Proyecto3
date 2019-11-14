@@ -51,13 +51,13 @@ public class ManejadorAdministrador {
 	stmCredenciales = conexion.prepareStatement(sqlCredenciales);
 	stmCredenciales.setString(1, administrador.getEmail());
 	stmCredenciales.setString(2, administrador.getPassword());
-		//el utlimo valor en la tabla empleado
-	stmCredenciales.setInt(3, DBConnection.getInstanceConnection().maximo("Empleado", "id_empleado"));
+	//el utlimo valor en la tabla empleado
+	stmCredenciales.setInt(3, DBConnection.getInstanceConnection().maximo("Empleado", "id_empleado")+1);
 	stmCredenciales.setInt(4, administrador.getAreaDeTrabajo());
 	stmCredenciales.execute();
     }
 
-
+    
     
     /**
      * registro del periodo del administrador

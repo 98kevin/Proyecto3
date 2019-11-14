@@ -7,6 +7,7 @@ const CONSULTAR_ENFERMERAS= 5;
 const CONSULTAR_MEDICOS = 6;
 const AGREGAR_MEDICAMENTO = 7;  
 const CONSULTAR_HABITACIONES=8;
+const CONSULTAR_PACIENTES_INTERNADOS= 9;
 
 var idPacienteSeleccionado=0;
 var numeroDeHabitacion = 0;
@@ -31,6 +32,9 @@ let enfermerasAsignadas =[];
 let formConsulta = document.getElementById('formConsulta');
 let botonTerminarConsulta = document.getElementById('botonAgregarMedicamento');
 
+//formulario de asignacion de medicamentos 
+let botonTerminarAsingacionMedicamentos = document.getElementById('btonAsignarMedicamentos');
+
 window.onload= ocultarComponentes(); 
 
 //al cargar la pagina 
@@ -41,7 +45,8 @@ function ocultarComponentes(){
 	tablaMedicos.style.display='none'; 
 	habitaciones.style.display='none';
 	botonTerminarConsulta.style.display='none';
-	controlFecha.style.display='none';
+    controlFecha.style.display='none';
+    botonTerminarAsingacionMedicamentos.style.display='none';
 }
 
 /*
@@ -54,6 +59,7 @@ btnNuevaConsulta.addEventListener('click', () => {
     medicosAsignados = [];
     enfermerasAsignadas =[]; 
     controlFecha.style.display='block';
+    formConsulta.style.display='block';
     $.post('medico', {
         operacion: NUEVA_CONSULTA
     }).done(
@@ -69,6 +75,28 @@ btnNuevaConsulta.addEventListener('click', () => {
     )
 });
 
+btnAsignarMedicamento.addEventListener('click', () =>{
+    alertify.message('Asingacion de medicamentos', 2);
+    botonTerminarAsingacionMedicamentos.style.display='block';
+    $.ajax({
+        url: 'medico',
+        dataType: 'html',
+        type: 'get',
+        data: {
+            operacion: CONSULTAR_PACIENTES_INTERNADOS
+       },
+       success: function( response){
+            tablaResultados.style.display='block';
+            tablaResultados.innerHTML = response;
+        },
+        error: function( jqXhr, textStatus, errorThrown ){
+        	alertify.error('estado del registros'+ textStatus+ ' error '+ errorThrown); 
+        	console.log('estado del registros'+ textStatus+ ' error '+ errorThrown);
+        }
+    })
+    
+});
+
 
 /*
 *Evento del boton del encabezado Registrar Cirugia 
@@ -78,13 +106,36 @@ btnRegistrarCirugia.addEventListener('click', () =>{
 });
 
 
-/*
-*Evento del boton del encabezado Asignar Medicamento
-*/
-btnAsignarMedicamento.addEventListener('click', () =>{
-    
+/**
+ * funcion del boton de agregar medicamentos a pacientes internados
+ */
+botonTerminarAsingacionMedicamentos.addEventListener('click', () =>{
+    $.ajax({
+        url: 'medico',
+        dataType: 'text',
+        type: 'post',
+        data: {
+            operacion: AGREGAR_MEDICAMENTO, 
+    	    cantidades: cantidadesMedicamentos,
+            codigos: codigosMedicamentos,
+            internado: idPacienteSeleccionado
+       },
+       success: function( response){
+        	alertify.message(response, 2);
+        	ocultarComponentes();
+        },
+        error: function( jqXhr, textStatus, errorThrown ){
+        	alertify.error('estado del registros'+ textStatus+ ' error '+ errorThrown); 
+        	console.log('estado del registros'+ textStatus+ ' error '+ errorThrown);
+        }
+    })
 });
 
+/**
+ * Funcion de seleccion de paciente
+ * @param {*} boton 
+ * El boton que 
+ */
 function seleccionarPaciente(boton){
     idPacienteSeleccionado= boton.getAttribute('id');
     alertify.success('Seleccion correcta',2); 
@@ -93,8 +144,7 @@ function seleccionarPaciente(boton){
     }).done(
         function (response){
             tablaResultados.style.display='block';
-            tablaResultados.innerHTML = response; 
-            formConsulta.style.display='block';
+            tablaResultados.innerHTML = response;
         }
     ).fail(
         function (xhr, status, error){

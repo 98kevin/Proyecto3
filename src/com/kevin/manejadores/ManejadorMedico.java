@@ -54,7 +54,10 @@ public class ManejadorMedico {
 	return respuesta.toString();
     }
     
-    
+    /**
+     * Habilita el autoCommit de un conexion
+     * @param conexion
+     */
     private void habilitarCommit(Connection conexion) {
 	try {
 		conexion.setAutoCommit(true);
@@ -63,7 +66,10 @@ public class ManejadorMedico {
 	    }
     }
 
-
+/**
+ * Reintegra la base de datos, de una mala transaccion. 
+ * @param conexion
+ */
     private void rollback(Connection conexion) {
 	try {
 		conexion.rollback();
@@ -97,7 +103,7 @@ public class ManejadorMedico {
 	    registrarInternado(paciente, habitacion, request,conexion);
 	    new ManejadorHabitacion().registrarCambioEnHabitacion(habitacion, true);
 	    registrarMedicosYEnfermeras(paciente, idInternado, request, conexion);
-	    registrarMedicamentos(paciente, idInternado,request,conexion);
+	    registrarMedicamentos(idInternado,request,conexion);
 	}
     }
 
@@ -109,20 +115,18 @@ public class ManejadorMedico {
      * @param conexion
      * @throws SQLException 
      */
-    private void registrarMedicamentos(int paciente, int idInternado, HttpServletRequest request, Connection conexion) throws SQLException {
+    private void registrarMedicamentos( int idInternado, HttpServletRequest request, Connection conexion) throws SQLException {
 	String [] codigosMedicamentos  = request.getParameterValues("codigos[]");
 	String [] cantidadesMedicamentos  = request.getParameterValues("cantidades[]");
 	  for (int i = 0; i < codigosMedicamentos.length; i++) {
-	      String sql = "INSERT INTO Internado_tiene_Medicamento (id_internado, id_paciente, id_medicamento, cantidad) "
-	      	+ " VALUES (?,?,?,?)"; 
+	      String sql = "INSERT INTO Internado_tiene_Medicamento (id_internado, id_medicamento, cantidad) "
+	      	+ " VALUES (?,?,?)"; 
 		  PreparedStatement stm = conexion.prepareStatement(sql); 
 		  stm.setInt(1, idInternado);
-		  stm.setInt(2, paciente );
-		  stm.setInt(3, Integer.parseInt(codigosMedicamentos[i]));
-		  stm.setInt(4, Integer.parseInt(cantidadesMedicamentos[i]));
+		  stm.setInt(2, Integer.parseInt(codigosMedicamentos[i]));
+		  stm.setInt(3, Integer.parseInt(cantidadesMedicamentos[i]));
 		  stm.execute();
 	}
-	
     }
 
     /**
@@ -184,11 +188,9 @@ public class ManejadorMedico {
     private ResultSet consultarMedicosEnDB() throws SQLException {
 	String sql ="SELECT e.id_empleado, p.nombre FROM Persona p INNER JOIN "
 		+ " Empleado e ON p.cui=e.cui_persona WHERE e.id_area=4"; 
-	ResultSet enfermeras = null;
 	Connection conexion = DBConnection.getInstanceConnection().getConexion();
 	Statement stm =conexion.createStatement();
-	enfermeras = stm.executeQuery(sql);
-	return enfermeras;
+	 return  stm.executeQuery(sql);
     }
     
     
@@ -234,7 +236,14 @@ public class ManejadorMedico {
 	}
     }
 
-
+    /**
+     * Registra la asignacion de un medicamento a una consulta. 
+     * @param idConsulta
+     * @param cantidad
+     * @param codigo
+     * @param conexion
+     * @throws SQLException
+     */
     private void asingarMedicamento(int idConsulta, String cantidad, String codigo, Connection conexion ) throws SQLException {
 	String sql = "INSERT INTO Consulta_tiene_Medicamentos (id_consulta, id_medicamento, cantidad) VALUES (?,?,?)";
 	PreparedStatement stm = conexion.prepareStatement(sql);
@@ -325,4 +334,76 @@ public class ManejadorMedico {
 	stm.execute();
     }
     
+    
+    /**
+     * Lee y asinga los medicamentos a un paciente internado. 
+     * @param request
+     * @return
+     * @throws SQLException 
+     */
+
+    public String asignarMedicamentos(HttpServletRequest request) {
+	StringBuffer respuesta = new StringBuffer();
+	int internado = Integer.parseInt(request.getParameter("internado"));  //paciente internado
+	Connection conexion = DBConnection.getInstanceConnection().getConexion();
+	try {
+	    conexion.setAutoCommit(false);
+	    registrarMedicamentos(internado, request, conexion);
+	    respuesta.append("Medicamentos asignados correctamente");
+	} catch (SQLException e) {
+	    e.printStackTrace();
+	    respuesta.append("Ocurrio un error al asignar los medicametnos");
+	    rollback(conexion);
+	} finally {
+	    habilitarCommit(conexion);
+	}
+	return respuesta.toString();
+    }
+    
+    
+    public String consultarTablaPacientesInternadosDeMedico(int medico) {
+	StringBuffer registros= new StringBuffer(); 
+	registros.append("<input type=\"text\" id=\"cajaFiltro\" class=\"form-control\" onkeyup=\"filtrarTabla()\" placeholder=\"Filtrar por nombre..\">");
+	registros.append("<table id=\"tabla\">");
+	registros.append("<tr>");
+	registros.append("<th>Codigo</th>");
+	registros.append("<th>Nombre</th>");
+	registros.append("<th>Habitacion</th>");
+	registros.append("<th>Fecha de Inicio</th>");
+	registros.append("</tr>");
+	try {
+	    ResultSet pacientes = consultarPacientesInternados(medico);
+	    while(pacientes.next()) {
+	        registros.append("<tr class=\"\">");
+	        registros.append("<td>"+pacientes.getInt(1)+"</td>");
+	        registros.append("<td>"+pacientes.getString(2)+"</td>");
+	        registros.append("<td>"+pacientes.getInt(3)+"</td>");
+	        registros.append("<td>"+pacientes.getDate(4)+"</td>");
+	        registros.append("<td><button id=\""+pacientes.getInt(1)+"\" onClick=\"seleccionarPaciente(this)\" "
+	        	+ "class=\"botonSeleccionar btn btn-info \">Seleccionar Paciente</button></td>");
+	        registros.append("</tr>");
+	    }
+	} catch (SQLException e) {
+	    e.printStackTrace();
+	}
+	registros.append("</table>");
+	return registros.toString(); 
+    }
+
+    /**
+     * Genera la consulta a la base de datos de los pacientes internados. 
+     * @return
+     * @throws SQLException 
+     */
+    private ResultSet consultarPacientesInternados(int medico) throws SQLException {
+	String sql = "SELECT i.id_internado , persona.nombre , i.id_habitacion, i.inicio " + 
+		"	FROM Internado i " + 
+		"		INNER JOIN Paciente p ON p.id_paciente= i.id_paciente " + 
+		"        INNER JOIN Persona persona ON persona.cui=p.cui" + 
+		"		INNER JOIN Internado_tiene_Empleado pte ON pte.id_internado = i.id_internado AND pte.id_empleado = ? "
+		+ "		WHERE i.fin IS NULL";
+	PreparedStatement stm = DBConnection.getInstanceConnection().getConexion().prepareStatement(sql);
+	stm.setInt(1, medico);
+	return stm.executeQuery();
+    }
 }

@@ -40,7 +40,7 @@
 	
 	<br><br>
 	<button id="botonAgregarMedicamento"class="btn btn-primary center form-control">Aceptar</button>	
-	
+		<button id="btonAsignarMedicamentos"class="btn btn-primary center form-control">Asignar Medicamentos</button>
 	
 	${foother}
 	
