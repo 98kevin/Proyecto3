@@ -261,13 +261,14 @@ public class ManejadorMedico {
      * @throws SQLException 
      */
     private void registrarPago(HttpServletRequest request, Connection conexion, int idMedico) throws SQLException {
-	String sql = "INSERT INTO Registro_Monetario(descripcion, monto, fecha, tipo, id_area) VALUES (?,?,?,?,?)";
+	String sql = "INSERT INTO Cuenta(id_paciente, detalle,monto, pagado,fecha, id_area) VALUES (?,?,?,?,?,?)";
 	PreparedStatement stm = conexion.prepareStatement(sql);
-	stm.setString(1,getDescripcionConsulta());
-	stm.setDouble(2, getMontoConsulta(conexion));
-	stm.setDate(3, getFechaIngresada(request));
-	stm.setBoolean(4, true);  //ingreso
-	stm.setInt(5, getIdArea(idMedico, conexion));
+	stm.setInt(1,	Integer.parseInt(request.getParameter("idPaciente")));
+	stm.setString(2,getDescripcionConsulta());
+	stm.setDouble(3, getMontoConsulta(conexion));
+	stm.setBoolean(4, false);  //No se ha pagado
+	stm.setDate(5, getFechaIngresada(request));
+	stm.setInt(6, getIdArea(idMedico, conexion));
 	stm.execute();
     }
 
