@@ -197,7 +197,7 @@ botonTerminarConsulta.addEventListener('click', () => {
         	alertify.error('estado del registros'+ textStatus+ ' error '+ errorThrown); 
         	console.log('estado del registros'+ textStatus+ ' error '+ errorThrown);
         }
-    })   
+    })   //finalizacion de la peticion ajax
 });
 
 

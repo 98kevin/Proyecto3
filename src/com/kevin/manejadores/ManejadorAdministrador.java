@@ -18,7 +18,7 @@ public class ManejadorAdministrador {
 	String msj= "";
 	try {
 	    conexion.setAutoCommit(false);
-	    ManjeadorPersona persona = new ManjeadorPersona(); 
+	    ManejadorPersona persona = new ManejadorPersona(); 
 	    persona.registrarPersona(administrador,conexion); 
 	    registrarEmpleado(administrador, conexion);
 	    registrarCredenciales(administrador, conexion);

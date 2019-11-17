@@ -5,6 +5,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import javax.servlet.http.HttpServletRequest;
+
 import com.kevin.modelos.Area;
 import com.kevin.servicio.DBConnection;
 import com.kevin.servicio.GeneradorHTML;
@@ -54,6 +56,27 @@ public class ManejadorArea{
 	PreparedStatement stm = conexion.prepareStatement(sql); 
 	ResultSet resultado = stm.executeQuery(); 
 	return GeneradorHTML.convertirTabla(resultado); 
+    }
+
+
+    public CharSequence registrarCirugia(HttpServletRequest request) {
+	StringBuffer respuesta = new StringBuffer(); 
+	Connection conexion = DBConnection.getInstanceConnection().getConexion();
+	String sql = "INSERT INTO Cirugias_Disponibles (descripcion, costo_al_hospital, tarifa_de_especialista, precio_al_cliente)  VALUES (?,?,?,?)";
+	PreparedStatement stm;
+	try {
+	    stm = conexion.prepareStatement(sql);
+	    stm.setString(1, request.getParameter("descripcion"));
+	    stm.setDouble(2, Double.parseDouble(request.getParameter("costo")));
+	    stm.setDouble(3, Double.parseDouble(request.getParameter("tarifaEspecialista")));
+	    stm.setDouble(4, Double.parseDouble(request.getParameter("precio")));
+	    stm.execute();
+	    respuesta.append("Registro de Nueva Cirugia correcto");
+	} catch (SQLException e) {
+	    e.printStackTrace();
+	    respuesta.append("Ocurrio un error al registrar la cirugia. Codigo de error: "+e.getErrorCode());
+	} 
+	return respuesta.toString();
     }
     
     

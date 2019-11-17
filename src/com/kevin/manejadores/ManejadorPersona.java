@@ -6,7 +6,7 @@ import java.sql.SQLException;
 
 import com.kevin.modelos.Persona;
 
-public class ManjeadorPersona {
+public class ManejadorPersona {
 
 /**
  * 

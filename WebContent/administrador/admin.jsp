@@ -7,6 +7,8 @@
 <meta charset="UTF-8">
 <title>Administrador</title>
  <link rel="shortcut icon" href="../icons/farmacia.png" />
+<link href="../scripts/alertifyjs/css/alertify.css" rel="stylesheet">
+<link href="../scripts/alertifyjs/css/themes/default.css" rel="stylesheet">
 </head>
 <body>
 	${encabezado}
@@ -31,6 +33,9 @@
 	<c:import var = "formEmpleado" url = "form-creacion-empleado.html" charEncoding="UTF-8" scope="page"></c:import>
 	${formEmpleado}
 	
+		<c:import var = "formCirugia" url = "form-creacion-cirugia.html" charEncoding="UTF-8" scope="page"></c:import>
+	${formCirugia}
+	
 	<c:import var = "formHabitacion" url = "form-creacion-habitacion.html" charEncoding="UTF-8" scope="page"></c:import>
 	${formHabitacion}
 	
@@ -43,4 +48,5 @@
 	
 	<script src="../scripts/admin.js"></script>
 	<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+	 <script src="../scripts/alertifyjs/alertify.js" type="text/javascript"></script>
 </body>

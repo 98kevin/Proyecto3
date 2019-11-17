@@ -7,17 +7,19 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.kevin.manejadores.ManejadorRecursosHumanos;
+
 /**
- * Servlet implementation class pruebas
+ * Servlet implementation class ServletRecurosHumanos
  */
-@WebServlet("/medico/pruebas")
-public class pruebas extends HttpServlet {
+@WebServlet("/recursos-humanos/creacion-de-medico-especialista")
+public class ServletRecurosHumanos extends HttpServlet {
 	private static final long serialVersionUID = 1L;
        
     /**
      * @see HttpServlet#HttpServlet()
      */
-    public pruebas() {
+    public ServletRecurosHumanos() {
         super();
         // TODO Auto-generated constructor stub
     }
@@ -26,16 +28,14 @@ public class pruebas extends HttpServlet {
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		// TODO Auto-generated method stub
-		response.getWriter().append("Served at: ").append(request.getContextPath());
+		
 	}
 
 	/**
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-	    String[] myJsonData = request.getParameterValues("json[]");
-	    System.out.println("arr: "+myJsonData);
+		response.getWriter().append(new ManejadorRecursosHumanos().registrarMedicoEspecialista(request));
 	}
 
 }

@@ -16,7 +16,7 @@ public class ManejadorPaciente {
 	StringBuffer mensaje= new StringBuffer();
 	try {
 	    conexion.setAutoCommit(false);
-	    ManjeadorPersona persona = new ManjeadorPersona(); 
+	    ManejadorPersona persona = new ManejadorPersona(); 
 	    persona.registrarPersona(paciente,conexion); 
 	    registrarPaciente(paciente, conexion); 
 	    conexion.commit();

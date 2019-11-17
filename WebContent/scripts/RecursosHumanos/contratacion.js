@@ -1,10 +1,28 @@
 
-
+//botones
 let botonContratarEmpleado = document.getElementById('contratarNuevoEmpleado');
+let botonRegistrarMedicoEspecialista= document.getElementById('registrarMedicoEspecialista');
+let botonRegistroMedicoEspecialista=document.getElementById('registrarNuevoEspecialista');
+
+//formularios
+let formEspecialista=document.getElementById('formMedicoEspecialista');
+formEspecialista.style.display='none';
+
+//eventos y llamadas a las funciones
+botonRegistrarMedicoEspecialista.addEventListener('click', mostrarFormularioMedicoEspecialista)
+
+
+
+//Funciones
+
+function mostrarFormularioMedicoEspecialista(){
+	formEspecialista.style.display='block';
+}
+
 
 //carga de las areas en el formulario
 window.onload = function() {
-    let areas = this.document.getElementById('areaDeTrabajo');
+	let areas = this.document.getElementById('areaDeTrabajo');
     $.get('contrataciones', {})
     .done(
             function(response){
@@ -58,3 +76,21 @@ botonContratarEmpleado.addEventListener('click', () => {
     ); 
     })
 
+//boton del formulario de registro de especialista
+botonRegistroMedicoEspecialista.addEventListener('click', () =>{
+	console.log('ingreso');
+	$.post('creacion-de-medico-especialista', {
+		cui : document.getElementById('cuiMedicoEspecilista').value,
+		nombre : document.getElementById('nombreMedicoEspecilista').value,
+		direccion : document.getElementById('direccionMedicoEspecilista').value,
+		colegiado : document.getElementById('colegiadoMedicoEspecilista').value
+	}).done(
+		function(responseText){
+		alertify.message(responseText);
+		formEspecialista.style.display='none'; //ocultamos el formulario
+	}).fail(
+		function(xhr, status, error){
+			alert('Ha ocurrido un error. Estado '+ status+ '. Codigo de error '+ error);
+		}
+	);
+});

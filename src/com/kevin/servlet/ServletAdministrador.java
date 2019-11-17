@@ -47,6 +47,8 @@ public class ServletAdministrador extends HttpServlet {
 		    String resultado = manejador.consutarAreas();
 		    response.getWriter().append(resultado);
 		    break;
+		case Main.REGISTRAR_CIRUGIA:
+		    response.getWriter().append(manejador.registrarCirugia(request));
 	    default:
 		break;
 	    }

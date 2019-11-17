@@ -62,12 +62,16 @@ public class ManejadorSession  {
 	case AREA_ADMINISTRACION: 
 	    direccion= socket + "/administrador/admin.jsp";
 	    break;
+	case AREA_RECURSOS_HUMANOS: 
+	    direccion = socket + "/recursos-humanos/recursos-humanos.jsp";
+	    break;
 	case AREA_FARMACIA: 
 	    direccion= socket + "/farmacia/farmacia.jsp";
 	    break;
 	case AREA_MEDICOS: 
 	    direccion= socket + "/medico/medico.jsp";
 	    break;
+
 	}
 	return direccion;
     }

@@ -2,11 +2,12 @@ const CONSULTAR_AREAS = 1;
 const CONSULTAR_MODULOS = 2;
 const CONSULTAR_EMPLEADOS = 3;
 const CONSULTAR_TARIFAS = 4;
-
+const REGISTRAR_CIRUGIA = 5; 
 
 //botones del panel superior
 let botonCrear =  document.getElementById('crearModulo');
 let botonArea = document.getElementById('crearArea');
+let botonCrearCirugia = document.getElementById('crearCirugia');
 
 //formulario de modulo
 let campoNombre = document.getElementById('campoNombre');
@@ -21,7 +22,14 @@ let botonCrearEmpleado = document.getElementById('enviarEmpleado');
 //formulario de empleado
 let botonMostrarFormNuevoEmpleado = document.getElementById('mostrarFormNuevoEmpleado');
 let formEmpleado = document.getElementById('form-empleado');
-formEmpleado.style.display="none";
+
+//formulario de creacion de cirugia
+let formCirugia = document.getElementById('form-crear-cirugia');
+let registrarNuevaCirugia = document.getElementById('registrarNuevaCirugia');
+
+formEmpleado.style.display='none';
+formCirugia.style.display='none';
+
 
 //eventos de los botones
 botonCrear.addEventListener('click',crearModulo);
@@ -30,8 +38,36 @@ botonArea.addEventListener('click', mostrarFormArea);
 botonArea.addEventListener('click', mostrarAreas); 
 botonCrearArea.addEventListener('click', enviarArea);
 botonCrearEmpleado.addEventListener('click', enviarEmpleado);
+botonCrearCirugia.addEventListener('click', mostrarFormCirugia);
 mostrarFormNuevoEmpleado.addEventListener('click', mostrarFormEmpleado);
+registrarNuevaCirugia.addEventListener('click', registrarCirugia);
 
+
+function mostrarFormCirugia(){
+	formCirugia.style.display='block';
+}
+
+/**
+ * Envio de solicitud de creacion de nueva cirugia
+ */
+function registrarCirugia(){
+	$.post('consultar', {
+		operacion : REGISTRAR_CIRUGIA,
+		descripcion: document.getElementById('descripcion-cirugia').value,
+		costo : document.getElementById('costo-al-hospital').value,
+		tarifaEspecialista : document.getElementById('tarifa-de-especialista').value,
+		precio : document.getElementById('precio-al-cliente').value
+	}).done(
+		function(responseText){
+		alertify.message(responseText,2);
+		alertify.message('Creacion correcta',2);
+		formCirugia.style.display='none';
+	}).fail(
+		function(xhr, status, error){
+			alert('estado del registro '+ status + '\n'+ error);
+		}
+    );
+}
 
 
 function mostrarAreas (){
