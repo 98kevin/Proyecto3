@@ -8,11 +8,14 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import com.kevin.exceptions.ConversionDeNumeros;
 import com.kevin.exceptions.ManejoDePaciente;
 import com.kevin.modelos.Administrador;
+import com.kevin.modelos.Cirugia;
 import com.kevin.servicio.DBConnection;
+import com.kevin.servicio.GeneradorHTML;
 
 public class ManejadorMedico {
     
@@ -200,7 +203,7 @@ public class ManejadorMedico {
      */
     public String consultarMedicos() {
 	    StringBuffer registros= new StringBuffer(); 
-		registros.append("<input type=\"text\" id=\"cajaFiltro\" class=\"form-control\" onkeyup=\"filtrarTabla()\" "
+		registros.append("<input type=\"text\" id=\"cajaFiltro\" class=\"form-control table\" onkeyup=\"filtrarTabla()\" "
 			+ " placeholder=\"Filtrar por medico..\">");
 		registros.append("<table class=\"table\" id=\"tabla\">");
 		registros.append("<tr>").append("<th>Codigo</th>");
@@ -365,7 +368,7 @@ public class ManejadorMedico {
     public String consultarTablaPacientesInternadosDeMedico(int medico) {
 	StringBuffer registros= new StringBuffer(); 
 	registros.append("<input type=\"text\" id=\"cajaFiltro\" class=\"form-control\" onkeyup=\"filtrarTabla()\" placeholder=\"Filtrar por nombre..\">");
-	registros.append("<table id=\"tabla\">");
+	registros.append("<table id=\"tabla\" class=\"table\">");
 	registros.append("<tr>");
 	registros.append("<th>Codigo</th>");
 	registros.append("<th>Nombre</th>");
@@ -406,5 +409,155 @@ public class ManejadorMedico {
 	PreparedStatement stm = DBConnection.getInstanceConnection().getConexion().prepareStatement(sql);
 	stm.setInt(1, medico);
 	return stm.executeQuery();
+    }
+
+    /**
+     * Genera condigo html de las cirugias disponibles en la DB
+     * @return codigo html con las cirugias disponibles
+     */
+    public String consultarCirugias() {
+	StringBuffer cirugias = new StringBuffer();
+	try {
+	    cirugias.append("<select id=\"selectCirugiasDisponibles\" class=\"form-control\">Cirugias Disponibles");
+	    ResultSet resultado = consultarCirugiasEnDB();
+	    while (resultado.next()) {
+	        cirugias.append("<option value=\""+resultado.getInt(1)+"\">"+resultado.getString(2)+"</option>");
+	    }
+	    cirugias.append("</select>");
+	} catch (SQLException e) {
+	    e.printStackTrace();
+	}
+	return cirugias.toString();
+    }
+    
+    
+    /**
+     * Consulta la DB en busca de las cirugias registradas
+     * @return
+     * @throws SQLException
+     */
+    public ResultSet consultarCirugiasEnDB() throws SQLException {
+	String sql = "SELECT * FROM Cirugias_Disponibles";
+	Connection conexion = DBConnection.getInstanceConnection().getConexion();
+	PreparedStatement stm = conexion.prepareStatement(sql);
+	return stm.executeQuery();
+    }
+
+    public String registrarCirugiaPaciente(HttpServletRequest request) {
+	StringBuffer mensaje = new StringBuffer();
+	Connection conexion = DBConnection.getInstanceConnection().getConexion();
+	Cirugia cirugia = new Cirugia(request);
+	try {
+	    conexion.setAutoCommit(false);
+	    registrarCirugia(cirugia, conexion);
+	    registrarMedicosAsingnados(cirugia, conexion, request); 
+	    registrarMedicosEspecialistasAsingnados(cirugia, conexion, request); 
+	    conexion.commit();
+	    mensaje.append("Operacion realizada con exito");
+	} catch (SQLException e) {
+	    e.printStackTrace();
+	    mensaje.append("Error en el registro de la operacion");
+	    try {
+		conexion.rollback();
+	    } catch (SQLException e1) {
+		e1.printStackTrace();
+	    }
+	} finally {
+	    try {
+		conexion.setAutoCommit(true);
+	    } catch (SQLException e) {
+		e.printStackTrace();
+	    }
+	}
+	return mensaje.toString();
+    }
+    
+    
+    private void registrarMedicosAsingnados(Cirugia cirugia, Connection conexion, HttpServletRequest request) throws SQLException {
+	String sql = "INSERT INTO Cirugia_tiene_Empleado (id_cirugia, id_paciente, id_empleado) VALUES (?,?,?)"; 
+	String [] medicos = request.getParameterValues("medicos[]");
+	for (int i = 0; i < medicos.length; i++) {
+	    PreparedStatement pstm = conexion.prepareStatement(sql);
+		pstm.setInt(1, cirugia.getCodigo());
+		System.out.println(request.getParameter("paciente"));
+		pstm.setInt(2, Integer.parseInt(request.getParameter("paciente")));
+		pstm.setInt(3, Integer.parseInt(medicos[i]));
+		pstm.execute();
+	}
+    }
+    
+    private void registrarMedicosEspecialistasAsingnados(Cirugia cirugia, Connection conexion, HttpServletRequest request) throws SQLException {
+	String sql = "INSERT INTO Cirugia_tiene_Medico_Especialista  (id_cirugia, id_medico_especialista) VALUES (?,?)"; 
+	String [] medicosEspecialistas = request.getParameterValues("medicosEspecialistas[]");
+	for (int i = 0; i < medicosEspecialistas.length; i++) {
+	    PreparedStatement pstm = conexion.prepareStatement(sql);
+		pstm.setInt(1, cirugia.getCodigo());
+		pstm.setInt(2, Integer.parseInt(medicosEspecialistas[i]));
+		pstm.execute();
+	}
+    }
+    
+
+    private void registrarCirugia(Cirugia cirugia, Connection conexion) throws SQLException {
+	String sql = "INSERT INTO Cirugia (fecha, id_tarifa, id_paciente) VALUES (?,?,?)";
+	PreparedStatement stm = conexion.prepareStatement(sql);
+	stm.setDate(1, cirugia.getFecha());
+	stm.setInt(2, cirugia.getCodigoTarifa());
+	stm.setInt(3, cirugia.getCodigoPaciente());
+	stm.execute();
+    }
+    
+    
+    public String consultarCirugiasPendientes() {
+	respuesta = new StringBuffer();
+	Connection conexion = DBConnection.getInstanceConnection().getConexion();
+	try {
+	    ResultSet consultas = consultarCirugiasPendientes(conexion);
+	    respuesta.append(GeneradorHTML.convertirTabla(consultas, "registrarCirugiaTerminada(this)", "Terminar Proceso"));
+	} catch (SQLException e) {
+	    e.printStackTrace();
+	}
+	return respuesta.toString();
+   }
+    
+    public ResultSet consultarCirugiasPendientes(Connection conexion) throws SQLException {
+	String sql = "SELECT Persona.cui, Persona.nombre, Cirugias_Disponibles.descripcion, Cirugia.fecha, Cirugias_Disponibles.precio_al_cliente, Cirugia.id_cirugia" + 
+		" FROM Persona JOIN Paciente ON Persona.cui=Paciente.cui" + 
+		" JOIN Cirugia ON Cirugia.id_paciente= Paciente.id_paciente" + 
+		" JOIN Cirugias_Disponibles ON Cirugia.id_tarifa = Cirugias_Disponibles.id_tarfia " + 
+		" WHERE Cirugia.realizada = 0";  //consulta para saber las cirugias en cola
+	return conexion.prepareStatement(sql).executeQuery();
+    }
+
+    /**
+     * 
+     * @param response
+     * @return
+     */
+    public String terminarCirugia(HttpServletResponse response) {
+	respuesta = new StringBuffer();
+	try {
+	    Connection conexion = DBConnection.getInstanceConnection().getConexion();
+	    String sql = "UPDATE ";
+	    PreparedStatement stm = conexion.prepareStatement(sql);
+	} catch (SQLException e) {
+	    e.printStackTrace();
+	}
+	return respuesta.toString();
+    }
+
+    public String consultarMedicosEspecialistas() {
+	String resp="";
+	Connection conexion = DBConnection.getInstanceConnection().getConexion();
+	String sql = "SELECT Medico_Especialista.id_medico_especialista AS 'codigo',  Persona.nombre AS 'Nombre Completo', "
+		+ " Persona.direccion AS 'Direccion',  Medico_Especialista.no_de_colegiado  AS 'No. de Colegiado' "+
+		"FROM Persona JOIN Medico_Especialista ON Persona.cui=Medico_Especialista.cui_persona";
+	try {
+	    PreparedStatement stm = conexion.prepareStatement(sql);
+	    resp= GeneradorHTML.convertirTabla(stm.executeQuery(), "seleccionarMedicoEspecialista(this)", "Asingar");
+	} catch (SQLException e) {
+	    e.printStackTrace();
+	}
+	return resp;
     }
 }

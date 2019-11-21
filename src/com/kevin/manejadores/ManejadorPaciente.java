@@ -46,7 +46,6 @@ public class ManejadorPaciente {
 	stm.setString(1, paciente.getNit());
 	stm.setString(2, paciente.getCui());
 	stm.execute();
-
     }
     
     
@@ -54,7 +53,7 @@ public class ManejadorPaciente {
 	StringBuffer registros= new StringBuffer(); 
 	registros.append("<input type=\"text\" id=\"cajaFiltro\" class=\"form-control\" onkeyup=\"filtrarTabla()\""
 		+ " placeholder=\"Filtrar por nombre..\">");
-	registros.append("<table id=\"tabla\">");
+	registros.append("<table id=\"tabla\" class=\"table\">"); 
 	registros.append("<tr>").append("<th>Cui</th>");
 	registros.append("<th>Nombre</th>");
 	registros.append("<th>Direccion</th>");

@@ -23,8 +23,7 @@ public class ServletMedico extends HttpServlet {
      * 
      */
     private static final long serialVersionUID = 3516163412083326515L;
-    private static final int NUEVA_CONSULTA= 1;
-    private static final int REGISTRAR_CIRUGIA= 2;
+    private static final int CONSULTAR_PACIENTES_REGISTRADOS= 1;
     private static final int REGISTRAR_CONSULTA= 3;    
     private static final int CONSULTAR_MEDICAMENTOS= 4;
     private static final int CONSULTAR_ENFERMERAS= 5;
@@ -32,6 +31,11 @@ public class ServletMedico extends HttpServlet {
     private static final int AGREGAR_MEDICAMENTO = 7;
     private static final int CONSULTAR_HABITACIONES = 8;
     private static final int CONSULTAR_PACIENTES_INTERNADOS = 9;
+    private static final int CONSUTLAR_CIRUGIAS = 10;
+    private static final int ASINGAR_CIRUGIA = 11;
+    private static final int TERMINAR_CIRUGIA= 12;
+    private static final int CONSULTAR_CIRUGIAS_PENDIENTES = 13;
+    private static final int CONSULTAR_MEDICOS_ESPECIALISTAS=14;
     
 
        
@@ -47,6 +51,7 @@ public class ServletMedico extends HttpServlet {
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 	    int operacion = Integer.parseInt(request.getParameter("operacion")); 
+	    ManejadorMedico medico = new ManejadorMedico();
 	    switch (operacion) {
 	    case CONSULTAR_MEDICAMENTOS:
 		response.getWriter().append(new ManejadorFarmacia().consultarMedicamentosMedico());
@@ -55,12 +60,22 @@ public class ServletMedico extends HttpServlet {
 		response.getWriter().append(new ManejadorEnfermera().consultarEnfermeras());
 		break;
 	    case CONSULTAR_MEDICOS:
-		response.getWriter().append(new ManejadorMedico().consultarMedicos());
+		response.getWriter().append(medico.consultarMedicos());
 		break;
 	    case CONSULTAR_HABITACIONES: 
 		response.getWriter().append(new ManejadorHabitacion().consultarHabitacionesLibres());
+		break;
 	    case CONSULTAR_PACIENTES_INTERNADOS:
-		response.getWriter().append(new ManejadorMedico().consultarTablaPacientesInternadosDeMedico((Integer)(request.getSession().getAttribute("user"))));
+		response.getWriter().append(medico.consultarTablaPacientesInternadosDeMedico((Integer)(request.getSession().getAttribute("user"))));
+		break;
+	    case CONSUTLAR_CIRUGIAS:
+		response.getWriter().append(medico.consultarCirugias());
+		break;
+	    case CONSULTAR_CIRUGIAS_PENDIENTES:
+		response.getWriter().append(medico.consultarCirugiasPendientes());
+		break;
+	    case CONSULTAR_MEDICOS_ESPECIALISTAS:
+		response.getWriter().append(medico.consultarMedicosEspecialistas());
 	    }
 	}
 
@@ -70,20 +85,25 @@ public class ServletMedico extends HttpServlet {
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 	    int operacion = Integer.parseInt(request.getParameter("operacion")); 
 	    ManejadorPaciente manejador = new ManejadorPaciente(); 
+	    ManejadorMedico medico = new ManejadorMedico();
 	    switch (operacion) {
-	    case NUEVA_CONSULTA: 
+	    case CONSULTAR_PACIENTES_REGISTRADOS: 
 		response.getWriter().append(manejador.pacientesRegistrados());
 		break;
-	    case REGISTRAR_CIRUGIA:  
-		
-		break;
 	    case REGISTRAR_CONSULTA: 
-		response.getWriter().append(new ManejadorMedico().nuevaConsulta(request));
+		response.getWriter().append(medico.nuevaConsulta(request));
 		break;
 	    case AGREGAR_MEDICAMENTO:
-		response.getWriter().append(new ManejadorMedico().asignarMedicamentos(request));
+		response.getWriter().append(medico.asignarMedicamentos(request));
+		break;
+	    case ASINGAR_CIRUGIA:
+		response.getWriter().append(medico.registrarCirugiaPaciente(request));
+		break;
+	    case TERMINAR_CIRUGIA:
+		response.getWriter().append(medico.terminarCirugia(response));
+		break;
 	    default: 
-		
+		// no hace nada por defecto
 	    break;
 	    }
 	}

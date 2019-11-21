@@ -1,13 +1,9 @@
 const enviar=  document.getElementById("enviar");
-enviar.addEventListener("click", iniciarSession);
 
-const correoVar = document.getElementById("email");
-const passwordVar = document.getElementById("password");
-
-function iniciarSession(){
+enviar.addEventListener("click", () => {
 	$.post('inicioDeSesion', {
-		correo : correoVar.value,
-		password: passwordVar.value
+		correo : document.getElementById("email").value,
+		password: document.getElementById("password").value
 	}).done(
 		function(response){
 		window.location = response;
@@ -16,4 +12,4 @@ function iniciarSession(){
 			alert('estado del registro '+ status + '\n'+ error);
 		}
 	);
-}
+	});

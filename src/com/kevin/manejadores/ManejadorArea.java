@@ -55,7 +55,8 @@ public class ManejadorArea{
 	String sql = "Select Area.id_area, Area.descripcion, Modulo.nombre FROM Area INNER JOIN Modulo ON Area.id_modulo= Modulo.id_modulo";
 	PreparedStatement stm = conexion.prepareStatement(sql); 
 	ResultSet resultado = stm.executeQuery(); 
-	return GeneradorHTML.convertirTabla(resultado); 
+	//return GeneradorHTML.convertirTabla(resultado); 
+	return null;
     }
 
 
