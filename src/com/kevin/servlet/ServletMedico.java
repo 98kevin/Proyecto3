@@ -103,7 +103,6 @@ public class ServletMedico extends HttpServlet {
 		response.getWriter().append(medico.terminarCirugia(request));
 		break;
 	    default: 
-		// no hace nada por defecto
 	    break;
 	    }
 	}
