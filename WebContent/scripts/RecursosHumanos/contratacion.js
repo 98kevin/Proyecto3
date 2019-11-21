@@ -1,3 +1,4 @@
+const REGISTRO_MEDICO_ESPECIALISTA = 1;
 
 //botones
 let botonContratarEmpleado = document.getElementById('contratarNuevoEmpleado');
@@ -80,6 +81,7 @@ botonContratarEmpleado.addEventListener('click', () => {
 botonRegistroMedicoEspecialista.addEventListener('click', () =>{
 	console.log('ingreso');
 	$.post('creacion-de-medico-especialista', {
+		operacion : REGISTRO_MEDICO_ESPECIALISTA,
 		cui : document.getElementById('cuiMedicoEspecilista').value,
 		nombre : document.getElementById('nombreMedicoEspecilista').value,
 		direccion : document.getElementById('direccionMedicoEspecilista').value,

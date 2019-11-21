@@ -257,7 +257,7 @@ botonTerminarAsingacionMedicamentos.addEventListener('click', () =>{
             operacion: AGREGAR_MEDICAMENTO, 
     	    cantidades: cantidadesMedicamentos,
             codigos: codigosMedicamentos,
-            internado: idPacienteSeleccionado
+            internado: idPacienteSeleccionadoc
        },
        success: function( response){
         	alertify.message(response, 2);
