@@ -66,7 +66,7 @@ function ocultarComponentes(){
 
 
 btnRecetarCirugia.addEventListener('click', nuevaCirugia);
-btnTerminarCirugia.addEventListener('click', terminarCirugia);
+btnTerminarCirugia.addEventListener('click', consultarCirugiasPendientes);
 recetarCirugia.addEventListener('click', asignarCirugia);
  
 
@@ -133,8 +133,9 @@ function acutalizarControlFecha(){
 /**
  * Consulta las cirugias en las que el medico ha estado involucrado
  */
-function terminarCirugia(){
+function consultarCirugiasPendientes(){
     ocultarComponentes();
+    acutalizarControlFecha();
     $.ajax({
         url: 'medico',
         dataType: 'html',
@@ -145,6 +146,7 @@ function terminarCirugia(){
        success: function(response){
            tablaCirugias.innerHTML=response;
            tablaCirugias.style.display='block';
+           controlFecha.style.display='block';
         },
         error: function( jqXhr, textStatus, errorThrown ){
             alertify.error('estado del registros'+ textStatus+ ' error '+ errorThrown); 
@@ -216,6 +218,7 @@ function consultarCirugiasDisponibles(){
 btnAsignarMedicamento.addEventListener('click', () =>{
     ocultarComponentes();
     alertify.message('Asingacion de medicamentos', 2);
+    consultarMedicamentos();
     botonTerminarAsingacionMedicamentos.style.display='block';
     $.ajax({
         url: 'medico',
@@ -291,6 +294,7 @@ function consultarMedicamentos(){
     }).done(
         function (response){
             tablaMedicamentos.innerHTML = response;
+            tablaMedicamentos.style.display='block';
         }
     ).fail(
         function (xhr, status, error){
@@ -472,13 +476,15 @@ function agregarEnfermera(boton){
 
 function registrarCirugiaTerminada(boton){
     let idCirugiaTerminada = boton.getAttribute('id');
+    let fecha = new Date(controlFecha.value);
     $.ajax({
         url: 'medico',
         dataType: 'text',
         type: 'post',
         data: {
             operacion: TERMINAR_CIRUGIA, 
-    	    idCirugia: idCirugiaTerminada
+            idCirugia: idCirugiaTerminada,
+            fecha: fecha.getTime()
        },
        success: function( response){
         	alertify.message(response, 2);
@@ -488,5 +494,5 @@ function registrarCirugiaTerminada(boton){
         	alertify.error('estado del registros'+ textStatus+ ' error '+ errorThrown); 
         	console.log('estado del registros'+ textStatus+ ' error '+ errorThrown);
         }
-    })   //finalizacion de la peticion ajax
+    })
 }

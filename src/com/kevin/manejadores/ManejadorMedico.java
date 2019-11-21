@@ -8,7 +8,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import com.kevin.exceptions.ConversionDeNumeros;
 import com.kevin.exceptions.ManejoDePaciente;
@@ -508,25 +507,26 @@ public class ManejadorMedico {
     }
     
     
+ 
+    /**
+     * Consulta las cirugias disponibles en la base de datos
+     * @return
+     */
     public String consultarCirugiasPendientes() {
-	respuesta = new StringBuffer();
+	String resultado= null;
 	Connection conexion = DBConnection.getInstanceConnection().getConexion();
+	String sql = "SELECT Cirugia.id_cirugia AS 'Codigo', Persona.nombre, Cirugias_Disponibles.descripcion, Cirugia.fecha, Cirugias_Disponibles.precio_al_cliente, Cirugia.id_cirugia "+
+		" FROM Persona JOIN Paciente ON Persona.cui=Paciente.cui "+
+		" JOIN Cirugia ON Cirugia.id_paciente= Paciente.id_paciente "+
+		" JOIN Cirugias_Disponibles ON Cirugia.id_tarifa = Cirugias_Disponibles.id_tarfia "+
+		" WHERE Cirugia.realizada = 0";
 	try {
-	    ResultSet consultas = consultarCirugiasPendientes(conexion);
-	    respuesta.append(GeneradorHTML.convertirTabla(consultas, "registrarCirugiaTerminada(this)", "Terminar Proceso"));
+	    resultado =  GeneradorHTML.convertirTabla(conexion.prepareStatement(sql).executeQuery(), 
+	    	"registrarCirugiaTerminada(this)", "Finalizar Cirugia");
 	} catch (SQLException e) {
 	    e.printStackTrace();
 	}
-	return respuesta.toString();
-   }
-    
-    public ResultSet consultarCirugiasPendientes(Connection conexion) throws SQLException {
-	String sql = "SELECT Persona.cui, Persona.nombre, Cirugias_Disponibles.descripcion, Cirugia.fecha, Cirugias_Disponibles.precio_al_cliente, Cirugia.id_cirugia" + 
-		" FROM Persona JOIN Paciente ON Persona.cui=Paciente.cui" + 
-		" JOIN Cirugia ON Cirugia.id_paciente= Paciente.id_paciente" + 
-		" JOIN Cirugias_Disponibles ON Cirugia.id_tarifa = Cirugias_Disponibles.id_tarfia " + 
-		" WHERE Cirugia.realizada = 0";  //consulta para saber las cirugias en cola
-	return conexion.prepareStatement(sql).executeQuery();
+	return resultado;
     }
 
     /**
@@ -534,16 +534,69 @@ public class ManejadorMedico {
      * @param response
      * @return
      */
-    public String terminarCirugia(HttpServletResponse response) {
+    public String terminarCirugia(HttpServletRequest request) {
 	respuesta = new StringBuffer();
+	Connection conexion = DBConnection.getInstanceConnection().getConexion();
 	try {
-	    Connection conexion = DBConnection.getInstanceConnection().getConexion();
-	    String sql = "UPDATE ";
-	    PreparedStatement stm = conexion.prepareStatement(sql);
+	    conexion.setAutoCommit(false);
+	    int codigoCirugia = Integer.parseInt(request.getParameter("idCirugia")); 
+	    Date fecha = getFechaIngresada(request);
+	    double monto = consultarMonto(conexion,codigoCirugia); 
+	    registrarCirugiaTerminada(conexion, codigoCirugia); 
+	    registrarPagosDeMedicosEspecialistas(conexion, monto,fecha);
+	    conexion.commit();
+	    respuesta.append("Registro completo"); 
+	} catch (SQLException e) {
+	    e.printStackTrace();
+	    respuesta.append("Ocurrio un error. Codigo de error: " + e.getErrorCode() ); 
+	    try {
+		conexion.rollback();
+	    } catch (SQLException e1) {
+		e1.printStackTrace();
+	    }
+	} finally {
+	    try {
+		conexion.setAutoCommit(true);
+	    } catch (Exception e2) {
+	    }
+	}
+	return respuesta.toString();
+    }
+
+    private double consultarMonto(Connection conexion,int codigoCirugia) {
+	String sql = "SELECT tarifa_de_especialista FROM Cirugias_Disponibles " + 
+		"INNER JOIN Cirugia ON Cirugia.id_tarifa = Cirugias_Disponibles.id_tarfia " + 
+		"WHERE Cirugia.id_cirugia = ?";
+	double monto =0;
+	PreparedStatement stm;
+	try {
+	    	stm = conexion.prepareStatement(sql);
+		stm.setInt(1, codigoCirugia);
+		ResultSet resultado = stm.executeQuery();
+		if (resultado.next()) {
+		    monto = resultado.getDouble(1);
+		}
 	} catch (SQLException e) {
 	    e.printStackTrace();
 	}
-	return respuesta.toString();
+	return monto;
+    }
+
+    private void registrarPagosDeMedicosEspecialistas(Connection conexion, double monto, Date fecha) throws SQLException {
+	String sql = "INSERT INTO Pago_Especialista (descripcion, monto, fecha, id_area) VALUES (?,?,?,?)";
+	PreparedStatement stm = conexion.prepareStatement(sql);
+	stm.setString(1, "Pago por cirugia realizada");
+	stm.setDouble(2, monto);
+	stm.setDate(3, fecha);
+	stm.setInt(4, 4);  //area de medicos
+	stm.execute();
+    }
+
+    private void registrarCirugiaTerminada(Connection conexion, int codigoCirugia) throws SQLException {
+	String sql = "UPDATE  Cirugia SET realizada=TRUE WHERE id_cirugia= ?";
+	PreparedStatement stm = conexion.prepareStatement(sql);
+	stm.setInt(1, codigoCirugia);
+	stm.execute();
     }
 
     public String consultarMedicosEspecialistas() {

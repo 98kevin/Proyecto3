@@ -100,7 +100,7 @@ public class ServletMedico extends HttpServlet {
 		response.getWriter().append(medico.registrarCirugiaPaciente(request));
 		break;
 	    case TERMINAR_CIRUGIA:
-		response.getWriter().append(medico.terminarCirugia(response));
+		response.getWriter().append(medico.terminarCirugia(request));
 		break;
 	    default: 
 		// no hace nada por defecto
