@@ -4,8 +4,6 @@ import java.sql.Date;
 
 import javax.servlet.http.HttpServletRequest;
 
-import com.kevin.servicio.DBConnection;
-
 public class Cirugia {
     private int codigo;
     private Date fecha;
@@ -93,9 +91,8 @@ public class Cirugia {
      * @param codigoTarifa
      * @param codigoPaciente
      */
-    public Cirugia(int codigo, Date fecha, int codigoTarifa, int codigoPaciente) {
+    public Cirugia( Date fecha, int codigoTarifa, int codigoPaciente) {
 	super();
-	this.codigo= codigo;
 	this.fecha = fecha;
 	this.codigoTarifa = codigoTarifa;
 	this.codigoPaciente = codigoPaciente;
@@ -103,8 +100,7 @@ public class Cirugia {
     
     
     public Cirugia(HttpServletRequest request) {
-	this((DBConnection.getInstanceConnection().maximo("Cirugia", "id_cirugia") +1),
-		new Date(Long.parseLong(request.getParameter("fecha"))), 
+	this(new Date(Long.parseLong(request.getParameter("fecha"))), 
 		Integer.parseInt(request.getParameter("cirugia")), 
 		Integer.parseInt(request.getParameter("paciente")));
     }

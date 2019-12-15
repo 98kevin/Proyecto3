@@ -13,6 +13,8 @@ public class ManejadorSession  {
     public static final int AREA_RECURSOS_HUMANOS= 2;
     public static final int AREA_FARMACIA= 3;
     public static final int AREA_MEDICOS=4;    
+    public static final int AREA_ENFERMERAS=5;    
+    
 
     public boolean verificarPassword(String email, String password) {
 	String passwordEnDB = null; 
@@ -71,7 +73,9 @@ public class ManejadorSession  {
 	case AREA_MEDICOS: 
 	    direccion= socket + "/medico/medico.jsp";
 	    break;
-
+	case AREA_ENFERMERAS: 
+	    direccion= socket + "/enfermera/enfermera.jsp";
+	    break;
 	}
 	return direccion;
     }

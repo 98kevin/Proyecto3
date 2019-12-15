@@ -2,7 +2,9 @@ package com.kevin.manejadores;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 import com.kevin.modelos.Administrador;
 import com.kevin.servicio.DBConnection;
@@ -20,10 +22,9 @@ public class ManejadorAdministrador {
 	    conexion.setAutoCommit(false);
 	    ManejadorPersona persona = new ManejadorPersona(); 
 	    persona.registrarPersona(administrador,conexion); 
-	    registrarEmpleado(administrador, conexion);
-	    registrarCredenciales(administrador, conexion);
-	    conexion.commit();
-	    registrarPeriodo(administrador, conexion);
+	    int empleado  =   registrarEmpleado(administrador, conexion);
+	    registrarCredenciales(administrador, conexion, empleado);
+	    registrarPeriodo(administrador, conexion,empleado);
 	    conexion.commit();
 	    msj += "Creacion de administrador exitosa"; 
 	} catch (SQLException e) {
@@ -45,14 +46,14 @@ public class ManejadorAdministrador {
 	return msj;
     }
     
-    private void registrarCredenciales(Administrador administrador, Connection conexion) throws SQLException {
+    private void registrarCredenciales(Administrador administrador, Connection conexion,int  idEmpleado) throws SQLException {
 	String sqlCredenciales = "INSERT INTO Credenciales (correo_electronico, password,id_empleado, id_area) VALUES (?,?,?,?)";
 	PreparedStatement stmCredenciales;
 	stmCredenciales = conexion.prepareStatement(sqlCredenciales);
 	stmCredenciales.setString(1, administrador.getEmail());
 	stmCredenciales.setString(2, administrador.getPassword());
 	//el utlimo valor en la tabla empleado
-	stmCredenciales.setInt(3, DBConnection.getInstanceConnection().maximo("Empleado", "id_empleado")+1);
+	stmCredenciales.setInt(3, idEmpleado);
 	stmCredenciales.setInt(4, administrador.getAreaDeTrabajo());
 	stmCredenciales.execute();
     }
@@ -64,31 +65,40 @@ public class ManejadorAdministrador {
      * @param administrador
      * @throws SQLException 
      */
-    public void registrarPeriodo(Administrador administrador, Connection conexion) throws SQLException {
+    public void registrarPeriodo(Administrador administrador, Connection conexion, int empleado) throws SQLException {
 	String sqlPeriodoLaboral = "INSERT INTO Contrato (salario, fecha_inicial,id_empleado) VALUES (?,?,?)";
 	PreparedStatement stmPeriodo;
 	    	stmPeriodo = conexion.prepareStatement(sqlPeriodoLaboral);
 		stmPeriodo.setDouble(1, administrador.getSalario());
 		stmPeriodo.setDate(2, administrador.getFechaDeInicio());
 		//el utlimo valor en la tabla empleado
-		stmPeriodo.setInt(3, DBConnection.getInstanceConnection().maximo("Empleado", "id_empleado"));
+		stmPeriodo.setInt(3, empleado);
 		stmPeriodo.execute();
     }
     
-    /**
-     * Registro del empleado Administrador
-     * @throws SQLException 
-     */
-    public void registrarEmpleado(Administrador administrador, Connection conexion) throws SQLException {
+/**
+ * Registra un nuevo empleado y retorna el valor de la clave primaria insertada
+ * @param administrador
+ * @param conexion
+ * @return
+ * @throws SQLException
+ */
+    public int registrarEmpleado(Administrador administrador, Connection conexion) throws SQLException {
+	int clavePrimaria=0;
+	ResultSet resultado = null;
 	String sqlEmpleado = "INSERT INTO Empleado (porcentaje_igss, porcentaje_irtra,fecha_de_vacaciones, cui_persona, id_area)  VALUES (?,?,?,?,?)";
 	PreparedStatement stmEmpleado;
-	    stmEmpleado = conexion.prepareStatement(sqlEmpleado);
+	    stmEmpleado = conexion.prepareStatement(sqlEmpleado, Statement.RETURN_GENERATED_KEYS);
 	    stmEmpleado.setInt(1, administrador.getIggs());
 	    stmEmpleado.setInt(2, administrador.getIrtra());
 	    stmEmpleado.setDate(3, administrador.getFechaDeVacaciones());
 	    stmEmpleado.setString(4, administrador.getCui());
 	    stmEmpleado.setInt(5, administrador.getAreaDeTrabajo());
 	    stmEmpleado.execute();
+	resultado = stmEmpleado.getGeneratedKeys(); 
+	if(resultado.next())
+	    clavePrimaria = resultado.getInt(1); 
+	return clavePrimaria; 
     }
     
     

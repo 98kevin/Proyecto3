@@ -11,6 +11,7 @@ botonEnviarTarifa.addEventListener('click', enviarTarifa);
 function mostrarFormTarifa() {
     formTarifa.style.display="block";
 }
+
 formTarifa.style.display="none";  //ocultar el formulario al mostrar la pantalla
 
 function enviarTarifa(){

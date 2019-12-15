@@ -4,10 +4,11 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 
+import com.kevin.exceptions.DataBaseException;
 import com.kevin.modelos.Paciente;
 import com.kevin.servicio.DBConnection;
+import com.kevin.servicio.GeneradorHTML;
 
 public class ManejadorPaciente {
 
@@ -50,52 +51,27 @@ public class ManejadorPaciente {
     
     
     public String pacientesRegistrados() {
-	StringBuffer registros= new StringBuffer(); 
-	registros.append("<input type=\"text\" id=\"cajaFiltro\" class=\"form-control\" onkeyup=\"filtrarTabla()\""
-		+ " placeholder=\"Filtrar por nombre..\">");
-	registros.append("<table id=\"tabla\" class=\"table\">"); 
-	registros.append("<tr>").append("<th>Cui</th>");
-	registros.append("<th>Nombre</th>");
-	registros.append("<th>Direccion</th>");
+	String sql = "SELECT Paciente.id_paciente, Persona.nombre, Persona.direccion, Persona.cui "+
+		" FROM Persona "+
+		" INNER JOIN Paciente ON Persona.cui=Paciente.cui ";
+	PreparedStatement stm = null ;
+	ResultSet pacientes = null ;
 	try {
-	    ResultSet pacientes = consultarPacientes();
-	    while(pacientes.next()) {
-	        registros.append("<tr class=\"\">");
-	        registros.append("<td>"+pacientes.getInt(1)+"</td>");
-	        registros.append("<td>"+pacientes.getString(2)+"</td>");
-	        registros.append("<td>"+pacientes.getString(3)+"</td>");
-	        registros.append("<td><button id=\""+pacientes.getInt(4)+"\" onClick=\"seleccionarPaciente(this)\" "
-	        	+ "class=\"botonSeleccionar btn btn-info \">Seleccionar Paciente</button></td>");
-	        registros.append("</tr>");
-	    }
+	    stm = DBConnection.getInstanceConnection().getConexion().prepareStatement(sql);
+	    pacientes = stm.executeQuery();
 	} catch (SQLException e) {
 	    e.printStackTrace();
 	}
-	registros.append("</table>");
-	return registros.toString(); 
+	return GeneradorHTML.convertirTabla(pacientes, "seleccionarPaciente(this)", "Seleccionar Paciente", true ,true ); 
     }
 
 
-    private ResultSet consultarPacientes() {
-	ResultSet pacientes = null; 
-	Connection conexion = DBConnection.getInstanceConnection().getConexion();
-	String sql = "SELECT p.cui, p.nombre, p.direccion, q.id_paciente FROM Persona p INNER JOIN Paciente q ON p.cui=q.cui";
-	Statement stm;
-	try {
-	    stm = conexion.createStatement();
-		pacientes = stm.executeQuery(sql);
-	} catch (SQLException e) {
-	    e.printStackTrace();
-	}
-	return pacientes;
-    }
-    
     public boolean isInternadoActualmente(int paciente) {
 	boolean resultado= false;
 	String sql = "SELECT * FROM Internado WHERE id_paciente=? AND fin IS NULL";
 	Connection conexion = DBConnection.getInstanceConnection().getConexion();
-	PreparedStatement stm;
-	try {
+	PreparedStatement stm=null;
+	try { 
 	    stm = conexion.prepareStatement(sql);
 	    stm.setInt(1, paciente);
 	    ResultSet resultados = stm.executeQuery();	
@@ -105,5 +81,68 @@ public class ManejadorPaciente {
 	}
 	return resultado;
     }
+    
+    public String consultarMedicamentosDePacientes(int codigoEnfermera) {
+	 ResultSet resultados=null;
+	String sql = " SELECT Medicamento.id_medicamento, Medicamento.nombre, Persona.nombre AS 'Paciente', " +
+		" Internado_tiene_Medicamento.cantidad AS 'Cantidad Faltante' FROM Medicamento  " +
+		" INNER JOIN Internado_tiene_Medicamento ON Internado_tiene_Medicamento.id_medicamento = Medicamento.id_medicamento "+
+		" INNER JOIN Internado ON Internado_tiene_Medicamento.id_internado = Internado.id_internado"+
+		" INNER JOIN Internado_tiene_Empleado ON Internado_tiene_Empleado.id_internado = Internado.id_internado"+
+		" INNER JOIN Empleado ON Empleado.id_empleado = Internado_tiene_Empleado.id_empleado"+
+		" INNER JOIN Paciente ON Paciente.id_paciente = Internado.id_paciente "+
+		" INNER JOIN Persona ON Persona.cui = Paciente.cui "+
+		" WHERE Internado.fin IS NULL AND Empleado.id_empleado = ? ";
+	Connection conexion = DBConnection.getInstanceConnection().getConexion();
+	PreparedStatement stm=null;
+	try { 
+	    stm = conexion.prepareStatement(sql);
+	    stm.setInt(1, codigoEnfermera);
+	    resultados = stm.executeQuery();
+	} catch (SQLException e) {
+	    e.printStackTrace();
+	}
+	return GeneradorHTML.convertirTabla(resultados, "suministrarMedicamento(this)", " Suministrar ", true, true);
+    }
+    
+    public String consultarPacinetesDeEnfermera(int codigoEnfermera) {
+	Connection conexion = DBConnection.getInstanceConnection().getConexion();
+	ResultSet resultado = null; 
+	PreparedStatement stm;
+	String sql = "Select Persona.cui, Persona.nombre " +
+		" FROM Persona  "+
+		" INNER JOIN Paciente ON Paciente.cui = Persona.cui " +
+		" INNER JOIN Internado ON Internado.id_paciente =Paciente.id_paciente "+
+		" INNER JOIN Internado_tiene_Empleado ON Internado_tiene_Empleado.id_internado = Internado.id_internado  "+
+		" INNER JOIN Empleado ON Empleado.id_empleado = Internado_tiene_Empleado.id_empleado "+
+		" WHERE Internado.fin IS NULL AND Empleado.id_empleado =  ?";
+	try {
+	    stm = conexion.prepareStatement(sql);
+	    stm.setInt(1, codigoEnfermera);
+	    resultado = stm.executeQuery(); 
+	} catch (SQLException e) {
+	    e.printStackTrace();
+	}
+	return GeneradorHTML.convertirSelector(resultado, "seleccionarPaciente()");
+    }
    
+    public int consultarCodigoDeInternado(String cui) throws SQLException, DataBaseException{
+	String sql  = " SELECT Internado_tiene_Medicamento.id_internado as 'Codigo de Internado' " + 
+		" FROM Internado_tiene_Medicamento " + 
+		" INNER JOIN Internado ON Internado_tiene_Medicamento.id_internado = Internado.id_internado" + 
+		" INNER JOIN Paciente ON Internado.id_paciente = Paciente.id_paciente " + 
+		" INNER JOIN Persona ON Paciente.cui = Persona.cui " + 
+		" WHERE Persona.cui =  ?"  + 
+		" AND Internado.fin is null " + 
+		" GROUP BY Internado.id_internado";
+	PreparedStatement stm = DBConnection.getInstanceConnection().getConexion().prepareStatement(sql); 
+	stm.setString(1, cui);
+	ResultSet resultado = stm.executeQuery();
+	if (resultado.next()) 
+	    return resultado.getInt(1);
+	else
+	    throw new DataBaseException("No existe el internado con el cui: " + cui);
+    }
+    
+    
 }

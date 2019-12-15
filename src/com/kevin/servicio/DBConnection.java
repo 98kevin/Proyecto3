@@ -5,7 +5,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
+import java.util.ArrayList;
 
 
 public class DBConnection {    
@@ -61,25 +61,36 @@ public class DBConnection {
 	return registros;
     }
     
-
+    
     /**
-     * Obtiene el ultimo registro de un campo en una tabla de la base de datos
-     * @param tabla
-     * @param campo
-     * @return
+     * Transaccion en la base de datos. 
+     * @param stm
      */
-    public int maximo(String tabla, String campo) {
-	int max=0; 
+    public void transaccion(ArrayList<PreparedStatement> stm) {
+	Connection conexion = getConexion(); 
 	try {
-	    Statement stm = conexion.createStatement();
-	    ResultSet rs = stm.executeQuery("SELECT MAX("+campo+") FROM " +tabla);
-	    if(rs.next()) {
-		max = rs.getInt(1);
-	    }
-	} catch (SQLException e ) {
+		conexion.setAutoCommit(false);
+		for (PreparedStatement preparedSteament : stm) {
+		    preparedSteament.execute();
+		    conexion.commit();
+		}
+	} catch (SQLException e) {
 	    e.printStackTrace();
+	    try {
+		conexion.rollback();
+	    } catch (SQLException e1) {
+		e1.printStackTrace();
+	    }
+	} finally {
+	    try {
+		conexion.setAutoCommit(true);
+	    } catch (SQLException e) {
+		e.printStackTrace();
+	    }
 	}
-	return max;
+
+	
+	
     }
-    	
+    
 }

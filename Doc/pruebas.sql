@@ -1,0 +1,1 @@
+SELECT id_area FROM Credenciales WHERE id_empleado = 19; 

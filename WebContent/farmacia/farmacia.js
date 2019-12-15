@@ -11,7 +11,7 @@ const REGISTRAR_ACTUALIZACION = 5;
 //botones del panel superior
 let botonActualiarInventario= document.getElementById('btnActualizarInventario');
 let botonComprarMedicamento= document.getElementById('btnComprarMedicamento');
-let botonVenderMedicamento= document.getElementById('btnVenderMedicamento');
+//let botonVenderMedicamento= document.getElementById('btnVenderMedicamento');
 let botonRegistrarMedicamento= document.getElementById('btnRegistrarMedicamento');
 let botonBuscarMedicamento= document.getElementById('btnBuscar');
 
@@ -116,7 +116,7 @@ botonActualiarInventario.addEventListener('click', () => {
 
 
 //funcion para vender medicamento
-botonVenderMedicamento.addEventListener('click', () => {});
+//botonVenderMedicamento.addEventListener('click', () => {});
 
 //funcion para registrar medicamento
 botonRegistrarMedicamento.addEventListener('click', () => {

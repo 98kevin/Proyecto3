@@ -127,9 +127,9 @@ public class ManejadorFarmacia{
 	try {
 		conexion.setAutoCommit(false);
 		Medicamento medicamento = leerMedicamento(idMedicamento);
-		manejador.registrarTransaccionMedicamento(idUsuario,medicamento,false, cantidad,
+		int registro= manejador.registrarTransaccionMedicamento(idUsuario,medicamento,false, cantidad,
 			ManejadorSession.AREA_FARMACIA,conexion);
-		registrarVenta(medicamento, cantidad, idUsuario,conexion, false);
+		registrarVenta(medicamento, cantidad, idUsuario,conexion, false, registro);
 		actualizarCantidades(medicamento, medicamento.getCantidadExistente()+ cantidad, conexion);
 		conexion.commit();
 		mensaje.append("Registro realizado con exito");
@@ -180,7 +180,7 @@ public class ManejadorFarmacia{
      * @throws SQLException
      */
     private void registrarVenta(Medicamento medicamento, int cantidad, int idUsuario, Connection conexion,
-	    boolean tipoDeOperacion) throws SQLException {
+	    boolean tipoDeOperacion, int registro) throws SQLException {
 	Date fechaActual = new Date(new java.util.Date(Calendar.getInstance().getTimeInMillis()).getTime());
 	String sql = "INSERT INTO Registros_Medicamento (fecha,costo_actual_medicamento, "
 		+ "precio_actual_medicamento, cantidad, tipo_operacion, id_medicamento, "
@@ -193,7 +193,7 @@ public class ManejadorFarmacia{
 	    stm.setBoolean(5, tipoDeOperacion);
 	    stm.setInt(6, medicamento.getCodigo());
 	    stm.setInt(7,idUsuario);
-	    stm.setInt(8, DBConnection.getInstanceConnection().maximo("Registro_Monetario", "id_registro"));
+	    stm.setInt(8, registro);
 	    stm.execute();
     }
 
@@ -205,7 +205,7 @@ public class ManejadorFarmacia{
      * @return
      * @throws SQLException
      */
-    private Medicamento leerMedicamento(int idMedicamento) throws SQLException {
+    public Medicamento leerMedicamento(int idMedicamento) throws SQLException {
 	Connection conexion = DBConnection.getInstanceConnection().getConexion();
 	String sqlStatement = "SELECT * FROM Medicamento WHERE id_medicamento= ?";
 	PreparedStatement stm = conexion.prepareStatement(sqlStatement);
@@ -312,5 +312,6 @@ public class ManejadorFarmacia{
 	}
 	return registros.toString();
     }
+
 
 }

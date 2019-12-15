@@ -9,6 +9,7 @@
  	<link href="../icons/farmacia.png" 										rel="shortcut icon" />
 	<link href="../scripts/alertifyjs/css/alertify.css" 					rel="stylesheet">
 	<link href="../scripts/alertifyjs/css/themes/default.css" 	rel="stylesheet">
+	 <link href="../bootstrap-4.4.1-dist/css/bootstrap.css" 		rel="stylesheet" />
 </head>
 <body>
 	${encabezado}  <!--  encabezado general -->
@@ -56,9 +57,10 @@
 	
 	<script src="../scripts/medico/medico.js">											</script>
 	<script src ="../scripts/filtro-tabla.js"> 												</script>
-	<script src="https://code.jquery.com/jquery-3.4.1.min.js">				</script>
-	<script src="../scripts/alertifyjs/alertify.js" type="text/javascript">	</script>
-	<script src="../scripts/jquery-2.1.4.min.js" type="text/javascript">	</script>
+	<script src="../scripts/alertifyjs/alertify.js" 								type="text/javascript"></script>
+	<script src="../JQuery/jquery-3.4.1.js"										type="text/javascript"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.15.0/popper.min.js"										type="text/javascript"></script>
+	<script src="../bootstrap-4.4.1-dist/js/bootstrap.js"	type="text/javascript"></script>
 	
  
 </body>

@@ -29,11 +29,12 @@ public class ManejadorMedico {
 	respuesta = new StringBuffer(); 
 	Connection conexion = DBConnection.getInstanceConnection().getConexion();
 	int idMedico= (Integer) request.getSession().getAttribute("user"); //empleado
+	int paciente = Integer.parseInt(request.getParameter("idPaciente"));
 	try {
 	    conexion.setAutoCommit(false);
-	    registrarPago(request, conexion, idMedico);   //registro monetario
-	    registrarConsulta(request, conexion, idMedico);  
-	    asignarMedicamentos(request, conexion); 
+	    int pago = registrarPago(request, conexion, idMedico);   //registro monetario
+	    int consulta = registrarConsulta(request, conexion, idMedico, pago);  
+	    asignarMedicamentos(request, conexion, consulta,paciente); 
 	    conexion.commit();
 	    respuesta.append("Consulta realizada con exito");
 	}
@@ -88,21 +89,19 @@ public class ManejadorMedico {
      * @throws SQLException 
      * @throws ManejoDePaciente 
      */
-    private void asignarMedicamentos(HttpServletRequest request, Connection conexion) throws SQLException, ManejoDePaciente, NumberFormatException {
+    private void asignarMedicamentos(HttpServletRequest request, Connection conexion, int idConsulta, int paciente) 
+	    throws SQLException, ManejoDePaciente, NumberFormatException {
 	boolean internado = Boolean.parseBoolean(request.getParameter("internado"));
-	int idInternado,paciente,habitacion;
-	if(internado) {
-	    registrarMedicamentos(request, conexion);
-	}
+	int habitacion;
+	if(internado)
+	    registrarMedicamentos(request, conexion, idConsulta);
 	else {
 	    try {
-		 idInternado = DBConnection.getInstanceConnection().maximo("Internado", "id_internado")+1;  //el ultimo paciente internado
-		 paciente = Integer.parseInt(request.getParameter("idPaciente"));
-		 habitacion = Integer.parseInt(request.getParameter("habitacion"));
-	    } catch (Exception e) {
+		habitacion = Integer.parseInt(request.getParameter("habitacion"));
+	    } catch (NumberFormatException e) {
 		throw new ConversionDeNumeros ("Error de lectura de datos");
 	    }
-	    registrarInternado(paciente, habitacion, request,conexion);
+	    int idInternado= registrarInternado(paciente, habitacion, request,conexion);
 	    new ManejadorHabitacion().registrarCambioEnHabitacion(habitacion, true);
 	    registrarMedicosYEnfermeras(paciente, idInternado, request, conexion);
 	    registrarMedicamentos(idInternado,request,conexion);
@@ -165,7 +164,7 @@ public class ManejadorMedico {
      * @throws SQLException 
      * @throws ManejoDePaciente 
      */
-    private void registrarInternado(int paciente, int habitacion, HttpServletRequest request, Connection conexion)  throws SQLException, ManejoDePaciente {
+    private int registrarInternado(int paciente, int habitacion, HttpServletRequest request, Connection conexion)  throws SQLException, ManejoDePaciente {
 	ManejadorPaciente manejador = new ManejadorPaciente();
 	boolean estaInternado = manejador.isInternadoActualmente(paciente);
 	if(estaInternado) {
@@ -173,11 +172,15 @@ public class ManejadorMedico {
 	}else {
 	    Date fecha= getFechaIngresada(request);
 		  String sql = "INSERT INTO Internado(id_paciente, inicio, id_habitacion) VALUES (?,?,?)";
-		  PreparedStatement stm = conexion.prepareStatement(sql);
+		  PreparedStatement stm = conexion.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
 		  stm.setInt(1, paciente);
 		  stm.setDate(2, fecha);
 		  stm.setInt(3, habitacion);
 		  stm.execute();
+		ResultSet resultado = stm.getGeneratedKeys();
+		if(resultado.next())
+		    return resultado.getInt(1);
+		else return -1;
 	}
     }
 
@@ -229,8 +232,7 @@ public class ManejadorMedico {
      * @param request
      * @param conexion
      */
-    private void registrarMedicamentos(HttpServletRequest request, Connection conexion)throws SQLException {
-	int idConsulta = DBConnection.getInstanceConnection().maximo("Consulta", "id_consulta") + 1;
+    private void registrarMedicamentos(HttpServletRequest request, Connection conexion, int idConsulta)throws SQLException {
 	String [] cantidades = request.getParameterValues("cantidades[]"); //cantidades de los medicamentos
 	String [] medicamentos = request.getParameterValues("codigos[]"); // codigos de los medicamentos
 	for(int i=0; i < cantidades.length ; i++) {
@@ -262,9 +264,9 @@ public class ManejadorMedico {
      * @param conexion
      * @throws SQLException 
      */
-    private void registrarPago(HttpServletRequest request, Connection conexion, int idMedico) throws SQLException {
+    private int registrarPago(HttpServletRequest request, Connection conexion, int idMedico) throws SQLException {
 	String sql = "INSERT INTO Cuenta(id_paciente, detalle,monto, pagado,fecha, id_area) VALUES (?,?,?,?,?,?)";
-	PreparedStatement stm = conexion.prepareStatement(sql);
+	PreparedStatement stm = conexion.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
 	stm.setInt(1,	Integer.parseInt(request.getParameter("idPaciente")));
 	stm.setString(2,getDescripcionConsulta());
 	stm.setDouble(3, getMontoConsulta(conexion));
@@ -272,6 +274,10 @@ public class ManejadorMedico {
 	stm.setDate(5, getFechaIngresada(request));
 	stm.setInt(6, getIdArea(idMedico, conexion));
 	stm.execute();
+	ResultSet resultado = stm.getGeneratedKeys();
+	if(resultado.next())
+	    return resultado.getInt(1);
+	else return -1;
     }
 
     /**
@@ -327,14 +333,18 @@ public class ManejadorMedico {
      * @param request
      * @throws SQLException 
      */
-    private void registrarConsulta(HttpServletRequest request,  Connection conexion, int idMedico) throws SQLException {
+    private int registrarConsulta(HttpServletRequest request,  Connection conexion, int idMedico, int idRegistro) throws SQLException {
 	String sql = "INSERT INTO Consulta (precio_de_consulta, id_registro_monetario, id_paciente, id_empleado) VALUES (?,?,?,?)";
-	PreparedStatement stm = conexion.prepareStatement(sql);
+	PreparedStatement stm = conexion.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
 	stm.setDouble(1,getMontoConsulta(conexion));
-	stm.setInt(2,  DBConnection.getInstanceConnection().maximo("Registro_Monetario", "id_registro"));
+	stm.setInt(2,  idRegistro);
 	stm.setInt(3, Integer.parseInt(request.getParameter("idPaciente")));
 	stm.setInt(4, idMedico); 
 	stm.execute();
+	ResultSet resultado = stm.getGeneratedKeys();
+	if(resultado.next())
+	    return resultado.getInt(1);
+	else return -1;
     }
     
     
@@ -448,9 +458,9 @@ public class ManejadorMedico {
 	Cirugia cirugia = new Cirugia(request);
 	try {
 	    conexion.setAutoCommit(false);
-	    registrarCirugia(cirugia, conexion);
-	    registrarMedicosAsingnados(cirugia, conexion, request); 
-	    registrarMedicosEspecialistasAsingnados(cirugia, conexion, request); 
+	    int codigoCirugia = registrarCirugia(cirugia, conexion);
+	    registrarMedicosAsingnados(codigoCirugia, conexion, request); 
+	    registrarMedicosEspecialistasAsingnados(codigoCirugia, conexion, request); 
 	    conexion.commit();
 	    mensaje.append("Operacion realizada con exito");
 	} catch (SQLException e) {
@@ -472,12 +482,12 @@ public class ManejadorMedico {
     }
     
     
-    private void registrarMedicosAsingnados(Cirugia cirugia, Connection conexion, HttpServletRequest request) throws SQLException {
+    private void registrarMedicosAsingnados(int codigoCirugia, Connection conexion, HttpServletRequest request) throws SQLException {
 	String sql = "INSERT INTO Cirugia_tiene_Empleado (id_cirugia, id_paciente, id_empleado) VALUES (?,?,?)"; 
 	String [] medicos = request.getParameterValues("medicos[]");
 	for (int i = 0; i < medicos.length; i++) {
 	    PreparedStatement pstm = conexion.prepareStatement(sql);
-		pstm.setInt(1, cirugia.getCodigo());
+		pstm.setInt(1, codigoCirugia);
 		System.out.println(request.getParameter("paciente"));
 		pstm.setInt(2, Integer.parseInt(request.getParameter("paciente")));
 		pstm.setInt(3, Integer.parseInt(medicos[i]));
@@ -485,25 +495,29 @@ public class ManejadorMedico {
 	}
     }
     
-    private void registrarMedicosEspecialistasAsingnados(Cirugia cirugia, Connection conexion, HttpServletRequest request) throws SQLException {
+    private void registrarMedicosEspecialistasAsingnados(int cirugia, Connection conexion, HttpServletRequest request) throws SQLException {
 	String sql = "INSERT INTO Cirugia_tiene_Medico_Especialista  (id_cirugia, id_medico_especialista) VALUES (?,?)"; 
 	String [] medicosEspecialistas = request.getParameterValues("medicosEspecialistas[]");
 	for (int i = 0; i < medicosEspecialistas.length; i++) {
 	    PreparedStatement pstm = conexion.prepareStatement(sql);
-		pstm.setInt(1, cirugia.getCodigo());
+		pstm.setInt(1, cirugia);
 		pstm.setInt(2, Integer.parseInt(medicosEspecialistas[i]));
 		pstm.execute();
 	}
     }
     
 
-    private void registrarCirugia(Cirugia cirugia, Connection conexion) throws SQLException {
+    private int registrarCirugia(Cirugia cirugia, Connection conexion) throws SQLException {
 	String sql = "INSERT INTO Cirugia (fecha, id_tarifa, id_paciente) VALUES (?,?,?)";
-	PreparedStatement stm = conexion.prepareStatement(sql);
+	PreparedStatement stm = conexion.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
 	stm.setDate(1, cirugia.getFecha());
 	stm.setInt(2, cirugia.getCodigoTarifa());
 	stm.setInt(3, cirugia.getCodigoPaciente());
 	stm.execute();
+	ResultSet resultado = stm.getGeneratedKeys();
+	if(resultado.next())
+	    return resultado.getInt(1);
+	else return -1;
     }
     
     
@@ -522,7 +536,7 @@ public class ManejadorMedico {
 		" WHERE Cirugia.realizada = 0";
 	try {
 	    resultado =  GeneradorHTML.convertirTabla(conexion.prepareStatement(sql).executeQuery(), 
-	    	"registrarCirugiaTerminada(this)", "Finalizar Cirugia");
+	    	"registrarCirugiaTerminada(this)", "Finalizar Cirugia", false, false);
 	} catch (SQLException e) {
 	    e.printStackTrace();
 	}
@@ -607,7 +621,7 @@ public class ManejadorMedico {
 		"FROM Persona JOIN Medico_Especialista ON Persona.cui=Medico_Especialista.cui_persona";
 	try {
 	    PreparedStatement stm = conexion.prepareStatement(sql);
-	    resp= GeneradorHTML.convertirTabla(stm.executeQuery(), "seleccionarMedicoEspecialista(this)", "Asingar");
+	    resp= GeneradorHTML.convertirTabla(stm.executeQuery(), "seleccionarMedicoEspecialista(this)", "Asingar", false, false);
 	} catch (SQLException e) {
 	    e.printStackTrace();
 	}
