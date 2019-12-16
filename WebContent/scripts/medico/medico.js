@@ -13,6 +13,8 @@ const ASINGAR_CIRUGIA=11;
 const TERMINAR_CIRUGIA=12;
 const CONSULTAR_CIRUGIAS_PENDIENTES=13;
 const CONSULTAR_MEDICOS_ESPECIALISTAS=14;
+const CONSULTAR_INTERNADOS = 15;
+const DAR_DE_ALTA = 16; 
 
 var idPacienteSeleccionado=0;
 var numeroDeHabitacion = 0;
@@ -21,7 +23,7 @@ let btnNuevaConsulta = document.getElementById('btnNuevaConsulta');
 let btnAsignarMedicamento = document.getElementById('btnAsignarMedicamento');
 let btnRecetarCirugia = document.getElementById('btnRecetarCirugia');
 let btnTerminarCirugia = document.getElementById('btnTerminarCirugia');
-
+let btnConsultarInternados = document.getElementById('btnConsultarInternados'); 
 
 let tablaPacientes = document.getElementById('tablaResultados');
 let tablaMedicamentos = document.getElementById('tablaMedicamentos');
@@ -68,7 +70,55 @@ function ocultarComponentes(){
 btnRecetarCirugia.addEventListener('click', nuevaCirugia);
 btnTerminarCirugia.addEventListener('click', consultarCirugiasPendientes);
 recetarCirugia.addEventListener('click', asignarCirugia);
- 
+btnConsultarInternados.addEventListener('click',  consultarInternados); 
+
+function consultarInternados(){
+    $.ajax({
+        url: 'medico',
+        dataType: 'text',
+        type: 'get',
+        data: {
+            operacion: CONSULTAR_INTERNADOS
+       },
+       success: function(response){
+           ocultarComponentes();
+            tablaPacientes.innerHTML = response; 
+            tablaPacientes.style.display = 'block'; 
+            acutalizarControlFecha(); 
+            controlFecha.style.display = 'block'; 
+        },
+        error: function( jqXhr, textStatus, errorThrown ){
+            alertify.error('estado del registros'+ textStatus+ ' error '+ errorThrown); 
+            console.log('estado del registros'+ textStatus+ ' error '+ errorThrown);
+        }
+    })
+}
+
+function darDeAlta(boton){
+    let cuiPaciente = boton.getAttribute('id'); 
+    acutalizarControlFecha(); 
+    let fecha = new Date(controlFecha.value); 
+    $.ajax({
+        url: 'medico',
+        dataType: 'text',
+        type: 'post',
+        data: {
+            operacion: DAR_DE_ALTA, 
+            cuiPaciente : cuiPaciente, 
+            fecha : fecha.getTime()
+       },
+       success: function(response){
+            alertify.message(response);
+            consultarInternados();
+            ocultarComponentes();
+        },
+        error: function( jqXhr, textStatus, errorThrown ){
+            alertify.error('estado del registros'+ textStatus+ ' error '+ errorThrown); 
+            console.log('estado del registros'+ textStatus+ ' error '+ errorThrown);
+        }
+    })
+}
+
 
 function asignarCirugia(){
     let cirugiaSeleccionada = document.getElementById('selectCirugiasDisponibles').value;
@@ -260,7 +310,7 @@ botonTerminarAsingacionMedicamentos.addEventListener('click', () =>{
             operacion: AGREGAR_MEDICAMENTO, 
     	    cantidades: cantidadesMedicamentos,
             codigos: codigosMedicamentos,
-            internado: idPacienteSeleccionadoc
+            internado: idPacienteSeleccionado
        },
        success: function( response){
         	alertify.message(response, 2);

@@ -36,8 +36,8 @@ public class ServletMedico extends HttpServlet {
     private static final int TERMINAR_CIRUGIA= 12;
     private static final int CONSULTAR_CIRUGIAS_PENDIENTES = 13;
     private static final int CONSULTAR_MEDICOS_ESPECIALISTAS=14;
-    
-
+    private static final int CONSULTAR_INTERNADOS = 15; 
+    private static final int DAR_DE_ALTA = 16; 
        
     /**
      * @see HttpServlet#HttpServlet()
@@ -65,8 +65,9 @@ public class ServletMedico extends HttpServlet {
 	    case CONSULTAR_HABITACIONES: 
 		response.getWriter().append(new ManejadorHabitacion().consultarHabitacionesLibres());
 		break;
-	    case CONSULTAR_PACIENTES_INTERNADOS:
-		response.getWriter().append(medico.consultarTablaPacientesInternadosDeMedico((Integer)(request.getSession().getAttribute("user"))));
+	    case CONSULTAR_PACIENTES_INTERNADOS:  //para asignacion de medicamento
+		response.getWriter().append(medico.consultarPacientesInternados("seleccionarPaciente(this)", "Seleccionar", 
+			(Integer) request.getSession().getAttribute("user")));
 		break;
 	    case CONSUTLAR_CIRUGIAS:
 		response.getWriter().append(medico.consultarCirugias());
@@ -76,6 +77,11 @@ public class ServletMedico extends HttpServlet {
 		break;
 	    case CONSULTAR_MEDICOS_ESPECIALISTAS:
 		response.getWriter().append(medico.consultarMedicosEspecialistas());
+		break; 
+	    case CONSULTAR_INTERNADOS :  //para dar de alta 
+		response.getWriter().append(medico.consultarPacientesInternados("darDeAlta(this)", "Dar de Alta",
+			(Integer) request.getSession().getAttribute("user"))); 
+		break; 
 	    }
 	}
 
@@ -102,6 +108,9 @@ public class ServletMedico extends HttpServlet {
 	    case TERMINAR_CIRUGIA:
 		response.getWriter().append(medico.terminarCirugia(request));
 		break;
+	    case DAR_DE_ALTA : 
+		response.getWriter().append(medico.darDeAlta(request.getParameter("cuiPaciente"),
+			Long.parseLong(request.getParameter("fecha"))));
 	    default: 
 	    break;
 	    }

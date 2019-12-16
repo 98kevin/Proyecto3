@@ -10,6 +10,7 @@ import java.sql.Statement;
 import javax.servlet.http.HttpServletRequest;
 
 import com.kevin.exceptions.ConversionDeNumeros;
+import com.kevin.exceptions.DataBaseException;
 import com.kevin.exceptions.ManejoDePaciente;
 import com.kevin.modelos.Administrador;
 import com.kevin.modelos.Cirugia;
@@ -373,52 +374,6 @@ public class ManejadorMedico {
 	return respuesta.toString();
     }
     
-    
-    public String consultarTablaPacientesInternadosDeMedico(int medico) {
-	StringBuffer registros= new StringBuffer(); 
-	registros.append("<input type=\"text\" id=\"cajaFiltro\" class=\"form-control\" onkeyup=\"filtrarTabla()\" placeholder=\"Filtrar por nombre..\">");
-	registros.append("<table id=\"tabla\" class=\"table\">");
-	registros.append("<tr>");
-	registros.append("<th>Codigo</th>");
-	registros.append("<th>Nombre</th>");
-	registros.append("<th>Habitacion</th>");
-	registros.append("<th>Fecha de Inicio</th>");
-	registros.append("</tr>");
-	try {
-	    ResultSet pacientes = consultarPacientesInternados(medico);
-	    while(pacientes.next()) {
-	        registros.append("<tr class=\"\">");
-	        registros.append("<td>"+pacientes.getInt(1)+"</td>");
-	        registros.append("<td>"+pacientes.getString(2)+"</td>");
-	        registros.append("<td>"+pacientes.getInt(3)+"</td>");
-	        registros.append("<td>"+pacientes.getDate(4)+"</td>");
-	        registros.append("<td><button id=\""+pacientes.getInt(1)+"\" onClick=\"seleccionarPaciente(this)\" "
-	        	+ "class=\"botonSeleccionar btn btn-info \">Seleccionar Paciente</button></td>");
-	        registros.append("</tr>");
-	    }
-	} catch (SQLException e) {
-	    e.printStackTrace();
-	}
-	registros.append("</table>");
-	return registros.toString(); 
-    }
-
-    /**
-     * Genera la consulta a la base de datos de los pacientes internados. 
-     * @return
-     * @throws SQLException 
-     */
-    private ResultSet consultarPacientesInternados(int medico) throws SQLException {
-	String sql = "SELECT i.id_internado , persona.nombre , i.id_habitacion, i.inicio " + 
-		"	FROM Internado i " + 
-		"		INNER JOIN Paciente p ON p.id_paciente= i.id_paciente " + 
-		"        INNER JOIN Persona persona ON persona.cui=p.cui" + 
-		"		INNER JOIN Internado_tiene_Empleado pte ON pte.id_internado = i.id_internado AND pte.id_empleado = ? "
-		+ "		WHERE i.fin IS NULL";
-	PreparedStatement stm = DBConnection.getInstanceConnection().getConexion().prepareStatement(sql);
-	stm.setInt(1, medico);
-	return stm.executeQuery();
-    }
 
     /**
      * Genera condigo html de las cirugias disponibles en la DB
@@ -626,5 +581,59 @@ public class ManejadorMedico {
 	    e.printStackTrace();
 	}
 	return resp;
+    }
+    
+    
+    public String consultarPacientesInternados(String evento, String texto, int medico) {
+	String sql =" SELECT Persona.cui as 'CUI', Persona.nombre AS 'Nombre Completo', Internado.inicio AS 'Fecha de Ingreso', Internado.id_habitacion AS 'Habitacion' "+
+		" FROM Persona "+
+		" INNER JOIN Paciente ON Persona.cui = Paciente.cui "+
+		" INNER JOIN Internado ON Paciente.id_paciente = Internado.id_paciente "+
+		" INNER JOIN Internado_tiene_Empleado ON Internado_tiene_Empleado.id_internado= Internado.id_internado "+
+		" INNER JOIN Empleado ON Empleado.id_empleado = Internado_tiene_Empleado.id_empleado "+
+		" WHERE Empleado.id_empleado = ? "+
+		" AND Internado.fin IS NULL";
+	ResultSet resultados = null;
+	try {
+	    PreparedStatement stm = DBConnection.getInstanceConnection().getConexion().prepareStatement(sql);
+	    stm.setInt(1, medico);
+	    resultados= stm.executeQuery();
+	} catch (SQLException e) {
+	    e.printStackTrace();
+	}
+	return GeneradorHTML.convertirTabla(resultados, evento, texto, false, false);
+    }
+
+    public String darDeAlta(String cuiPaciente, long millisDate) {
+	StringBuffer str = new StringBuffer(); 
+	Date fecha = new Date(millisDate); 
+	try {
+	    String sql = "UPDATE Internado SET fin = ? WHERE id_internado = ? "; 
+	    PreparedStatement stm = DBConnection.getInstanceConnection().getConexion().prepareStatement(sql);
+	    stm.setDate(1, fecha);
+	    stm.setInt(2, getIdInternado(cuiPaciente));
+	    stm.execute(); 
+	    str.append("Registro realizado con exito"); 
+	} catch (Exception e) {
+	    str.append(e.getMessage()); 
+	    e.printStackTrace();
+	}
+	return str.toString();
+    }
+    
+    private int getIdInternado(String cuiPaciente) throws SQLException, DataBaseException {
+	String sql =" Select Internado.id_internado "+
+		" FROM Internado "+
+		" INNER JOIN Paciente ON Paciente.id_paciente = Internado.id_paciente "+
+		" WHERE Paciente.cui = ? "
+		+ " AND Internado.fin IS NULL";
+	PreparedStatement stm = DBConnection.getInstanceConnection().getConexion().prepareStatement(sql);
+	stm.setString(1, cuiPaciente);
+	ResultSet resultado = stm.executeQuery(); 
+	if(resultado.next())
+	    return resultado.getInt(1); 
+	else 
+	    throw new DataBaseException("No existe el internado con el cui " + cuiPaciente ); 
+	
     }
 }
