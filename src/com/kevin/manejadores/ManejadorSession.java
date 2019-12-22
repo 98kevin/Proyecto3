@@ -5,16 +5,11 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import com.kevin.modelos.Area;
 import com.kevin.servicio.DBConnection;
 
 public class ManejadorSession  {
-    
-    public static final int AREA_ADMINISTRACION= 1;
-    public static final int AREA_RECURSOS_HUMANOS= 2;
-    public static final int AREA_FARMACIA= 3;
-    public static final int AREA_MEDICOS=4;    
-    public static final int AREA_ENFERMERAS=5;    
-    
+     
 
     public boolean verificarPassword(String email, String password) {
 	String passwordEnDB = null; 
@@ -61,19 +56,19 @@ public class ManejadorSession  {
 	String direccion= null; 
 	String socket = "http://localhost:8080/Proyecto3";
 	switch(area) {
-	case AREA_ADMINISTRACION: 
+	case Area.ADMINISTRACION: 
 	    direccion= socket + "/administrador/admin.jsp";
 	    break;
-	case AREA_RECURSOS_HUMANOS: 
+	case Area.RECURSOS_HUMANOS: 
 	    direccion = socket + "/recursos-humanos/recursos-humanos.jsp";
 	    break;
-	case AREA_FARMACIA: 
+	case Area.FARMACIA: 
 	    direccion= socket + "/farmacia/farmacia.jsp";
 	    break;
-	case AREA_MEDICOS: 
+	case Area.MEDICOS: 
 	    direccion= socket + "/medico/medico.jsp";
 	    break;
-	case AREA_ENFERMERAS: 
+	case Area.ENFERMEROS: 
 	    direccion= socket + "/enfermera/enfermera.jsp";
 	    break;
 	}
