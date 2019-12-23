@@ -81,7 +81,7 @@ public class ManejadorRecursosHumanos {
 		" ORDER BY Contrato.id_contrato"; 
 	Connection conexion = DBConnection.getInstanceConnection().getConexion();
 	try {
-	    respuesta = GeneradorHTML.convertirTabla(conexion.prepareStatement(sql).executeQuery(), "despedirEmpleado(this)", "Despedir", false, false);
+	    respuesta = GeneradorHTML.convertirTabla(conexion.prepareStatement(sql).executeQuery(), "despedirEmpleado(this)", "Despedir", false, false, true);
 	} catch (SQLException e) {
 	    e.printStackTrace();
 	}
@@ -99,7 +99,7 @@ public class ManejadorRecursosHumanos {
 		" WHERE Contrato.fecha_final IS NOT NULL AND Empleado.activo= 0"+
 		" ORDER BY Contrato.id_contrato"; 
 	try {
-	    respuesta = GeneradorHTML.convertirTabla(conexion.prepareStatement(sql).executeQuery(), "recontratarEmpleado(this)", "Recontratar", false, false);
+	    respuesta = GeneradorHTML.convertirTabla(conexion.prepareStatement(sql).executeQuery(), "recontratarEmpleado(this)", "Recontratar", false, false, true);
 	} catch (SQLException e) {
 	    e.printStackTrace();
 	}

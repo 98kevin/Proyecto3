@@ -492,7 +492,7 @@ public class ManejadorMedico {
 		" WHERE Cirugia.realizada = 0";
 	try {
 	    resultado =  GeneradorHTML.convertirTabla(conexion.prepareStatement(sql).executeQuery(), 
-	    	"registrarCirugiaTerminada(this)", "Finalizar Cirugia", false, false);
+	    	"registrarCirugiaTerminada(this)", "Finalizar Cirugia", false, false, true);
 	} catch (SQLException e) {
 	    e.printStackTrace();
 	}
@@ -577,7 +577,7 @@ public class ManejadorMedico {
 		"FROM Persona JOIN Medico_Especialista ON Persona.cui=Medico_Especialista.cui_persona";
 	try {
 	    PreparedStatement stm = conexion.prepareStatement(sql);
-	    resp= GeneradorHTML.convertirTabla(stm.executeQuery(), "seleccionarMedicoEspecialista(this)", "Asingar", false, false);
+	    resp= GeneradorHTML.convertirTabla(stm.executeQuery(), "seleccionarMedicoEspecialista(this)", "Asingar", false, false,true);
 	} catch (SQLException e) {
 	    e.printStackTrace();
 	}
@@ -602,7 +602,7 @@ public class ManejadorMedico {
 	} catch (SQLException e) {
 	    e.printStackTrace();
 	}
-	return GeneradorHTML.convertirTabla(resultados, evento, texto, false, false);
+	return GeneradorHTML.convertirTabla(resultados, evento, texto, false, false, true);
     }
 
     public String darDeAlta(String cuiPaciente, long millisDate) {

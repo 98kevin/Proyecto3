@@ -82,7 +82,7 @@ public class ManejadorEnfermera {
 	} catch (SQLException e) {
 	    e.printStackTrace();
 	}
-	return GeneradorHTML.convertirTabla(resultado, "suministrarMedicamento(this)", "Suministrar", true, true);
+	return GeneradorHTML.convertirTabla(resultado, "suministrarMedicamento(this)", "Suministrar", true, true, true);
     }
 
     /**
