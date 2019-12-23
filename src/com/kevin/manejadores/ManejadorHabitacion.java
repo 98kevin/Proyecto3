@@ -1,10 +1,12 @@
 package com.kevin.manejadores;
 
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import com.kevin.modelos.Area;
 import com.kevin.modelos.Habitacion;
 import com.kevin.servicio.DBConnection;
 
@@ -55,5 +57,42 @@ public class ManejadorHabitacion {
 	stm.setInt(1, codigo);
 	stm.setBoolean(2, ocupada);
 	stm.execute();
+    }
+    
+    public PreparedStatement registrarCostosDeHabitacion(String cuiPaciente, Date fecha) throws SQLException {
+	PreparedStatement stm = null; 
+	String sql =" INSERT INTO Registro_Monetario (descripcion, monto, fecha, tipo, id_area) VALUES ( "+
+		" 'Costo de mantenimiento de la habitacion', "+
+		" (SELECT Habitacion.precio_de_mantenimiento FROM Habitacion WHERE id_habitacion = "+
+		"	(SELECT Habitacion.id_habitacion FROM Habitacion "+
+		"	INNER JOIN Internado ON Internado.id_habitacion = Habitacion.id_habitacion "+ 
+		"	INNER JOIN Paciente ON Internado.id_paciente = Paciente.id_paciente "+
+		"	WHERE Paciente.cui = '?')) * 	(SELECT TIMESTAMPDIFF(DAY, Internado.inicio, ?) " + 
+		"									FROM Internado " + 
+		"									INNER JOIN Paciente ON Internado.id_paciente = Paciente.id_paciente " + 
+		"									WHERE Paciente.cui = ? ), "+
+	" ?, "+
+	" false, "+ //egresos
+	" ?)";  //area de medicos
+	stm = DBConnection.getInstanceConnection().getConexion().prepareStatement(sql);
+	stm.setString(1, cuiPaciente);
+	stm.setDate(2, fecha);
+	stm.setString(3, cuiPaciente);
+	stm.setDate(4, fecha);
+	stm.setInt(5, Area.MEDICOS);
+	return stm;
+    }
+    
+    public PreparedStatement registrarSalidaPaciente(String cuiPaciente) throws SQLException {
+	String sql = " UPDATE Habitacion SET esta_ocupada = 0 " + 
+		" WHERE Habitacion.id_habitacion = " + 
+		"	(SELECT Habitacion.id_habitacion " + 
+		"    FROM Habitacion " + 
+		"    INNER JOIN Internado ON Habitacion.id_habitacion = Internado.id_habitacion " + 
+		"    INNER JOIN Paciente ON  Internado.id_paciente = Paciente.id_paciente " + 
+		"    WHERE Paciente.cui = ? )";
+	PreparedStatement stm = DBConnection.getInstanceConnection().getConexion().prepareStatement(sql); 
+	stm.setString(1, cuiPaciente);
+	return stm;
     }
 }

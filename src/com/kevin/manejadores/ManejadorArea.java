@@ -39,24 +39,19 @@ public class ManejadorArea{
      * @throws SQLException
      */
     public String consultarAreasDeTrabajo() throws SQLException {
-	StringBuffer areas = new StringBuffer(); 
 	Connection conexion = DBConnection.getInstanceConnection().getConexion();
-	String sql = "Select Area.id_area, Area.descripcion, Modulo.nombre FROM Area INNER JOIN Modulo ON Area.id_modulo= Modulo.id_modulo WHERE Area.id_area>2";
+	String sql = "Select Area.id_area, Area.descripcion FROM Area WHERE Area.id_area > 2"; // no se toma en cuenta el area de administracion
 	PreparedStatement stm = conexion.prepareStatement(sql); 
 	ResultSet resultado = stm.executeQuery(); 
-	while(resultado.next()) {
-	    areas.append("<option value=\""+resultado.getInt(1)+"\">"+resultado.getString(2) +" - " +resultado.getString(3)+"</option>");
-	}
-	return areas.toString();
+	return GeneradorHTML.convertirSelector(resultado, ""); 
     }
     
     public String consutarAreas() throws SQLException {
 	Connection conexion = DBConnection.getInstanceConnection().getConexion();
-	String sql = "Select Area.id_area, Area.descripcion, Modulo.nombre FROM Area INNER JOIN Modulo ON Area.id_modulo= Modulo.id_modulo";
+	String sql = "Select Area.id_area, Area.descripcion FROM Area";
 	PreparedStatement stm = conexion.prepareStatement(sql); 
 	ResultSet resultado = stm.executeQuery(); 
-	//return GeneradorHTML.convertirTabla(resultado); 
-	return null;
+	return GeneradorHTML.convertirSelector(resultado, "seleccionarArea()"); 
     }
 
 

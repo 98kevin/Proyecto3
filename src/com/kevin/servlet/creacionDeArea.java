@@ -32,6 +32,7 @@ public class creacionDeArea extends HttpServlet {
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 	    ManejadorModulo modulo = new ManejadorModulo(); 
+	    //consulta los modulos registrados
 	    	String [][] modulos = modulo.modulosRegistrados();
 	    	for(int i=0; i<modulos.length; i++) {
 	    		 response.getWriter().append("<option value=\""+modulos[i][0]+"\">"+modulos[i][1]+"</option>");		   

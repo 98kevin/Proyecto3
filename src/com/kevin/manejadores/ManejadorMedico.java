@@ -6,6 +6,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -605,20 +606,30 @@ public class ManejadorMedico {
     }
 
     public String darDeAlta(String cuiPaciente, long millisDate) {
-	StringBuffer str = new StringBuffer(); 
+	ArrayList<PreparedStatement> operaciones =  new ArrayList<PreparedStatement>();
+	ManejadorPaciente manejador= new ManejadorPaciente(); 
+	ManejadorHabitacion manejadorHabitacion = new ManejadorHabitacion(); 
 	Date fecha = new Date(millisDate); 
 	try {
+	    operaciones.add(registrarFinInternado(cuiPaciente, fecha));
+	    operaciones.add(manejador.registroCuentaCliente(cuiPaciente, fecha)); 
+	    operaciones.add(manejadorHabitacion.registrarCostosDeHabitacion(cuiPaciente, fecha)); 
+	    operaciones.add(manejadorHabitacion.registrarSalidaPaciente(cuiPaciente)); 
+	} catch (Exception e) {
+	    e.printStackTrace();
+	} 
+	return DBConnection.getInstanceConnection().transaccion(operaciones); 
+    }
+    
+    
+    private PreparedStatement registrarFinInternado(String cuiPaciente, Date fecha) throws SQLException, DataBaseException {
+	PreparedStatement stm = null ; 
 	    String sql = "UPDATE Internado SET fin = ? WHERE id_internado = ? "; 
-	    PreparedStatement stm = DBConnection.getInstanceConnection().getConexion().prepareStatement(sql);
+	    stm = DBConnection.getInstanceConnection().getConexion().prepareStatement(sql);
 	    stm.setDate(1, fecha);
 	    stm.setInt(2, getIdInternado(cuiPaciente));
 	    stm.execute(); 
-	    str.append("Registro realizado con exito"); 
-	} catch (Exception e) {
-	    str.append(e.getMessage()); 
-	    e.printStackTrace();
-	}
-	return str.toString();
+	return stm; 
     }
     
     private int getIdInternado(String cuiPaciente) throws SQLException, DataBaseException {
@@ -634,6 +645,7 @@ public class ManejadorMedico {
 	    return resultado.getInt(1); 
 	else 
 	    throw new DataBaseException("No existe el internado con el cui " + cuiPaciente ); 
-	
     }
+    
+    
 }

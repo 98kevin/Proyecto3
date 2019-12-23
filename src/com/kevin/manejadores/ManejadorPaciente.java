@@ -1,11 +1,14 @@
 package com.kevin.manejadores;
 
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import com.kevin.exceptions.DataBaseException;
+import com.kevin.modelos.Area;
+import com.kevin.modelos.Main;
 import com.kevin.modelos.Paciente;
 import com.kevin.servicio.DBConnection;
 import com.kevin.servicio.GeneradorHTML;
@@ -62,7 +65,7 @@ public class ManejadorPaciente {
 	} catch (SQLException e) {
 	    e.printStackTrace();
 	}
-	return GeneradorHTML.convertirTabla(pacientes, "seleccionarPaciente(this)", "Seleccionar Paciente", true ,true ); 
+	return GeneradorHTML.convertirTabla(pacientes, "seleccionarPaciente(this)", "Seleccionar Paciente", true ,true,true ); 
     }
 
 
@@ -102,7 +105,7 @@ public class ManejadorPaciente {
 	} catch (SQLException e) {
 	    e.printStackTrace();
 	}
-	return GeneradorHTML.convertirTabla(resultados, "suministrarMedicamento(this)", " Suministrar ", true, true);
+	return GeneradorHTML.convertirTabla(resultados, "suministrarMedicamento(this)", " Suministrar ", true, true, true);
     }
     
     public String consultarPacinetesDeEnfermera(int codigoEnfermera) {
@@ -143,6 +146,73 @@ public class ManejadorPaciente {
 	else
 	    throw new DataBaseException("No existe el internado con el cui: " + cui);
     }
+    
+    
+    public int consultarDiasInternado(String cuiPaciente, Date fecha ) throws SQLException, DataBaseException {
+	String sql = "SELECT TIMESTAMPDIFF(DAY, Internado.inicio, ?) as 'Dias' "+ 
+		" FROM Internado"+ 
+		" INNER JOIN Paciente ON Internado.id_paciente = Paciente.id_paciente"+ 
+		" WHERE Paciente.cui = ?";  
+	PreparedStatement stm = DBConnection.getInstanceConnection().getConexion().prepareStatement(sql); 
+	stm.setDate(1, fecha);
+	stm.setString(2, cuiPaciente);
+	ResultSet dias = stm.executeQuery(); 
+	if(dias.next())
+	    return dias.getInt(1); 
+	else 
+	    throw new DataBaseException("No se pudo leer los dias del paciente con el cui" + cuiPaciente); 
+    }
+
+
+    public PreparedStatement registroCuentaCliente(String cuiPaciente, Date fecha) throws SQLException, DataBaseException {
+	int dias = consultarDiasInternado(cuiPaciente, fecha); 
+	String sql ="INSERT INTO Cuenta (id_paciente, detalle, monto, pagado, fecha, id_area) "
+		+ " VALUES ((SELECT id_paciente FROM Paciente WHERE cui = ?), " //1
+		+"?, "//2
+		+ "(SELECT monto FROM Constantes WHERE id_constante = 2) * ?, " //3
+		+ "?, "//4
+		+ "?, " //5
+		+ "? )"; //6
+	PreparedStatement stm = null; 
+	stm = DBConnection.getInstanceConnection().getConexion().prepareStatement(sql); 
+	stm.setString(1, cuiPaciente);
+	stm.setString(2, getDescripcionDiasInternado(dias));
+	stm.setInt(3, dias);
+	stm.setBoolean(4, Main.INGRESOS);
+	stm.setDate(5, fecha);
+	stm.setInt(6, Area.MEDICOS);
+	return stm;
+    }
+
+
+    private String getDescripcionDiasInternado(int dias) {
+	StringBuffer descripcion = new StringBuffer(); 
+	descripcion.append("Por "); 
+	descripcion.append(dias); 
+	descripcion.append(" internado en el hospital"); 
+	return descripcion.toString();
+    }
+
+
+    public String consultarPacientesConCuentaPendiente(String funcionJS, String textoBoton) {
+	PreparedStatement stm;
+	ResultSet resultados = null;
+	String sql ="	SELECT Persona.cui, Persona.nombre, IFNULL(Internado.inicio, '--') AS 'Ingreso', IFNULL(Internado.fin, '--') AS 'Egreso', " + 
+		"	(SELECT SUM(Cuenta.monto) FROM Cuenta WHERE id_paciente = Paciente.id_paciente AND pagado = false) AS 'Cuenta' FROM Persona  " + 
+		"	INNER JOIN Paciente ON Persona.cui = Paciente.cui  " + 
+		"	INNER JOIN Internado ON Paciente.id_paciente = Internado.id_paciente  " + 
+		"	INNER JOIN Cuenta ON Paciente.id_paciente = Cuenta.id_paciente   " + 
+		"	WHERE (SELECT SUM(Cuenta.monto) FROM Cuenta WHERE id_paciente = Paciente.id_paciente AND pagado = false) > 0 " + 
+		"	GROUP BY Persona.cui";
+	try {
+	    stm = DBConnection.getInstanceConnection().getConexion().prepareStatement(sql);
+	    resultados = stm.executeQuery(); 
+	} catch (SQLException e) {
+	    e.printStackTrace();
+	}
+	return GeneradorHTML.convertirTabla(resultados, funcionJS, textoBoton, false, false, true);
+    }
+    
     
     
 }

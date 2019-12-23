@@ -10,6 +10,7 @@ import java.util.Calendar;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.kevin.modelos.Area;
 import com.kevin.modelos.Medicamento;
 import com.kevin.servicio.DBConnection;
 
@@ -128,7 +129,7 @@ public class ManejadorFarmacia{
 		conexion.setAutoCommit(false);
 		Medicamento medicamento = leerMedicamento(idMedicamento);
 		int registro= manejador.registrarTransaccionMedicamento(idUsuario,medicamento,false, cantidad,
-			ManejadorSession.AREA_FARMACIA,conexion);
+			Area.FARMACIA,conexion);
 		registrarVenta(medicamento, cantidad, idUsuario,conexion, false, registro);
 		actualizarCantidades(medicamento, medicamento.getCantidadExistente()+ cantidad, conexion);
 		conexion.commit();

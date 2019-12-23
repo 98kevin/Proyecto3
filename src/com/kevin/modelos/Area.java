@@ -1,7 +1,12 @@
 package com.kevin.modelos;
 
 public class Area {
-    
+    public static final int ADMINISTRACION = 1; 
+    public static final int RECURSOS_HUMANOS = 2; 
+    public static final int FARMACIA= 3; 
+    public static final int MEDICOS= 4; 
+    public static final int ENFERMEROS= 5;
+    public static final int CAJA = 7; 
     
     private int modulo; 
     private String descripcion;

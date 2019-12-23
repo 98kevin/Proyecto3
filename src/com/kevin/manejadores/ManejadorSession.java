@@ -71,6 +71,9 @@ public class ManejadorSession  {
 	case Area.ENFERMEROS: 
 	    direccion= socket + "/enfermera/enfermera.jsp";
 	    break;
+	case Area.CAJA: 
+	    direccion = socket + "/cajero/cajero.jsp"; 
+	    break;
 	}
 	return direccion;
     }

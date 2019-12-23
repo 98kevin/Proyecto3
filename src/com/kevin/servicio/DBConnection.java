@@ -66,16 +66,18 @@ public class DBConnection {
      * Transaccion en la base de datos. 
      * @param stm
      */
-    public void transaccion(ArrayList<PreparedStatement> stm) {
-	Connection conexion = getConexion(); 
+    public String transaccion(ArrayList<PreparedStatement> stm) {
+	StringBuffer respuesta = new StringBuffer();
 	try {
 		conexion.setAutoCommit(false);
 		for (PreparedStatement preparedSteament : stm) {
 		    preparedSteament.execute();
 		    conexion.commit();
 		}
+		respuesta.append("Operacion Exitosa"); 
 	} catch (SQLException e) {
 	    e.printStackTrace();
+	    respuesta.append(e.getMessage()); 
 	    try {
 		conexion.rollback();
 	    } catch (SQLException e1) {
@@ -88,9 +90,7 @@ public class DBConnection {
 		e.printStackTrace();
 	    }
 	}
-
-	
-	
+	return respuesta.toString();
     }
     
 }

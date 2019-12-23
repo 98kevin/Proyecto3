@@ -16,7 +16,7 @@ public class GeneradorHTML {
  * @return
  */
     public static String convertirTabla(ResultSet resutladoConsulta, String funcionJs, String textoBoton,
-	    boolean tieneCajaDeTexto, boolean rango)  {
+	    boolean tieneCajaDeTexto, boolean rango, boolean tieneBoton)  {
 		StringBuffer sourceTable = new StringBuffer();
 		try {
 		    sourceTable.append("<p><table border=1 class=\"table\">");
@@ -28,7 +28,7 @@ public class GeneradorHTML {
 			     sourceTable.append("<th>" + rsmd.getColumnLabel(i + 1) + "</th>");
 			   }
 			 sourceTable.append("</tr></thead>");
-			 sourceTable.append(agregarData(resutladoConsulta, columnCount, funcionJs, textoBoton, tieneCajaDeTexto, rango));
+			 sourceTable.append(agregarData(resutladoConsulta, columnCount, funcionJs, textoBoton, tieneCajaDeTexto, rango, tieneBoton));
 			 sourceTable.append("</table></p>");
 		} catch (SQLException e) {
 		    e.printStackTrace();
@@ -37,7 +37,7 @@ public class GeneradorHTML {
     }
     
     private static String agregarData(ResultSet resultadoConsulta,int columnCount,String funcionJs, String textoBoton,
-	    boolean tieneCajaDeTexto, boolean rango)  throws SQLException {
+	    boolean tieneCajaDeTexto, boolean rango, boolean tieneBoton)  throws SQLException {
 	StringBuffer data = new StringBuffer();
 	 while (resultadoConsulta.next()) { 
 	     data.append("<tr>");
@@ -46,6 +46,7 @@ public class GeneradorHTML {
 	     }
 	  if(tieneCajaDeTexto)
 	      data.append(agregarCajaDeTexto(rango, columnCount, resultadoConsulta));
+	  if(tieneBoton)
 	  data.append("<td><button id=\""+resultadoConsulta.getInt(1)+"\" " +
 	  	 "onClick=\""+funcionJs+" \" class=\"btn btn-info \">"+textoBoton+"</button></td>"); 
 	  }

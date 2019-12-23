@@ -1,11 +1,9 @@
 const CREAR = 1; 
 
-let botonNuevaTarifa= document.getElementById('crearTarifa'); 
 let botonEnviarTarifa = document.getElementById('crearTarifaFormulario');
 
 let formTarifa= document.getElementById('formTarifa');
 
-botonNuevaTarifa.addEventListener('click', mostrarFormTarifa);
 botonEnviarTarifa.addEventListener('click', enviarTarifa);
 
 function mostrarFormTarifa() {

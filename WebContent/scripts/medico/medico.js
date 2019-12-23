@@ -1,19 +1,21 @@
-
-const CONSULTAR_PACIENTES_REGISTRADOS= 1;
-const REGISTRAR_OPERACION= 2;
-const REGISTRAR_CONSULTA= 3;  //Registro completo de la consulta
+//constantes del metodo GET
 const CONSULTAR_MEDICAMENTOS= 4;
 const CONSULTAR_ENFERMERAS= 5;
 const CONSULTAR_MEDICOS = 6;
-const AGREGAR_MEDICAMENTO = 7;
 const CONSULTAR_HABITACIONES=8;
 const CONSULTAR_PACIENTES_INTERNADOS= 9;
 const CONSUTLAR_CIRUGIAS=10;
-const ASINGAR_CIRUGIA=11;
-const TERMINAR_CIRUGIA=12;
 const CONSULTAR_CIRUGIAS_PENDIENTES=13;
 const CONSULTAR_MEDICOS_ESPECIALISTAS=14;
 const CONSULTAR_INTERNADOS = 15;
+
+// constantes del metodo POST
+const CONSULTAR_PACIENTES_REGISTRADOS= 1;
+const REGISTRAR_OPERACION= 2;
+const REGISTRAR_CONSULTA= 3;  //Registro completo de la consulta
+const AGREGAR_MEDICAMENTO = 7;
+const ASINGAR_CIRUGIA=11;
+const TERMINAR_CIRUGIA=12;
 const DAR_DE_ALTA = 16; 
 
 var idPacienteSeleccionado=0;
@@ -100,7 +102,7 @@ function darDeAlta(boton){
     let fecha = new Date(controlFecha.value); 
     $.ajax({
         url: 'medico',
-        dataType: 'text',
+        dataType: 'text', 
         type: 'post',
         data: {
             operacion: DAR_DE_ALTA, 

@@ -20,23 +20,27 @@ import com.kevin.manejadores.ManejadorPaciente;
 @WebServlet("/medico/medico")
 public class ServletMedico extends HttpServlet {
     /**
-     * 
+     * Serializacion de la clase del medico
      */
     private static final long serialVersionUID = 3516163412083326515L;
+    
+    // Constantes del Metodo GET
     private static final int CONSULTAR_PACIENTES_REGISTRADOS= 1;
-    private static final int REGISTRAR_CONSULTA	= 3;    
     private static final int CONSULTAR_MEDICAMENTOS= 4;
     private static final int CONSULTAR_ENFERMERAS= 5;
     private static final int CONSULTAR_MEDICOS = 6;
-    private static final int AGREGAR_MEDICAMENTO = 7;
     private static final int CONSULTAR_HABITACIONES = 8;
     private static final int CONSULTAR_PACIENTES_INTERNADOS = 9;
     private static final int CONSUTLAR_CIRUGIAS = 10;
-    private static final int ASINGAR_CIRUGIA = 11;
-    private static final int TERMINAR_CIRUGIA= 12;
     private static final int CONSULTAR_CIRUGIAS_PENDIENTES = 13;
     private static final int CONSULTAR_MEDICOS_ESPECIALISTAS=14;
     private static final int CONSULTAR_INTERNADOS = 15; 
+    
+    //Constantes del Metodo POST
+    private static final int REGISTRAR_CONSULTA	= 3;    
+    private static final int AGREGAR_MEDICAMENTO = 7;
+    private static final int ASINGAR_CIRUGIA = 11;
+    private static final int TERMINAR_CIRUGIA= 12;
     private static final int DAR_DE_ALTA = 16; 
        
     /**
