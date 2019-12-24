@@ -14,6 +14,7 @@ import com.kevin.exceptions.ConversionDeNumeros;
 import com.kevin.exceptions.DataBaseException;
 import com.kevin.exceptions.ManejoDePaciente;
 import com.kevin.modelos.Administrador;
+import com.kevin.modelos.Area;
 import com.kevin.modelos.Cirugia;
 import com.kevin.servicio.DBConnection;
 import com.kevin.servicio.GeneradorHTML;
@@ -186,19 +187,6 @@ public class ManejadorMedico {
 	}
     }
 
-
-    /**
-     * Consulta la base de dato en busca de los medicos registrados
-     * @return
-     * @throws SQLException
-     */
-    private ResultSet consultarMedicosEnDB() throws SQLException {
-	String sql ="SELECT e.id_empleado, p.nombre FROM Persona p INNER JOIN "
-		+ " Empleado e ON p.cui=e.cui_persona WHERE e.id_area=4"; 
-	Connection conexion = DBConnection.getInstanceConnection().getConexion();
-	Statement stm =conexion.createStatement();
-	 return  stm.executeQuery(sql);
-    }
     
     
     /**
@@ -206,26 +194,20 @@ public class ManejadorMedico {
      * @return
      */
     public String consultarMedicos() {
-	    StringBuffer registros= new StringBuffer(); 
-		registros.append("<input type=\"text\" id=\"cajaFiltro\" class=\"form-control table\" onkeyup=\"filtrarTabla()\" "
-			+ " placeholder=\"Filtrar por medico..\">");
-		registros.append("<table class=\"table\" id=\"tabla\">");
-		registros.append("<tr>").append("<th>Codigo</th>");
-		registros.append("<th>Medico</th>").append("</tr>");
-		try {
-		    ResultSet medicos = consultarMedicosEnDB();
-		    while(medicos.next()) {
-		        registros.append("<tr class=\"\">");
-		        registros.append("<td>"+medicos.getString(1)+"</td>");
-		        registros.append("<td>"+medicos.getString(2)+"</td>");
-		        registros.append("<td><button id=\""+medicos.getString(1)+"\" onClick=\"agregarMedico(this)\" "
-		        	+ " class=\"btn-agregar-medico\">Asignar</button></td>");
-		        registros.append("</tr>");
-		    }
-		} catch(SQLException e ) {
-		    e.printStackTrace();
-		}
-		return registros.toString();
+	    String sql ="SELECT e.id_empleado, p.nombre FROM Persona p INNER JOIN "
+			+ " Empleado e ON p.cui=e.cui_persona WHERE e.id_area=?"; 
+		Connection conexion = DBConnection.getInstanceConnection().getConexion();
+		ResultSet medicos = null;
+			PreparedStatement stm;
+			try {
+			    stm = conexion.prepareStatement(sql);
+			    stm.setInt(1, Area.MEDICOS);
+			    medicos = stm.executeQuery();
+			} catch (SQLException e) {
+			    e.printStackTrace();
+			} 
+			return GeneradorHTML.convertirTabla(medicos, "agregarMedico(this)", "Agregar", false, false, true);
+		
 	    }
 
 

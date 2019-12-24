@@ -5,12 +5,12 @@ import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 
 import javax.servlet.http.HttpServletRequest;
 
 import com.kevin.exceptions.DataBaseException;
+import com.kevin.modelos.Area;
 import com.kevin.modelos.Medicamento;
 import com.kevin.servicio.DBConnection;
 import com.kevin.servicio.GeneradorHTML;
@@ -19,42 +19,22 @@ public class ManejadorEnfermera {
 
     
     /**
-     * 
-     * @return
-     * @throws SQLException
-     */
-    private ResultSet consultarEnfermerasEnDB() throws SQLException {
-	ResultSet enfermeras = null;
-	String sql = "SELECT e.id_empleado, p.nombre FROM Persona p INNER JOIN Empleado e ON p.cui=e.cui_persona WHERE e.id_area=5";
-	Connection conexion = DBConnection.getInstanceConnection().getConexion();
-	Statement stm =conexion.createStatement();
-	enfermeras = stm.executeQuery(sql);
-	return enfermeras;
-    }
-    
-    /**
      * Consulta las enfermeras disponibles
      * @return
+     * @throws SQLException 
      */
-    public String consultarEnfermeras() {
-    StringBuffer registros= new StringBuffer(); 
-	registros.append("<input type=\"text\" id=\"cajaFiltro\" class=\"form-control\" onkeyup=\"filtrarTabla()\" placeholder=\"Filtrar por enfermera..\">");
-	registros.append("<table class=\"table\" id=\"tabla\">");
-	registros.append("<tr>").append("<th>codigo</th>");
-	registros.append("<th>Enfermera</th>").append("</tr>");
+    public String consultarEnfermeras()  {
+    String sql = "SELECT e.id_empleado, p.nombre FROM Persona p INNER JOIN Empleado e ON p.cui=e.cui_persona WHERE e.id_area=?";
+	Connection conexion = DBConnection.getInstanceConnection().getConexion();
+	ResultSet enfermeras = null;
 	try {
-	    ResultSet enfermeras = consultarEnfermerasEnDB();
-	    while(enfermeras.next()) {
-	        registros.append("<tr class=\"\">");
-	        registros.append("<td>"+enfermeras.getString(1)+"</td>");
-	        registros.append("<td>"+enfermeras.getString(2)+"</td>");
-	        registros.append("<td><button id=\""+enfermeras.getString(1)+"\" onClick=\"agregarEnfermera(this)\" class=\"btn-agregar-enfermera\">Asingar</button></td>");
-	        registros.append("</tr>");
-	    }
-	} catch(SQLException e ) {
+		PreparedStatement stm = conexion.prepareStatement(sql); 
+		stm.setInt(1, Area.ENFERMEROS);
+		enfermeras = stm.executeQuery(sql);
+	} catch (SQLException e) {
 	    e.printStackTrace();
 	}
-	return registros.toString();
+	return GeneradorHTML.convertirTabla(enfermeras, "agregarEnfermera(this)", "Asingar", false, false, true); 
     }
     
     
@@ -104,7 +84,8 @@ public class ManejadorEnfermera {
 	    int idInternado  = manejadorPaciente.consultarCodigoDeInternado(cuiPaciente);
 	    preparedStatements.add(suministrarMedicamento(idInternado, medicamento.getCodigo(), cantidad)); 
 	    preparedStatements.add(sumarCuentaCliente(getIdPaciente(cuiPaciente), medicamento, cantidad, fecha, consultarArea(idEmpleado)));
-	    preparedStatements.add(restarCantidad(medicamento, cantidad)); 
+	    preparedStatements.add(restarCantidad(medicamento, cantidad));
+	    
 	    DBConnection.getInstanceConnection().transaccion(preparedStatements);
 	    respuesta.append("Actualizacion realizada correctamente ");
 	} catch (SQLException | DataBaseException e ) {

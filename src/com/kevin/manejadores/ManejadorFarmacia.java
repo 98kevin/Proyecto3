@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServletRequest;
 import com.kevin.modelos.Area;
 import com.kevin.modelos.Medicamento;
 import com.kevin.servicio.DBConnection;
+import com.kevin.servicio.GeneradorHTML;
 
 public class ManejadorFarmacia{
 
@@ -84,33 +85,19 @@ public class ManejadorFarmacia{
      * @return
      */
     public String agregarRegistrosDeMedicamentos()  {
-	StringBuffer registros= new StringBuffer(); 
-	registros.append("<input type=\"text\" id=\"cajaFiltro\" class=\"form-control\" onkeyup=\"filtrarTabla()\" placeholder=\"Filtrar por medicamento..\">");
-	registros.append("<table class=\"table\" id=\"tabla\">");
-	registros.append("<tr>").append("<th>Codigo</th>");
-	registros.append("<th>Nombre</th>");
-	registros.append("<th>Precio Compra</th>");
-	registros.append("<th>Existencia</th>");
-	registros.append("<th>Cantidad Minima</th>");
-	registros.append("<th>Cantidad de Compra</th>").append("</tr>");
+	ResultSet medicamentos = null; 
+	Connection conexion = DBConnection.getInstanceConnection().getConexion();
+	String sql = "SELECT id_medicamento as Codigo, nombre as 'Descripcion', costo, cant_existencia as 'Unidades existentes', "
+		+ " cant_minima as 'Cantidad Minima'"
+		+ " FROM Medicamento";
+	Statement stm;
 	try {
-	    ResultSet medicamentos = consultarMedicamentos();
-	    while(medicamentos.next()) {
-	        registros.append("<tr class=\""+colorearTexto(medicamentos)+"\">");
-	        registros.append("<td>"+medicamentos.getInt(1)+"</td>");
-	        registros.append("<td>"+medicamentos.getString(2)+"</td>");
-	        registros.append("<td>"+medicamentos.getDouble(3)+"</td>");
-	        registros.append("<td>"+medicamentos.getInt(4)+"</td>");
-	        registros.append("<td>"+medicamentos.getInt(5)+"</td>");
-	        registros.append("<td ><input id=\"cant"+medicamentos.getInt(1)+"\"  class = \"form-control\" min=\"0\" placeholder=\"cantidad a comprar...\"></input></td>");
-	        registros.append("<td><button id=\""+medicamentos.getInt(1)+"\" onClick=\"botonComprar(this)\" class=\"botonComprar\">Comprar</button></td>");
-	        registros.append("</tr>");
-	    }
+	    stm = conexion.createStatement();
+	    medicamentos = stm.executeQuery(sql);
 	} catch (SQLException e) {
 	    e.printStackTrace();
 	}
-	registros.append("</table>");
-	return registros.toString(); 
+	return GeneradorHTML.convertirTabla(medicamentos, "botonComprar(this)", "Comprar", true, false, true); 
     }
 
     /**
