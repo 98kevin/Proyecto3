@@ -1,8 +1,12 @@
+//CONSTANTES DEL METODO POST
+const CONSULTAR_SALARIOS_PENDIENTES = 1; 
+//CONSTANTES DEL METODO GET 
 const CONSULTAR_AREAS = 1;
 const CONSULTAR_MODULOS = 2;
 const CONSULTAR_EMPLEADOS = 3;
 const CONSULTAR_TARIFAS = 4;
 const REGISTRAR_CIRUGIA = 5; 
+const PAGAR_SALARIO = 6; 
 
 //botones del panel superior
 let botonCrear =  document.getElementById('crearModulo');
@@ -27,9 +31,72 @@ let formEmpleado = document.getElementById('form-empleado');
 let formCirugia = document.getElementById('form-crear-cirugia');
 let registrarNuevaCirugia = document.getElementById('registrarNuevaCirugia');
 
-formEmpleado.style.display='none';
-formCirugia.style.display='none';
+let controlFecha = document.getElementById('controlFecha'); 
+let botonConsultaSalarios = document.getElementById('btnConsultarSalarios'); 
+let formularioIngresoDeFechas = document.getElementById('formularioIngresoFechas');
+let botonSolicitudPlanilla = document.getElementById('btnSolicitudDatosPlanilla'); 
 
+botonSolicitudPlanilla.addEventListener('click', () => {
+	let mes = document.getElementById('mesesDelAnio').value;
+	let anio = document.getElementById('anio').value; 
+	$.ajax({
+        url: 'administrador',
+        dataType: 'text',
+        type: 'GET',
+        data: {
+			operacion: CONSULTAR_SALARIOS_PENDIENTES, 
+			mes: mes, 
+			anio: anio
+       },
+       success: function( response){
+			ocultarComponentes();
+			tablaResultados.innerHTML = response;
+        },
+        error: function( jqXhr, textStatus, errorThrown ){
+        	alertify.error('estado del registros'+ textStatus+ ' error '+ errorThrown); 
+        	console.log('estado del registros'+ textStatus+ ' error '+ errorThrown);
+        }
+    })
+}); 
+
+function pagarSalario(boton){
+	let mes = document.getElementById('mesesDelAnio').value;
+	let anio = document.getElementById('anio').value; 
+	let cuiEmpleado = boton.getAttribute('id'); 
+	let fecha = new Date(controlFecha.value);
+	$.ajax({
+        url: 'administrador',
+        dataType: 'text',
+        type: 'POST',
+        data: {
+			operacion: PAGAR_SALARIO, 
+			cuiEmpleado: cuiEmpleado, 
+			mes: mes, 
+			anio: anio, 
+			fechaEnMilisegundos: fecha.getTime()
+       },
+       success: function( response){
+			ocultarComponentes(); 
+			alertify.message(response); 
+        },
+        error: function( jqXhr, textStatus, errorThrown ){
+        	alertify.error('estado del registros'+ textStatus+ ' error '+ errorThrown); 
+        	console.log('estado del registros'+ textStatus+ ' error '+ errorThrown);
+        }
+    })
+}
+
+window.onload = function () {
+	ocultarComponentes();
+	acutalizarControlFecha();
+}
+
+function ocultarComponentes(){
+	formEmpleado.style.display='none';
+	formCirugia.style.display='none';
+	controlFecha.style.display='none';
+	formularioIngresoDeFechas.style.display= 'none'; 
+}
 
 //eventos de los botones
 botonCrear.addEventListener('click',crearModulo);
@@ -41,10 +108,27 @@ botonCrearEmpleado.addEventListener('click', enviarEmpleado);
 botonCrearCirugia.addEventListener('click', mostrarFormCirugia);
 mostrarFormNuevoEmpleado.addEventListener('click', mostrarFormEmpleado);
 registrarNuevaCirugia.addEventListener('click', registrarCirugia);
+botonConsultaSalarios.addEventListener('click', mostrarControlesDeSalarios); 
+
 
 
 function mostrarFormCirugia(){
 	formCirugia.style.display='block';
+}
+
+function mostrarControlesDeSalarios(){
+	formularioIngresoDeFechas.style.display = 'block'; 
+}
+
+/**
+ * Actualiza el control de fechas a la fecha actual 
+ */
+function acutalizarControlFecha(){
+    let fechaActual = new Date();
+    let dias = fechaActual.getDate();
+    let mes = fechaActual.getMonth()+1;
+    let anio = fechaActual.getFullYear();
+    controlFecha.value=anio+'-'+mes+'-'+dias;
 }
 
 /**
@@ -179,4 +263,36 @@ function enviarEmpleado(){
 		}
     );
 	
+
+	/**
+	 * Realiza una peticion al servidor 
+	 * @param {*} url 
+	 * 	La direccion del recurso solicitado
+	 * @param {*} metodo 
+	 * 	El tipo de Metodo a llamar
+	 * @param {*} datos 
+	 * 	Los datos que se enviaran al servidor
+	 * @param {*} esTabla 
+	 * 	Si los resultados se mostraran en una tabla o en una alerta
+	 * @param {*} tablaParaMostrar 
+	 * 	El componente en donde se desplegaran los resultados 
+	 */
+	function ajaxPeticion(url, metodo, datos, esTabla, tablaParaMostrar){
+		$.ajax({
+			url: url,
+			dataType: 'text',
+			type: metodo,
+			data: datos,
+		   success: function( response){
+				ocultarComponentes();
+				if(esTabla)
+					tablaParaMostrar.innerHTML = response; 
+				else
+					alertify.message(response, 2); 
+			},
+			error: function( jqXhr, textStatus, errorThrown ){
+				alertify.error('estado del registros'+ textStatus+ ' error '+ errorThrown); 
+			}
+		})
+	}
 }

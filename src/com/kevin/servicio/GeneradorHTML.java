@@ -47,7 +47,7 @@ public class GeneradorHTML {
 	  if(tieneCajaDeTexto)
 	      data.append(agregarCajaDeTexto(rango, columnCount, resultadoConsulta));
 	  if(tieneBoton)
-	  data.append("<td><button id=\""+resultadoConsulta.getInt(1)+"\" " +
+	  data.append("<td><button id=\""+resultadoConsulta.getLong(1)+"\" " +
 	  	 "onClick=\""+funcionJs+" \" class=\"btn btn-info \">"+textoBoton+"</button></td>"); 
 	  }
 	 return data.toString();

@@ -1,6 +1,7 @@
 package com.kevin.manejadores;
 
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -8,6 +9,7 @@ import java.sql.Statement;
 
 import com.kevin.modelos.Administrador;
 import com.kevin.servicio.DBConnection;
+import com.kevin.servicio.GeneradorHTML;
 
 public class ManejadorAdministrador {
 
@@ -102,4 +104,68 @@ public class ManejadorAdministrador {
     }
     
     
+    public String consultarSalariosPendientes(int mes, int anio) {
+	ResultSet registros = null;
+	String sql = "SELECT Persona.cui, Persona.nombre, Contrato.salario" + 
+		"	FROM Persona " + 
+		"	INNER JOIN Empleado ON Persona.cui = Empleado.cui_persona" + 
+		"	INNER JOIN Contrato ON Empleado.id_empleado = Contrato.id_empleado" + 
+		"	WHERE ? NOT IN (SELECT pp.id_mes FROM Pagos_Planilla pp " + 
+		"		INNER JOIN Contrato c ON pp.id_contrato = c.id_contrato" + 
+		"    		WHERE c.id_contrato = Contrato.id_contrato)" + 
+		"	AND ? NOT IN (SELECT pp.anio FROM Pagos_Planilla pp " + 
+		"		INNER JOIN Contrato c ON pp.id_contrato = c.id_contrato" + 
+		"    		WHERE c.id_contrato = Contrato.id_contrato)" + 
+		"	AND Contrato.fecha_final IS NULL";
+	PreparedStatement stm; 
+	try {
+	    stm = DBConnection.getInstanceConnection().getConexion().prepareStatement(sql); 
+	    stm.setInt(1, mes);
+	    stm.setInt(2, anio);
+	    registros = stm.executeQuery(); 
+	} catch (SQLException e) {
+	    e.printStackTrace();
+	}
+	return GeneradorHTML.convertirTabla(registros, "pagarSalario(this)", "Pagar salario", false, false, true);
+    }
+    
+    
+    public String pagarSalario(String cuiEmpleado, int mes, int anio, Date fecha) {
+	StringBuffer resp = new StringBuffer(); 
+	String sql = "INSERT INTO Pagos_Planilla (descripcion, monto, id_contrato, id_mes, anio, area, fecha) VALUES (" + 
+		"'Pago de salario Mensual', " +  
+		" 	(SELECT Contrato.salario " + 
+		"		FROM Contrato " + 
+		"		INNER JOIN Empleado  ON Contrato.id_empleado = Empleado.id_empleado " + 
+		"		WHERE Empleado.cui_persona = ?" + //1
+		"		AND Contrato.fecha_final IS NULL), " + 
+		" 	(SELECT Contrato.id_contrato " + 
+		"		FROM Contrato " + 
+		"		INNER JOIN Empleado e1 ON Contrato.id_empleado = e1.id_empleado " + 
+		"		WHERE e1.cui_persona = ? " + //2
+		"		AND Contrato.fecha_final IS NULL), " + 
+		"?, " + //3
+		"?, " + //4 
+		" 	(SELECT e.id_area " + 
+		"		FROM Persona p, Empleado e " + 
+		"		WHERE p.cui = e.cui_persona " + 
+		"		AND p.cui = ?), " + //5
+		"?)"; //6
+	PreparedStatement pstm;
+	try {
+	    	pstm = DBConnection.getInstanceConnection().getConexion().prepareStatement(sql);
+		pstm.setString(1, cuiEmpleado);
+		pstm.setString(2, cuiEmpleado);
+		pstm.setInt(3, mes);
+		pstm.setInt(4, anio);
+		pstm.setString(5, cuiEmpleado);
+		pstm.setDate(6, fecha);
+		pstm.execute(); 
+		resp.append("Registro realizado exitosamente"); 
+	} catch (SQLException e) {
+	    	e.printStackTrace();
+	    	resp.append("Ocurrio un error. Codigo de error " + e.getErrorCode()); 
+	}
+	return resp.toString(); 
+    }
 }

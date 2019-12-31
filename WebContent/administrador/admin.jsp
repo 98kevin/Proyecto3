@@ -22,6 +22,7 @@
 	<input id='botonEnviar' class="btn btn-primary" type="button" hidden="true" value="Crear">
 	</form>
 	
+	<input id="controlFecha" class="from-control" type="date">
 	
 	<!-- Formulario de creacion de area -->
 	<form>
@@ -42,6 +43,26 @@
 	
 	<c:import var= "fromTarifa"  url= "from-tarifa.html" charEncoding= "UTF-8" scope= "page"> </c:import>
 	${fromTarifa}
+	
+	<form id="formularioIngresoFechas">
+		Mes <select id="mesesDelAnio"  > 
+			<option value="1"> Enero	</option> 
+			<option value="2"> Febrero	</option> 
+			<option value="3"> Marzo	</option> 
+			<option value="4"> Abril	</option> 
+			<option value="5"> Mayo </option> 
+			<option value="6"> Junio	</option> 
+			<option value="7"> Julio	</option> 
+			<option value="8"> Agosto	</option> 
+			<option value="9"> Septiembre	</option> 
+			<option value="10"> Octubre	</option> 
+			<option value="11"> Noviembre</option> 
+			<option value="12"> Diciembre	</option> 
+	</select>
+	Anio<input id="anio" type= "number" min="2018" max="2050">
+	<input  id= "btnSolicitudDatosPlanilla" type="button" class= "btn btn-primary" value="Solicitar Informacion">
+	</form>
+	
 	
 	<div id="tablaResultados" class= "table"></div>
 	

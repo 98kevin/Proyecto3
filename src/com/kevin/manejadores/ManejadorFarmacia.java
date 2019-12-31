@@ -6,18 +6,26 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
 import com.kevin.modelos.Area;
 import com.kevin.modelos.Medicamento;
+import com.kevin.reportes.ControladorDeReportes;
+import com.kevin.reportes.modelos_de_reportes.SubVentaDeMedicamento;
+import com.kevin.reportes.modelos_de_reportes.VentaDeMedicamento;
 import com.kevin.servicio.DBConnection;
 import com.kevin.servicio.GeneradorHTML;
 
 public class ManejadorFarmacia{
 
     
+    public static final String REPORTE_MAESTRO_GANANCIAS_MEDICAMENTOS = "resources/ReporteGananciasMedicamentos.jasper";
+    public static final String SUB_REPORTE_GANANCIAS_MEDICAMENTOS = "resources/SubReporteVentasDeMedicamentos.jasper";
+
     /**
      * Ejecuta la transaccion del registro de medicamentos
      * @param medicamento
@@ -300,6 +308,70 @@ public class ManejadorFarmacia{
 	}
 	return registros.toString();
     }
+    
+    public void reporteDeGanancias(String filtroNombre, Date fechaInicial, Date fechaFinal, String nombreReporte, int tipoDeReporte) 
+	    throws SQLException {
+	StringBuffer sql = new StringBuffer(); 
+	ControladorDeReportes<VentaDeMedicamento> controladorDeReportes = new ControladorDeReportes<VentaDeMedicamento>(); 
+	int contadorParametros = 1; //se inicia con 0 parametros
+	sql.append("SELECT Medicamento.id_medicamento, Medicamento.nombre, Medicamento.cant_existencia, Medicamento.cant_minima, " + 
+		"	IFNULL((SELECT SUM((precio_actual_medicamento - costo_actual_medicamento) * cantidad)  " + 
+		"	FROM Transacciones_Medicamentos" + 
+		"	WHERE id_medicamento = Medicamento.id_medicamento"); 
+	if(fechaInicial!=null)
+	    sql.append("	AND fecha > ?"); 
+	if(fechaFinal!=null)
+	    sql.append("	AND fecha < ?");
+	sql.append("), 0 ) AS 'ganancia'" + 
+		"	FROM Medicamento" + 
+		"	WHERE Medicamento.nombre LIKE ?");
+	PreparedStatement stm= DBConnection.getInstanceConnection().getConexion().prepareStatement(sql.toString());
+	if(fechaInicial!=null)
+	    stm.setDate(contadorParametros++, fechaInicial);
+	if(fechaFinal!=null)
+	    stm.setDate(contadorParametros++, fechaFinal);
+	stm.setString(contadorParametros++, filtroNombre + "%");
+	ResultSet resultados = stm.executeQuery();
+	ArrayList<VentaDeMedicamento> ventas = generarListadoMaestro(resultados);
+	controladorDeReportes.generarReporteConSubReporte(REPORTE_MAESTRO_GANANCIAS_MEDICAMENTOS,
+		SUB_REPORTE_GANANCIAS_MEDICAMENTOS,
+		ventas, nombreReporte, tipoDeReporte); 
+    }
+    
+    
+    public ArrayList<VentaDeMedicamento> generarListadoMaestro(ResultSet resultadoSql) throws SQLException{
+	ArrayList<VentaDeMedicamento> ventas = new ArrayList<VentaDeMedicamento>(); 
+	while (resultadoSql.next()) {
+	    ventas.add(new VentaDeMedicamento(resultadoSql.getInt(1), 
+		    resultadoSql.getString(2), 
+		    resultadoSql.getInt(3), 
+		    resultadoSql.getInt(4), 
+		    resultadoSql.getDouble(5), getSubBeanList(resultadoSql.getInt(1)))); 
+	}
+	return ventas; 
+    }
 
+    private List<SubVentaDeMedicamento> getSubBeanList(int codigoMedicamento) throws SQLException {
+	String sql = "SELECT fecha, cantidad, precio_actual_medicamento, costo_actual_medicamento, " + 
+		"	(precio_actual_medicamento - costo_actual_medicamento) * cantidad AS 'ganancia' " + 
+		"	FROM Transacciones_Medicamentos" + 
+		"	WHERE id_medicamento = ?"; 
+	PreparedStatement stm = DBConnection.getInstanceConnection().getConexion().prepareStatement(sql); 
+	stm.setInt(1, codigoMedicamento);
+	ResultSet resultado = stm.executeQuery(); 
+	return generarListadoHijo(resultado);
+    }
+
+    private List<SubVentaDeMedicamento> generarListadoHijo(ResultSet resultado) throws SQLException {
+	List<SubVentaDeMedicamento> listaDeVentas = new ArrayList<SubVentaDeMedicamento>(); 
+	while (resultado.next()) {
+	    listaDeVentas.add(new SubVentaDeMedicamento(resultado.getDate(1), 
+		    resultado.getInt(2), 
+		    resultado.getDouble(3), 
+		    resultado.getDouble(4),
+		    resultado.getDouble(5))); 
+	}
+	return listaDeVentas;
+    }
 
 }

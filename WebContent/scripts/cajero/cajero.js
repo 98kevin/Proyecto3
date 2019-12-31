@@ -15,7 +15,7 @@ btnConsultarCuenta.addEventListener('click', consultarPacientesConCuenta)
 let tablaPacientes = document.getElementById('tablaPacientes'); 
 let pagarCuenta = document.getElementById('botonPagarCuenta'); 
 
-window.onload = () => {
+window.onload = function() {
     ocultarComponentes(); 
 }
 
