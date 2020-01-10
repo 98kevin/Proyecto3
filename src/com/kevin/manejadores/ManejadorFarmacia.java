@@ -6,11 +6,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Calendar;
 
 import javax.servlet.http.HttpServletRequest;
 
-import com.kevin.modelos.Area;
+import com.kevin.modelos.Empleado;
 import com.kevin.modelos.Medicamento;
 import com.kevin.servicio.DBConnection;
 import com.kevin.servicio.GeneradorHTML;
@@ -110,19 +109,13 @@ public class ManejadorFarmacia{
      * @param request
      * @return
      */
-    public String comprarMedicamento(HttpServletRequest request) {
+    public String comprarMedicamento(int idMedicamento,int  cantidad, int idUsuario, Date fecha, String cuiPaciente) {
 	StringBuffer mensaje = new StringBuffer(); 
-	ManejadorRegistrosMonetarios manejador = new ManejadorRegistrosMonetarios();
-	int idMedicamento = Integer.parseInt(request.getParameter("idMedicamento"));
-	int cantidad = Integer.parseInt(request.getParameter("cantidad"));
-	int idUsuario = (Integer) (request.getSession().getAttribute("user"));
 	Connection conexion = DBConnection.getInstanceConnection().getConexion();
 	try {
 		conexion.setAutoCommit(false);
 		Medicamento medicamento = leerMedicamento(idMedicamento);
-		int registro= manejador.registroMonetarioMedicamento(idUsuario,medicamento,COMPRA, cantidad,
-			Area.FARMACIA,conexion);
-		registrarTransaccionMedicamento(medicamento, cantidad, idUsuario, COMPRA, registro);
+		transaccionMedicamento(medicamento, fecha, cantidad, COMPRA, true,new Empleado(idUsuario), cuiPaciente);
 		actualizarCantidades(medicamento, medicamento.getCantidadExistente()+ cantidad, conexion);
 		conexion.commit();
 		mensaje.append("Registro realizado con exito");
@@ -140,6 +133,31 @@ public class ManejadorFarmacia{
     }
 
     
+    public void transaccionMedicamento(Medicamento m, Date fecha, int cantidad, boolean operacion, boolean pagado, Empleado e, String cuiPaciente) {
+	String sql = "INSERT INTO Transacciones_Medicamentos (fecha, costo_actual_medicamento, precio_actual_medicamento, "
+		+ "cantidad, tipo_operacion, id_medicamento, id_empleado, id_area, pagado, cui_paciente) 	"
+		+ "VALUES (?,?,?,?,?,?,?,?)"; 
+	PreparedStatement stm;
+	try {
+	    stm = DBConnection.getInstanceConnection().getConexion().prepareStatement(sql);
+	    stm.setDate(1, fecha);
+	    stm.setDouble(2, m.getCostoCompra());
+	    stm.setDouble(3, m.getPrecioVenta());
+	    stm.setInt(4, cantidad);
+	    stm.setBoolean(5, operacion);
+	    stm.setInt(6, m.getCodigo());
+	    stm.setInt(7, e.getCodigoEmpleado());
+	    stm.setInt(8, e.getAreaDeTrabajo());
+	    stm.setBoolean(9, pagado);
+	    stm.setString(10, cuiPaciente);
+	    stm.execute();
+	} catch (SQLException ex) {
+	    ex.printStackTrace();
+	} 
+
+	
+    }
+
     /**
      * Actualiza una cantidad de un medicamento en la base de datos. 
      * @param medicamento
@@ -156,31 +174,6 @@ public class ManejadorFarmacia{
     }
 
     
-    /**
-     * @param medicamento
-     * @param cantidad
-     * @param idUsuario
-     * @param conexion
-     * @param tipoDeOperacion
-     * @throws SQLException
-     */
-    public void registrarTransaccionMedicamento(Medicamento medicamento, int cantidad, int idUsuario, 
-	    boolean tipoDeOperacion, Integer registro) throws SQLException {
-	Date fechaActual = new Date(new java.util.Date(Calendar.getInstance().getTimeInMillis()).getTime());
-	String sql = "INSERT INTO Registros_Medicamento (fecha,costo_actual_medicamento, "
-		+ "precio_actual_medicamento, cantidad, tipo_operacion, id_medicamento, "
-		+ "id_empleado, id_registro) VALUES (?,?,?,?,?,?,?,?)";
-	    PreparedStatement stm = DBConnection.getInstanceConnection().getConexion().prepareStatement(sql);
-	    stm.setDate(1, fechaActual);
-	    stm.setDouble(2, medicamento.getCostoCompra());
-	    stm.setDouble(3, medicamento.getPrecioVenta());
-	    stm.setInt(4, cantidad);
-	    stm.setBoolean(5, tipoDeOperacion);
-	    stm.setInt(6, medicamento.getCodigo());
-	    stm.setInt(7,idUsuario);
-	    stm.setInt(8, registro);
-	    stm.execute();
-    }
 
 
 

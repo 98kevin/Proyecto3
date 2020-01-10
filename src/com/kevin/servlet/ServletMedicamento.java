@@ -1,6 +1,7 @@
 package com.kevin.servlet;
 
 import java.io.IOException;
+import java.sql.Date;
 import java.sql.SQLException;
 
 import javax.servlet.ServletException;
@@ -57,7 +58,12 @@ public class ServletMedicamento extends HttpServlet {
 		response.getWriter().append(farmacia.agregarRegistrosDeMedicamentos());
 		break;
 	    case COMPRAR_MEDICAMENTOS:
-		response.getWriter().append(farmacia.comprarMedicamento(request));
+		response.getWriter().append(farmacia.comprarMedicamento(
+			Integer.parseInt(request.getParameter("idMedicamento")),
+			Integer.parseInt(request.getParameter("cantidad")), 
+			(Integer) (request.getSession().getAttribute("user")), 
+			new Date(Long.parseLong(request.getParameter("fecha"))),
+			null));
 		break;
 	    case CONSULTAR_INVENTARIO:
 		response.getWriter().append(farmacia.consultarInventario());

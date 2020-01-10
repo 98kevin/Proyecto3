@@ -1,6 +1,11 @@
 package com.kevin.modelos;
 
 import java.sql.Date;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+import com.kevin.servicio.DBConnection;
 
 
 /**
@@ -11,7 +16,23 @@ import java.sql.Date;
  */
 public class Empleado extends Persona{
     
+    protected int codigoEmpleado; 
     protected double salario;
+    /**
+     * @return the codigoEmpleado
+     */
+    public int getCodigoEmpleado() {
+        return codigoEmpleado;
+    }
+
+
+    /**
+     * @param codigoEmpleado the codigoEmpleado to set
+     */
+    public void setCodigoEmpleado(int codigoEmpleado) {
+        this.codigoEmpleado = codigoEmpleado;
+    }
+
     protected int iggs;
     protected int irtra; 
     protected Date fechaDeVacaciones;
@@ -43,6 +64,25 @@ public class Empleado extends Persona{
 	this.areaDeTrabajo = areaDeTrabajo;
     }
     
+    
+    public Empleado(int idEmpleado) {
+	this.codigoEmpleado = idEmpleado;
+	String sql = "SELECT * from Empleado WHERE id_empleado = ? "; 
+	try {
+	    PreparedStatement stm = DBConnection.getInstanceConnection().getConexion().prepareStatement(sql);
+	    stm.setInt(1, idEmpleado);
+	    ResultSet r = stm.executeQuery(); 
+	    if(r.next()) {
+		this.iggs = r.getInt(2);
+		this.irtra = r.getInt(3);
+		this.fechaDeVacaciones = r.getDate(5);
+		this.setCui(r.getString(7));
+	    }
+	} catch (SQLException e) {
+	    e.printStackTrace();
+	}
+	
+    }
     
     public Empleado(String cui, String nombre, String direccion) {
 	super(cui, nombre, direccion);

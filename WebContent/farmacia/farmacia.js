@@ -39,6 +39,7 @@ botonComprarMedicamento.addEventListener('click', actualizarTablaMedicamentos);
 
 window.onload = function (){
 	ocultarComponentes(); 
+	acutalizarControlFecha();
 }
 
 function ocultarComponentes(){
@@ -47,6 +48,7 @@ function ocultarComponentes(){
 		$('#filtrosReporteGanancias').css('display','none'); 
 		$('#filtrosReporteVentas').css('display','none');
 		formMedicamento.style.display='none';
+		$('#form-fecha').css('display', 'none'); 
 }
 
 $("#reporteMedicamentos").click(function(){
@@ -223,6 +225,7 @@ registrarMedicamento.addEventListener('click', () => {
 });
 
 function actualizarTablaMedicamentos () {
+	$('#form-fecha').css('display', 'block'); 
 	$.post('medicamento', {
 		operacion: CONSULTAR_MEDICAMENTOS
 	}).done(
@@ -236,19 +239,21 @@ function actualizarTablaMedicamentos () {
 }
 
 function botonComprar (boton) {
+	let fecha = new Date(document.getElementById('controlFecha').value);
 	let varId= boton.getAttribute('id');
-	let varCantidad = document.getElementById('cant'+varId).value;
+	let varCantidad = document.getElementById('caja'+varId).value;
 	$.post('medicamento', {
 		operacion: COMPRAR_MEDICAMENTOS,  //3
 		idMedicamento : varId, 
-		cantidad: varCantidad
+		cantidad: varCantidad, 
+		fecha: fecha.getTime()
 	}).done(
 		function(msg){
-		alert(msg);
+		alertify.message(msg); 
 		actualizarTablaMedicamentos();
 	}).fail(
 		function(xhr, status, error){
-			alert('estado del registro '+ status + '\n'+ error);
+			alertify.alert('estado del registro '+ status + '\n'+ error);
 		}
     );
 }
@@ -270,7 +275,7 @@ botonActualiarInventario.addEventListener('click', () => {
 
  function botonActualizar (boton){
 	let varId= boton.getAttribute('id');
-	let varCantidad = document.getElementById('cant'+varId).value;
+	let varCantidad = document.getElementById('caja'+varId).value;
 	$.post('medicamento', {
 		operacion: REGISTRAR_ACTUALIZACION, //5
 		idMedicamento: varId, 
@@ -284,3 +289,9 @@ botonActualiarInventario.addEventListener('click', () => {
 		}
     );
 };
+
+
+function acutalizarControlFecha(){
+	let controlFecha = document.getElementById('controlFecha');  
+	controlFecha.value = new Date().toLocaleDateString('en-CA');
+}

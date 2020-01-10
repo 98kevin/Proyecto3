@@ -1,6 +1,8 @@
 package com.kevin.servlet;
 
 import java.io.IOException;
+import java.sql.Date;
+
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -62,7 +64,12 @@ public class ServletEnfermera extends HttpServlet {
 	    ManejadorEnfermera manejador = new ManejadorEnfermera(); 
 		switch ( operacion ) {
 		case ASINGAR_MEDICAMENTOS_PACIENTE:
-		  response.getWriter().append(manejador.suministrarMedicamento(request));
+		  response.getWriter().append(manejador.suministrarMedicamento(
+			  Integer.parseInt(request.getParameter("medicamento")), 
+			  Integer.parseInt(request.getParameter("cantidad")), 
+			  String.valueOf(request.getParameter("pacienteSeleccionado")),
+			  new Date(Long.parseLong(request.getParameter("fecha"))),
+			  (Integer) request.getSession().getAttribute("user")));
 		    break;
 		default:
 		    break;

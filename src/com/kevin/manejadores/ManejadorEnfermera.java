@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import com.kevin.exceptions.DataBaseException;
 import com.kevin.modelos.Area;
+import com.kevin.modelos.Empleado;
 import com.kevin.modelos.Medicamento;
 import com.kevin.servicio.DBConnection;
 import com.kevin.servicio.GeneradorHTML;
@@ -69,13 +70,8 @@ public class ManejadorEnfermera {
      * Suministra medicamento a un paciente
      * @param request
      */ 
-    public String suministrarMedicamento(HttpServletRequest request) { 
+    public String suministrarMedicamento(int idMedicamento, int cantidad, String cuiPaciente, Date fecha, int idEmpleado) { 
 	StringBuffer respuesta = new StringBuffer(); 
-	int idMedicamento = Integer.parseInt(request.getParameter("medicamento")); 
-	int cantidad = Integer.parseInt(request.getParameter("cantidad")); 
-	String cuiPaciente = String.valueOf(request.getParameter("pacienteSeleccionado")); 
-	Date fecha = new Date(Long.parseLong(request.getParameter("fecha"))); 
-	int idEmpleado = (Integer) request.getSession().getAttribute("user"); 
 	ArrayList<PreparedStatement> preparedStatements = new ArrayList<PreparedStatement>();
 	try {
 	    ManejadorFarmacia manejador = new ManejadorFarmacia(); 	
@@ -85,7 +81,7 @@ public class ManejadorEnfermera {
 	    preparedStatements.add(suministrarMedicamento(idInternado, medicamento.getCodigo(), cantidad)); 
 	    preparedStatements.add(sumarCuentaCliente(getIdPaciente(cuiPaciente), medicamento, cantidad, fecha, consultarArea(idEmpleado)));
 	    preparedStatements.add(restarCantidad(medicamento, cantidad));
-	    new ManejadorFarmacia().registrarTransaccionMedicamento(medicamento, cantidad, idEmpleado,  ManejadorFarmacia.VENTA, null);
+	    manejador.transaccionMedicamento(medicamento, fecha, cantidad, ManejadorFarmacia.VENTA, false, new Empleado(idEmpleado), cuiPaciente);
 	    DBConnection.getInstanceConnection().transaccion(preparedStatements);
 	    respuesta.append("Actualizacion realizada correctamente ");
 	} catch (SQLException | DataBaseException e ) {

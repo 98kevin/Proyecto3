@@ -52,6 +52,13 @@
 	
 	<c:import var = "formMedicamento" url = "form-medicamento.html" charEncoding="UTF-8" scope="page"></c:import>
 	${formMedicamento}
+	
+	<div id = 'form-fecha' class="input-group">
+  		<div class="input-group-prepend">
+    		<span class="input-group-text" id="">Fecha de la compra</span>
+  		</div>
+	  <input id='controlFecha' type="date" class="form-control">
+	</div>
 
 	<div id="medicamentosSeleccionados" class="table"></div>
 	
