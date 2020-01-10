@@ -7,6 +7,7 @@
 <meta charset="UTF-8">
 <title>Administrador</title>
  <link rel="shortcut icon" href="../icons/farmacia.png" />
+ <script src="../JQuery/jquery-3.4.1.js"		type="text/javascript"></script>
 <link href="../scripts/alertifyjs/css/alertify.css" rel="stylesheet">
 <link href="../scripts/alertifyjs/css/themes/default.css" rel="stylesheet">
   <link href="../bootstrap-4.4.1-dist/css/bootstrap.css" rel="stylesheet" />
@@ -16,6 +17,49 @@
 	 <c:import var = "encabezadoAdministrador" url = "encabezado-administrador.html" charEncoding="UTF-8" scope="application"></c:import>
 	${encabezadoAdministrador}
 	
+		<div id='filtroReporteIngresos'> 
+		<h3>Reporte de Ingresos</h3>
+		<div  class="input-group">
+				<input type="date" class='form-control'  	id='fechaInicioIngresos' >
+				<input type="date" class='form-control'		id="fechaFinIngresos" >
+		</div>
+		<br>
+		<div class='btn-group'>
+				 <input id="generarReporteIngresos" type='button' class="btn btn-primary" 	value= 'Generar Reporte'>
+				<input id="exportarReporteIngresos" type='button' class="btn btn-info" 			value= 'Exportar'>
+		</div>
+	</div>
+	
+	
+	<div id='filtroReporteEgresos' class= 'ocultable' > 
+		<h3>Reporte de Egresos</h3>
+		<div  class="input-group">
+				<input type="date" class='form-control'  	id='fechaInicioEgresos' >
+				<input type="date" class='form-control'		id="fechaFinEgresos" >
+		</div>
+		<br>
+		<div class='btn-group'>
+				 <input id="generarReporteEgresos" type='button' class="btn btn-primary" 	value= 'Generar Reporte'>
+				<input id="exportarReporteEgresos" type='button' class="btn btn-info" 			value= 'Exportar'>
+		</div>
+	</div>
+	
+	
+		<div id='filtroReporteGanancias'> 
+		<h3>Reporte de Ganancias</h3>
+		<div  class="input-group">
+				<input type="date" class='form-control'  	id='fechaInicioGanancias' >
+				<input type="date" class='form-control'		id="fechaFinGanancias" >
+		</div>
+		<br>
+		<div class='btn-group'>
+				 <input id="generarReporteGanancias" type='button' class="btn btn-primary" 	value= 'Generar Reporte'>
+				<input id="exportarReporteGanancias" type='button' class="btn btn-info" 			value= 'Exportar'>
+		</div>
+	</div>
+	
+	<div id = 'reporte'>
+	</div>
 		<!-- Formulario de creacion de modulo -->
 	<form>
 	<input id="campoNombre" class="input"  type="text" hidden ="true" placeholder="nombre del modulo" required  />
@@ -69,8 +113,7 @@
 	${foother}
 	
 	<script src="../scripts/admin.js"></script>
-	<script src="../scripts/alertifyjs/alertify.js" 																						type="text/javascript"></script>
-	<script src="../JQuery/jquery-3.4.1.js"																								type="text/javascript"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js"		type="text/javascript"></script>
-	<script src="../bootstrap-4.4.1-dist/js/bootstrap.js"																		type="text/javascript"></script>
+	<script src="../scripts/alertifyjs/alertify.js" 					type="text/javascript"></script>
+	<script src="../Propper/propper.js"								type="text/javascript"></script>
+	<script src="../bootstrap-4.4.1-dist/js/bootstrap.js"	type="text/javascript"></script>
 </body>

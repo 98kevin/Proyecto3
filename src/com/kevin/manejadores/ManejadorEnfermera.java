@@ -85,7 +85,7 @@ public class ManejadorEnfermera {
 	    preparedStatements.add(suministrarMedicamento(idInternado, medicamento.getCodigo(), cantidad)); 
 	    preparedStatements.add(sumarCuentaCliente(getIdPaciente(cuiPaciente), medicamento, cantidad, fecha, consultarArea(idEmpleado)));
 	    preparedStatements.add(restarCantidad(medicamento, cantidad));
-	    
+	    new ManejadorFarmacia().registrarTransaccionMedicamento(medicamento, cantidad, idEmpleado,  ManejadorFarmacia.VENTA, null);
 	    DBConnection.getInstanceConnection().transaccion(preparedStatements);
 	    respuesta.append("Actualizacion realizada correctamente ");
 	} catch (SQLException | DataBaseException e ) {
@@ -165,7 +165,7 @@ public class ManejadorEnfermera {
 	    nombre = resultado.getString(1);
 	else 
 	    throw new DataBaseException("No existe el medicamento que esta consultando");
-	return "Sumnistro de " + nombre; 
+	return "Compra de " + nombre; 
     }
     
     

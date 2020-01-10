@@ -61,7 +61,7 @@ public class ManejadorHabitacion {
     
     public PreparedStatement registrarCostosDeHabitacion(String cuiPaciente, Date fecha) throws SQLException {
 	PreparedStatement stm = null; 
-	String sql =" INSERT INTO Registro_Monetario (descripcion, monto, fecha, tipo, id_area) VALUES ( "+
+	String sql =" INSERT INTO Costos_Habitacion (descripcion, monto, fecha, tipo, id_area) VALUES ( "+
 		" 'Costo de mantenimiento de la habitacion', "+
 		" (SELECT Habitacion.precio_de_mantenimiento FROM Habitacion WHERE id_habitacion = "+
 		"	(SELECT Habitacion.id_habitacion FROM Habitacion "+
@@ -72,7 +72,6 @@ public class ManejadorHabitacion {
 		"									INNER JOIN Paciente ON Internado.id_paciente = Paciente.id_paciente " + 
 		"									WHERE Paciente.cui = ? ), "+
 	" ?, "+
-	" false, "+ //egresos
 	" ?)";  //area de medicos
 	stm = DBConnection.getInstanceConnection().getConexion().prepareStatement(sql);
 	stm.setString(1, cuiPaciente);

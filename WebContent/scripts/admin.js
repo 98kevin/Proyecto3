@@ -8,6 +8,13 @@ const CONSULTAR_TARIFAS = 4;
 const REGISTRAR_CIRUGIA = 5; 
 const PAGAR_SALARIO = 6; 
 
+const REPORTE_INGRESOS_MONETARIOS= 9;
+const REPORTE_EGRESOS_MONETARIOS= 10;
+const REPORTE_GANANCIAS= 11;
+
+const TIPO_HTML =1; 
+const TIPO_PDF = 2; 
+
 //botones del panel superior
 let botonCrear =  document.getElementById('crearModulo');
 let botonArea = document.getElementById('crearArea');
@@ -28,7 +35,6 @@ let botonMostrarFormNuevoEmpleado = document.getElementById('mostrarFormNuevoEmp
 let formEmpleado = document.getElementById('form-empleado');
 
 //formulario de creacion de cirugia
-let formCirugia = document.getElementById('form-crear-cirugia');
 let registrarNuevaCirugia = document.getElementById('registrarNuevaCirugia');
 
 let controlFecha = document.getElementById('controlFecha'); 
@@ -93,9 +99,13 @@ window.onload = function () {
 
 function ocultarComponentes(){
 	formEmpleado.style.display='none';
-	formCirugia.style.display='none';
+	$('#form-crear-cirugia').css('display', 'none')
 	controlFecha.style.display='none';
 	formularioIngresoDeFechas.style.display= 'none'; 
+	$('#filtroReporteIngresos').css('display', 'none');
+	$('#filtroReporteEgresos').css('display', 'none');
+	$('#filtroReporteGanancias').css('display', 'none');
+	 
 }
 
 //eventos de los botones
@@ -105,16 +115,164 @@ botonArea.addEventListener('click', mostrarFormArea);
 botonArea.addEventListener('click', mostrarAreas); 
 botonCrearArea.addEventListener('click', enviarArea);
 botonCrearEmpleado.addEventListener('click', enviarEmpleado);
-botonCrearCirugia.addEventListener('click', mostrarFormCirugia);
+$('#crearCirugia').click(() => { $('#form-crear-cirugia').css('display', 'block')})
 mostrarFormNuevoEmpleado.addEventListener('click', mostrarFormEmpleado);
 registrarNuevaCirugia.addEventListener('click', registrarCirugia);
 botonConsultaSalarios.addEventListener('click', mostrarControlesDeSalarios); 
 
+$('#reporteIngresos').click(() => {
+	$('#filtroReporteIngresos').css('display', 'block');
+})
+
+$('#reporteEgresos').click(() => {
+	$('#filtroReporteEgresos').css('display', 'block');
+})
+
+$('#reporteGanancias').click(() => {
+	$('#filtroReporteGanancias').css('display', 'block');
+})
+
+var fechaInicio; 
+var fechaFin; 
+
+// reportes de ingresos
+$('#generarReporteIngresos').click(() =>{
+	fechaInicio = new Date(document.getElementById('fechaInicioIngresos').value); 
+	fechaFin = new Date(document.getElementById('fechaFinIngresos').value);
+	$.ajax({
+        url: 'reportes',
+        dataType: 'text',
+        type: 'post',
+        data: {
+			tipoDeReporte: REPORTE_INGRESOS_MONETARIOS,
+			fechaInicial: fechaInicio.getTime(), 
+			fechaFinal:fechaFin.getTime(),
+			tipo: TIPO_HTML
+       },
+       success: function(response){
+           document.getElementById('reporte').innerHTML = response; 
+           alertify.message('consulta terminada');
+        },
+        error: function( jqXhr, textStatus, errorThrown ){
+            alertify.error(' error '+ errorThrown);
+        }
+    })
+})
 
 
-function mostrarFormCirugia(){
-	formCirugia.style.display='block';
-}
+$('#exportarReporteIngresos').click(() =>{
+	$.ajax({
+        url: 'reportes',
+        dataType: 'text',
+        type: 'post',
+        data: {
+			tipoDeReporte: REPORTE_INGRESOS_MONETARIOS,
+			fechaInicial: fechaInicio.getTime(), 
+			fechaFinal:fechaFin.getTime(),
+			tipo: TIPO_PDF
+       },
+       success: function(response){
+           document.getElementById('reporte').innerHTML = response; 
+           alertify.message('consulta terminada');
+        },
+        error: function( jqXhr, textStatus, errorThrown ){
+            alertify.error(' error '+ errorThrown);
+        }
+    })
+})
+
+// reportes de egresos
+$('#generarReporteEgresos').click(() =>{
+	fechaInicio = new Date(document.getElementById('fechaInicioEgresos').value); 
+	fechaFin = new Date(document.getElementById('fechaFinEgresos').value);
+	$.ajax({
+        url: 'reportes',
+        dataType: 'text',
+        type: 'post',
+        data: {
+			tipoDeReporte: REPORTE_EGRESOS_MONETARIOS,
+			fechaInicial: fechaInicio.getTime(), 
+			fechaFinal:fechaFin.getTime(),
+			tipo: TIPO_HTML
+       },
+       success: function(response){
+           document.getElementById('reporte').innerHTML = response; 
+           alertify.message('consulta terminada');
+        },
+        error: function( jqXhr, textStatus, errorThrown ){
+            alertify.error(' error '+ errorThrown);
+        }
+    })
+})
+
+
+$('#exportarReporteEgresos').click(() =>{
+	$.ajax({
+        url: 'reportes',
+        dataType: 'text',
+        type: 'post',
+        data: {
+			tipoDeReporte: REPORTE_EGRESOS_MONETARIOS,
+			fechaInicial: fechaInicio.getTime(), 
+			fechaFinal:fechaFin.getTime(),
+			tipo: TIPO_PDF
+       },
+       success: function(response){
+           document.getElementById('reporte').innerHTML = response; 
+           alertify.message('consulta terminada');
+        },
+        error: function( jqXhr, textStatus, errorThrown ){
+            alertify.error(' error '+ errorThrown);
+        }
+    })
+})
+
+// reportes de ganancias
+$('#generarReporteGanancias').click(() =>{
+	fechaInicio = new Date(document.getElementById('fechaInicioGanancias').value); 
+	fechaFin = new Date(document.getElementById('fechaFinGanancias').value);
+	$.ajax({
+        url: 'reportes',
+        dataType: 'text',
+        type: 'post',
+        data: {
+			tipoDeReporte: REPORTE_GANANCIAS,
+			fechaInicial: fechaInicio.getTime(), 
+			fechaFinal:fechaFin.getTime(),
+			tipo: TIPO_HTML
+       },
+       success: function(response){
+           document.getElementById('reporte').innerHTML = response; 
+           alertify.message('consulta terminada');
+        },
+        error: function( jqXhr, textStatus, errorThrown ){
+            alertify.error(' error '+ errorThrown);
+        }
+    })
+})
+
+
+$('#exportarReporteGanancias').click(() =>{
+	$.ajax({
+        url: 'reportes',
+        dataType: 'text',
+        type: 'post',
+        data: {
+			tipoDeReporte: REPORTE_GANANCIAS,
+			fechaInicial: fechaInicio.getTime(), 
+			fechaFinal:fechaFin.getTime(),
+			tipo: TIPO_PDF
+       },
+       success: function(response){
+           document.getElementById('reporte').innerHTML = response; 
+           alertify.message('consulta terminada');
+        },
+        error: function( jqXhr, textStatus, errorThrown ){
+            alertify.error(' error '+ errorThrown);
+        }
+    })
+})
+
 
 function mostrarControlesDeSalarios(){
 	formularioIngresoDeFechas.style.display = 'block'; 

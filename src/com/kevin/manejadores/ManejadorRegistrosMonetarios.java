@@ -24,7 +24,7 @@ public class ManejadorRegistrosMonetarios {
      * @param conexion
      * @throws SQLException
      */
-    public int registrarTransaccionMedicamento( int idUsuario, Medicamento medicamento, 
+    public int registroMonetarioMedicamento( int idUsuario, Medicamento medicamento, 
 	    boolean tipoDeOperacion, int cantidad, int areaFarmacia, Connection conexion) throws SQLException {
 	int registro = 0;
 	Date fechaActual = new Date(new java.util.Date(Calendar.getInstance().getTimeInMillis()).getTime());
@@ -38,7 +38,7 @@ public class ManejadorRegistrosMonetarios {
 	    stm.setBoolean(4, tipoDeOperacion);
 	    stm.setInt(5, areaFarmacia);
 	    stm.execute();
-	    ResultSet resultado = stm.getGeneratedKeys(); 
+	    ResultSet resultado = stm.getGeneratedKeys();
 	    if(resultado.next())
 		registro = resultado.getInt(1);
 	    return registro;
@@ -98,7 +98,7 @@ public class ManejadorRegistrosMonetarios {
 	StringBuffer response = new StringBuffer(); 
 	try {
 	    String sql = "UPDATE Cuenta, Paciente, Persona" + 
-	    	"	SET pagado = true" + 
+	    	"	SET Cuenta.pagado = true" + 
 	    	"	WHERE Cuenta.id_paciente = Paciente.id_paciente " + 
 	    	"	AND Persona.cui = Paciente.cui " + 
 	    	"	AND Persona.cui = ?";

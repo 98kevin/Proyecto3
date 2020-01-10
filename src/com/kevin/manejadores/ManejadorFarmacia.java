@@ -6,17 +6,12 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
 import com.kevin.modelos.Area;
 import com.kevin.modelos.Medicamento;
-import com.kevin.reportes.ControladorDeReportes;
-import com.kevin.reportes.modelos_de_reportes.SubVentaDeMedicamento;
-import com.kevin.reportes.modelos_de_reportes.VentaDeMedicamento;
 import com.kevin.servicio.DBConnection;
 import com.kevin.servicio.GeneradorHTML;
 
@@ -25,6 +20,8 @@ public class ManejadorFarmacia{
     
     public static final String REPORTE_MAESTRO_GANANCIAS_MEDICAMENTOS = "resources/ReporteGananciasMedicamentos.jasper";
     public static final String SUB_REPORTE_GANANCIAS_MEDICAMENTOS = "resources/SubReporteVentasDeMedicamentos.jasper";
+    public static final boolean VENTA = true;
+    public static final boolean COMPRA = false; 
 
     /**
      * Ejecuta la transaccion del registro de medicamentos
@@ -123,14 +120,14 @@ public class ManejadorFarmacia{
 	try {
 		conexion.setAutoCommit(false);
 		Medicamento medicamento = leerMedicamento(idMedicamento);
-		int registro= manejador.registrarTransaccionMedicamento(idUsuario,medicamento,false, cantidad,
+		int registro= manejador.registroMonetarioMedicamento(idUsuario,medicamento,COMPRA, cantidad,
 			Area.FARMACIA,conexion);
-		registrarVenta(medicamento, cantidad, idUsuario,conexion, false, registro);
+		registrarTransaccionMedicamento(medicamento, cantidad, idUsuario, COMPRA, registro);
 		actualizarCantidades(medicamento, medicamento.getCantidadExistente()+ cantidad, conexion);
 		conexion.commit();
 		mensaje.append("Registro realizado con exito");
 	} catch (SQLException e) {
-	   mensaje.append("Ocurrio un error al registrar la compra. \n Codigo de error: "+e.getErrorCode());
+	   mensaje.append("Ocurrio un error al registrar la compra.  Codigo de error: "+e.getErrorCode());
 	   e.printStackTrace();
 	} finally {
 	    try {
@@ -160,14 +157,6 @@ public class ManejadorFarmacia{
 
     
     /**
-     * Registra el la transaccion de     public String registrarMedicamento(Medicamento medicamento) {
-	Connection conexion = conexion(); 
-	StringBuffer mensaje= new StringBuffer();
-	try {
-	    conexion.setAutoCommit(false);
-	    registrarMedicamento(medicamento,conexion);
-	    conexion.commit();
-	    mensaje.append("Registro de medicamento con exito"); medicamento, el la tabla de Registros_Medicamento. Especialmente para medicamentos. 
      * @param medicamento
      * @param cantidad
      * @param idUsuario
@@ -175,13 +164,13 @@ public class ManejadorFarmacia{
      * @param tipoDeOperacion
      * @throws SQLException
      */
-    private void registrarVenta(Medicamento medicamento, int cantidad, int idUsuario, Connection conexion,
-	    boolean tipoDeOperacion, int registro) throws SQLException {
+    public void registrarTransaccionMedicamento(Medicamento medicamento, int cantidad, int idUsuario, 
+	    boolean tipoDeOperacion, Integer registro) throws SQLException {
 	Date fechaActual = new Date(new java.util.Date(Calendar.getInstance().getTimeInMillis()).getTime());
 	String sql = "INSERT INTO Registros_Medicamento (fecha,costo_actual_medicamento, "
 		+ "precio_actual_medicamento, cantidad, tipo_operacion, id_medicamento, "
 		+ "id_empleado, id_registro) VALUES (?,?,?,?,?,?,?,?)";
-	    PreparedStatement stm = conexion.prepareStatement(sql);
+	    PreparedStatement stm = DBConnection.getInstanceConnection().getConexion().prepareStatement(sql);
 	    stm.setDate(1, fechaActual);
 	    stm.setDouble(2, medicamento.getCostoCompra());
 	    stm.setDouble(3, medicamento.getPrecioVenta());
@@ -309,69 +298,6 @@ public class ManejadorFarmacia{
 	return registros.toString();
     }
     
-    public void reporteDeGanancias(String filtroNombre, Date fechaInicial, Date fechaFinal, String nombreReporte, int tipoDeReporte) 
-	    throws SQLException {
-	StringBuffer sql = new StringBuffer(); 
-	ControladorDeReportes<VentaDeMedicamento> controladorDeReportes = new ControladorDeReportes<VentaDeMedicamento>(); 
-	int contadorParametros = 1; //se inicia con 0 parametros
-	sql.append("SELECT Medicamento.id_medicamento, Medicamento.nombre, Medicamento.cant_existencia, Medicamento.cant_minima, " + 
-		"	IFNULL((SELECT SUM((precio_actual_medicamento - costo_actual_medicamento) * cantidad)  " + 
-		"	FROM Transacciones_Medicamentos" + 
-		"	WHERE id_medicamento = Medicamento.id_medicamento"); 
-	if(fechaInicial!=null)
-	    sql.append("	AND fecha > ?"); 
-	if(fechaFinal!=null)
-	    sql.append("	AND fecha < ?");
-	sql.append("), 0 ) AS 'ganancia'" + 
-		"	FROM Medicamento" + 
-		"	WHERE Medicamento.nombre LIKE ?");
-	PreparedStatement stm= DBConnection.getInstanceConnection().getConexion().prepareStatement(sql.toString());
-	if(fechaInicial!=null)
-	    stm.setDate(contadorParametros++, fechaInicial);
-	if(fechaFinal!=null)
-	    stm.setDate(contadorParametros++, fechaFinal);
-	stm.setString(contadorParametros++, filtroNombre + "%");
-	ResultSet resultados = stm.executeQuery();
-	ArrayList<VentaDeMedicamento> ventas = generarListadoMaestro(resultados);
-	controladorDeReportes.generarReporteConSubReporte(REPORTE_MAESTRO_GANANCIAS_MEDICAMENTOS,
-		SUB_REPORTE_GANANCIAS_MEDICAMENTOS,
-		ventas, nombreReporte, tipoDeReporte); 
-    }
-    
-    
-    public ArrayList<VentaDeMedicamento> generarListadoMaestro(ResultSet resultadoSql) throws SQLException{
-	ArrayList<VentaDeMedicamento> ventas = new ArrayList<VentaDeMedicamento>(); 
-	while (resultadoSql.next()) {
-	    ventas.add(new VentaDeMedicamento(resultadoSql.getInt(1), 
-		    resultadoSql.getString(2), 
-		    resultadoSql.getInt(3), 
-		    resultadoSql.getInt(4), 
-		    resultadoSql.getDouble(5), getSubBeanList(resultadoSql.getInt(1)))); 
-	}
-	return ventas; 
-    }
-
-    private List<SubVentaDeMedicamento> getSubBeanList(int codigoMedicamento) throws SQLException {
-	String sql = "SELECT fecha, cantidad, precio_actual_medicamento, costo_actual_medicamento, " + 
-		"	(precio_actual_medicamento - costo_actual_medicamento) * cantidad AS 'ganancia' " + 
-		"	FROM Transacciones_Medicamentos" + 
-		"	WHERE id_medicamento = ?"; 
-	PreparedStatement stm = DBConnection.getInstanceConnection().getConexion().prepareStatement(sql); 
-	stm.setInt(1, codigoMedicamento);
-	ResultSet resultado = stm.executeQuery(); 
-	return generarListadoHijo(resultado);
-    }
-
-    private List<SubVentaDeMedicamento> generarListadoHijo(ResultSet resultado) throws SQLException {
-	List<SubVentaDeMedicamento> listaDeVentas = new ArrayList<SubVentaDeMedicamento>(); 
-	while (resultado.next()) {
-	    listaDeVentas.add(new SubVentaDeMedicamento(resultado.getDate(1), 
-		    resultado.getInt(2), 
-		    resultado.getDouble(3), 
-		    resultado.getDouble(4),
-		    resultado.getDouble(5))); 
-	}
-	return listaDeVentas;
-    }
+   
 
 }

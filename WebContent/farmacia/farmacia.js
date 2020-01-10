@@ -6,7 +6,15 @@ const COMPRAR_MEDICAMENTOS = 3;
 const ACTUALIZAR_INVENTARIO= 4;
 const REGISTRAR_ACTUALIZACION = 5;
 
+const REPORTE_MEDICAMENTOS = 1; 
+const REPORTE_GANANCIAS_MEDICAMENTOS= 2;
+const REPORTE_VENTAS_POR_EMPLEADO=3;
 
+const TIPO_HTML =1; 
+const TIPO_PDF = 2; 
+
+ var fechaInicial; 
+ var fechaFinal; 
 
 //botones del panel superior
 let botonActualiarInventario= document.getElementById('btnActualizarInventario');
@@ -20,7 +28,6 @@ let registrarMedicamento= document.getElementById('registrarMedicamento');
 
 //Formularios
 let formMedicamento = document.getElementById('form-medicamento');
-formMedicamento.style.display='none';
 
 
 //tablas ocultas
@@ -28,7 +35,171 @@ let tablaDeMedicamentos = document.getElementById('tablaResultados');
 let medicamentosSeleccionados = document.getElementById('medicamentosSeleccionados');
 
 //funcion para comprar medicamento
-botonComprarMedicamento.addEventListener('click', actualizarTablaMedicamentos);
+botonComprarMedicamento.addEventListener('click', actualizarTablaMedicamentos); 
+
+window.onload = function (){
+	ocultarComponentes(); 
+}
+
+function ocultarComponentes(){
+		//document.getElementById('formularioFiltros').style.display = 'none';
+		$("#formularioFiltros").css('display', 'none');
+		$('#filtrosReporteGanancias').css('display','none'); 
+		$('#filtrosReporteVentas').css('display','none');
+		formMedicamento.style.display='none';
+}
+
+$("#reporteMedicamentos").click(function(){
+	ocultarComponentes();
+	$("#formularioFiltros").css('display', 'block');
+})
+
+$("#reporteGananciasMedicamentos").click(function(){
+	ocultarComponentes();
+	$("#filtrosReporteGanancias").css('display', 'block');
+})
+
+$("#reporteVentasPorEmpleado").click(function(){
+	ocultarComponentes();
+	$("#filtrosReporteVentas").css('display', 'block');
+})
+
+
+$('#generarReporteVentas').click(function(){
+	fechaInicial = new Date(document.getElementById('controlFechaInicialVentas').value); 
+	fechaFinal = new Date(document.getElementById('controlFechaFinalVentas').value); 
+	$.ajax({
+        url: 'reportes',
+        dataType: 'text',
+        type: 'post',
+        data: {
+			tipoDeReporte: REPORTE_VENTAS_POR_EMPLEADO,
+			filtroCui: document.getElementById('filtroCuiEmpleadoVentas').value,
+			filtroNombrePersona : document.getElementById('filtroNombreEmpleadoVentas').value,
+			filtroNombreMedicamento: document.getElementById('filtroNombreMedicamentoVentas').value,
+			fechaInicial: fechaInicial.getTime(), 
+			fechaFinal: fechaFinal.getTime(),
+			tipo: TIPO_HTML
+       },
+       success: function(response){
+		   document.getElementById('reporte').innerHTML = response; 
+        },
+        error: function( jqXhr, textStatus, errorThrown ){
+            alertify.error(' error '+ errorThrown);
+        }
+    })
+})
+
+$('#btnExportarReporteVentas').click(function(){
+	$.ajax({
+        url: 'reportes',
+        dataType: 'text',
+        type: 'post',
+        data: {
+			tipoDeReporte: REPORTE_VENTAS_POR_EMPLEADO,
+			filtroCui: document.getElementById('filtroCuiEmpleadoVentas').value,
+			filtroNombrePersona : document.getElementById('filtroNombreEmpleadoVentas').value,
+			filtroNombreMedicamento: document.getElementById('filtroNombreMedicamentoVentas').value,
+			fechaInicial: fechaInicial.getTime(), 
+			fechaFinal: fechaFinal.getTime(),
+			tipo: TIPO_PDF
+       },
+       success: function(response){
+		   document.getElementById('reporte').innerHTML = response; 
+        },
+        error: function( jqXhr, textStatus, errorThrown ){
+            alertify.error(' error '+ errorThrown);
+        }
+    })
+})
+
+
+
+$('#generarReporteGanancias').click(function(){
+	fechaInicial = new Date(document.getElementById('controlFechaInicial').value); 
+	fechaFinal = new Date(document.getElementById('controlFechaFinal').value); 
+	$.ajax({
+        url: 'reportes',
+        dataType: 'text',
+        type: 'post',
+        data: {
+			tipoDeReporte: REPORTE_GANANCIAS_MEDICAMENTOS,
+			filtroNombre: document.getElementById('filtroNombreGanancias').value, 
+			fechaInicial: fechaInicial.getTime(), 
+			fechaFinal: fechaFinal.getTime(),
+			tipo: TIPO_HTML
+       },
+       success: function(response){
+		   document.getElementById('reporte').innerHTML = response; 
+        },
+        error: function( jqXhr, textStatus, errorThrown ){
+            alertify.error(' error '+ errorThrown);
+        }
+    })
+})
+
+$('#btnExportarReporteGanancias').click(function(){
+	$.ajax({
+        url: 'reportes',
+        dataType: 'text',
+        type: 'post',
+        data: {
+			tipoDeReporte: REPORTE_GANANCIAS_MEDICAMENTOS,
+			filtroNombre: document.getElementById('filtroNombreGanancias').value,
+			fechaInicial: fechaInicial.getTime(),
+			fechaFinal: fechaFinal.getTime(),
+			tipo: TIPO_PDF
+       },
+       success: function(response){
+		   document.getElementById('reporte').innerHTML = response; 
+        },
+        error: function( jqXhr, textStatus, errorThrown ){
+            alertify.error(' error '+ errorThrown);
+        }
+    })
+})
+
+
+$('#generarReporteMedicamentos').click(function(){
+	$.ajax({
+        url: 'reportes',
+        dataType: 'text',
+        type: 'post',
+        data: {
+			tipoDeReporte: REPORTE_MEDICAMENTOS,
+			filtroNombre: document.getElementById('filtroNombre').value,
+			tipo: TIPO_HTML
+       },
+       success: function(response){
+		   document.getElementById('reporte').innerHTML = response; 
+        },
+        error: function( jqXhr, textStatus, errorThrown ){
+            alertify.error(' error '+ errorThrown);
+        }
+    })
+})
+
+$('#btnExportarReporteMedicamentos').click(() => {
+	$.ajax({
+        url: 'reportes',
+        dataType: 'text',
+        type: 'post',
+        data: {
+			tipoDeReporte: REPORTE_MEDICAMENTOS,
+			filtroNombre: document.getElementById('filtroNombre').value,
+			tipo: TIPO_PDF
+       },
+       success: function(response){
+		   alertify.success('Reporte Generado exitosamente', 2 ); 
+        },
+        error: function( jqXhr, textStatus, errorThrown ){
+            alertify.error(' error '+ errorThrown);
+        }
+    })
+})
+
+
+
 
 registrarMedicamento.addEventListener('click', () => {
 	let varNombre= document.getElementById('nombreMedicamento').value;
@@ -113,15 +284,3 @@ botonActualiarInventario.addEventListener('click', () => {
 		}
     );
 };
-
-
-//funcion para vender medicamento
-//botonVenderMedicamento.addEventListener('click', () => {});
-
-//funcion para registrar medicamento
-botonRegistrarMedicamento.addEventListener('click', () => {
-	formMedicamento.style.display='block';
-}); 
-
-//funcion para buscar un medicamento
-botonBuscarMedicamento.addEventListener('click', () => {});

@@ -177,7 +177,7 @@ AND Contrato.fecha_final IS NULL;
 SELECT nombre from Meses where id_mes = 1; 
 
 INSERT INTO Pagos_Planilla (descripcion, monto, id_contrato, id_mes, anio, area, fecha) VALUES (
-'Pago de salario Mensual' , 
+'Pago de salario Mensual', 
  (SELECT Contrato.salario 
 FROM Contrato 
 INNER JOIN Empleado  ON Contrato.id_empleado = Empleado.id_empleado 
@@ -194,22 +194,77 @@ AND Contrato.fecha_final IS NULL),
 FROM Persona p, Empleado e 
 WHERE p.cui = e.cui_persona 
 AND p.cui = '123413241234'), 
-1)
+CURDATE());
+
+-- Cuenta, Registro_Monetario, Transacciones_Medicamentos
+
+SELECT Cuenta.monto, Registro_Monetario.monto
+FROM Cuenta, Registro_Monetario 
+WHERE Cuenta.id_area = 5 
+AND Registro_Monetario.id_area = 5;  
+
+SELECT SUM(Registro_Monetario.monto) 
+FROM Registro_Monetario 
+WHERE Registro_Monetario.id_area = 5;  
 
 
+-- ingresos
+
+SELECT 
+IFNULL((SELECT SUM(precio_al_cliente) 
+	FROM Cirugias_Disponibles 
+	INNER JOIN Cirugia ON Cirugias_Disponibles.id_tarfia = Cirugia.id_tarifa
+	WHERE Cirugia.realizada = true 
+	AND fecha > $P{FECHA_INICIAL}
+    AND fecha < $P{FECHA_FINAL}), 0)
+AS 'Ingresos';
 
 
+-- egresos 
+SELECT 
+IFNULL((SELECT SUM(costo_al_hospital) + SUM(tarifa_de_especialista) 
+	FROM Cirugias_Disponibles 
+	INNER JOIN Cirugia ON Cirugia.id_tarifa = Cirugias_Disponibles.id_tarfia
+	WHERE Cirugia.fecha > $P{FECHA_INICIAL}
+    AND Cirugia.fecha < $P{FECHA_FINAL}
+    AND Cirugia.realizada = true ), 0 ) +
+IFNULL((SELECT SUM(monto) 
+	FROM Pagos_Planilla 
+    WHERE fecha > $P{FECHA_INICIAL}
+    AND fecha < $P{FECHA_FINAL}), 0 ) +
+IFNULL((SELECT SUM(monto) 
+	FROM Costos_Habitacion 
+	WHERE fecha > $P{FECHA_INICIAL}
+    AND fecha < $P{FECHA_FINAL}), 0 ) +
+IFNULL((SELECT SUM(costo_actual_medicamento * cantidad) 
+	FROM Transacciones_Medicamentos 
+	WHERE fecha > $P{FECHA_INICIAL}
+    AND fecha < $P{FECHA_FINAL}), 0 ) 
+AS 'Egresos'; 
 
+SELECT fecha, detalle, monto 
+FROM Registro_Internados 
+WHERE pagado = 1
+	AND fecha > $P{FECHA_INICIAL}
+    AND fecha < $P{FECHA_FINAL}
 
+SELECT SUM( Cirugias_Disponibles.precio_al_cliente)
+	FROM Cirugias_Disponibles 
+	INNER JOIN Cirugia ON Cirugias_Disponibles.id_tarfia = Cirugia.id_tarifa
+	WHERE Cirugia.realizada = true 
+	AND fecha > $P{FECHA_INICIAL}
+    AND fecha < $P{FECHA_FINAL}
+    
+    
+SELECT Cirugia.fecha, Cirugias_Disponibles.descripcion, Persona.nombre, Cirugias_Disponibles.precio_al_cliente
+	FROM Cirugias_Disponibles 
+	INNER JOIN Cirugia ON Cirugias_Disponibles.id_tarfia = Cirugia.id_tarifa
+    INNER JOIN Paciente ON Paciente.id_paciente = Cirugia.id_paciente 
+    INNER JOIN Persona ON Paciente.cui = Persona.cui
+	WHERE Cirugia.realizada = true 
+	AND fecha > $P{FECHA_INICIAL}
+    AND fecha < $P{FECHA_FINAL}
 
-
-
-
-
-
-
-
-
-
+    
 
 

@@ -10,6 +10,7 @@
  	<link href="../scripts/alertifyjs/css/alertify.css" 					rel="stylesheet">
 	<link href="../scripts/alertifyjs/css/themes/default.css" 	rel="stylesheet">
 	 <link href="../bootstrap-4.4.1-dist/css/bootstrap.css" 		rel="stylesheet" />
+	 	<script src="../JQuery/jquery-3.4.1.js"										type="text/javascript"></script>
 </head>
 <body>
 	${encabezado}
@@ -20,6 +21,51 @@
 	<c:import var = "formContratacion" 								url = "form-contratacion-empleado.html" 			charEncoding="UTF-8" scope="page">				</c:import>
 	${formContratacion}
 	
+	
+		<div id='filtrosReporteEmpleadosContratados'> 
+		<div  class="input-group">
+				<input type="text" class="form-control" 	id="filtroAreaContratados" 										placeholder = 'Area...' >
+				<input type="date" class='form-control'  	id='controlFechaInicialContratados' >
+				<input type="date" class='form-control'		id="controlFechaFinalContratados" >
+		</div>
+		<br>
+		<div class='btn-group'>
+				 <input id="generarReporteContratados" type='button' class="btn btn-primary" 	value= 'Generar Reporte'>
+				<input id="exportarReporteContratados" type='button' class="btn btn-info" 			value= 'Exportar'>
+		</div>
+	</div>
+	
+	
+	<div id='filtrosReporteEmpleadosDespedidos'> 
+		<div  class="input-group">
+				<input type="text" class="form-control" 	id="filtroAreaDespedidos" 										placeholder = 'Area...' >
+				<input type="date" class='form-control'  	id='controlFechaInicialDespedidos' >
+				<input type="date" class='form-control'		id="controlFechaFinalDespedidos" >
+		</div>
+		<br>
+		<div class='btn-group'>
+				 <input id="generarReporteDespedidos" type='button' class="btn btn-primary" 	value= 'Generar Reporte'>
+				<input id="exportarReporteDespedidos" type='button' class="btn btn-info" 			value= 'Exportar'>
+		</div>
+	</div>
+	
+	
+		<div id='filtrosReporteMedicos'> 
+		<div  class="input-group">
+				<select id= 'filtroMedicos'>
+					<option value = '6'>Todos</option>
+					<option  value = '7'>Con Pacientes</option>
+					<option  value = '8'>Sin Pacientes</option>
+				</select>
+				<input id="generarReporteMedicos" type='button' class="btn btn-primary" 	value= 'Generar Reporte'>
+				<input id="exportarReporteMedicos" type='button' class="btn btn-info" 			value= 'Exportar'>
+		</div>
+	</div>
+	
+	<div id = 'reporte'>
+	
+	</div>
+	
 	<div			id = "empleados">
 	</div>
 
@@ -27,9 +73,7 @@
 	${foother}
 	
 	<script src="../scripts/RecursosHumanos/recursos-humanos.js">				</script>
-	<script src="../scripts/RecursosHumanos/contratacion.js">							</script>	
 	<script src="../scripts/alertifyjs/alertify.js" 								type="text/javascript"></script>
-	<script src="../JQuery/jquery-3.4.1.js"										type="text/javascript"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js"										type="text/javascript"></script>
+	<script src="../Propper/propper.js"										type="text/javascript"></script>
 	<script src="../bootstrap-4.4.1-dist/js/bootstrap.js"				type="text/javascript"></script>
 </body>
