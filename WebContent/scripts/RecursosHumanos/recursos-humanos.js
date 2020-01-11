@@ -14,6 +14,12 @@ const REPORTE_DE_MEDICOS= 6;
 const REPORTE_DE_MEDICOS_CON_PACIENTES= 7;
 const REPORTE_DE_MEDICOS_SIN_PACIENTES= 8;
 
+//crud de credenciales
+const LEER_USUARIOS = 1; 
+const ACTUALIZAR_CREDENCIALES = 2; 
+const BORRAR_CREDENCIALES = 3; 
+const LEER_CREDENCIAL = 4; 
+
 const TIPO_HTML =1; 
 const TIPO_PDF = 2; 
 
@@ -48,6 +54,83 @@ botonRegistrarMedicoEspecialista.addEventListener('click', mostrarFormularioMedi
 
 
 //Funciones
+
+$('#leerUsuarios').click(() => {
+    tablaEmpleados.style.display= 'block'; 
+    $.ajax({
+        url: 'credenciales',
+        dataType: 'text',
+        type: 'post',
+        data: {
+			operacion: LEER_USUARIOS
+       },
+       success: function(response){
+
+           document.getElementById('empleados').innerHTML = response;
+        },
+        error: function( jqXhr, textStatus, errorThrown ){
+            alertify.error(' error '+ errorThrown);
+        }
+    })
+})
+
+
+function seleccionarCredenciales(boton){
+    $.ajax({
+        url: 'credenciales',
+        dataType: 'text',
+        type: 'post',
+        data: {
+            operacion: LEER_CREDENCIAL, 
+            codigo : boton.getAttribute('id')
+       },
+       success: function(response){
+           document.getElementById('empleados').innerHTML = response;
+        },
+        error: function( jqXhr, textStatus, errorThrown ){
+            alertify.error(' error '+ errorThrown);
+        }
+    })
+}
+
+function actualizarCredencial(boton){
+    $.ajax({
+        url: 'credenciales',
+        dataType: 'text',
+        type: 'post',
+        data: {
+            operacion: ACTUALIZAR_CREDENCIALES, 
+            codigo : boton.getAttribute('id'), 
+            correo: document.getElementById('correo'+boton.getAttribute('id')).value, 
+            password: document.getElementById('password'+boton.getAttribute('id')).value
+       },
+       success: function(response){
+           document.getElementById('empleados').innerHTML = response;
+        },
+        error: function( jqXhr, textStatus, errorThrown ){
+            alertify.error(' error '+ errorThrown);
+        }
+    })
+}
+
+function borrarCredencial(boton){
+    $.ajax({
+        url: 'credenciales',
+        dataType: 'text',
+        type: 'post',
+        data: {
+            operacion: BORRAR_CREDENCIALES, 
+            codigo : boton.getAttribute('id')
+       },
+       success: function(response){
+           document.getElementById('empleados').innerHTML = response;
+        },
+        error: function( jqXhr, textStatus, errorThrown ){
+            alertify.error(' error '+ errorThrown);
+        }
+    })
+}
+
 
 function mostrarFormularioMedicoEspecialista(){
 	formEspecialista.style.display='block';

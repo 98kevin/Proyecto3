@@ -361,7 +361,7 @@ function consultarMedicamentos(){
  */
 function agregarMedicamento(botonAgregar){
     let varIdMedicamento = botonAgregar.getAttribute('id'); 
-    let varCantidad = document.getElementById('caja'+ varIdMedicamento).value;
+    let varCantidad = document.getElementById('cant'+ varIdMedicamento).value;
     if(varCantidad > 0 ){
         codigosMedicamentos.push(varIdMedicamento);
         cantidadesMedicamentos.push(varCantidad);

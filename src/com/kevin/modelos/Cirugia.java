@@ -98,12 +98,10 @@ public class Cirugia {
 	this.codigoPaciente = codigoPaciente;
     }
     
-    
     public Cirugia(HttpServletRequest request) {
 	this(new Date(Long.parseLong(request.getParameter("fecha"))), 
 		Integer.parseInt(request.getParameter("cirugia")), 
 		Integer.parseInt(request.getParameter("paciente")));
     }
-
     
 }

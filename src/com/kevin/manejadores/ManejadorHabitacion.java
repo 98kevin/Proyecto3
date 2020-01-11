@@ -54,8 +54,8 @@ public class ManejadorHabitacion {
 	String sql = "UPDATE Habitacion SET esta_ocupada=? WHERE id_habitacion=?";
 	Connection conexion = DBConnection.getInstanceConnection().getConexion();
 	PreparedStatement stm = conexion.prepareStatement(sql);
-	stm.setInt(1, codigo);
-	stm.setBoolean(2, ocupada);
+	stm.setBoolean(1, ocupada);
+	stm.setInt(2, codigo);
 	stm.execute();
     }
     

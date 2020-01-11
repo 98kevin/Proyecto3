@@ -7,6 +7,7 @@ import java.sql.SQLException;
 
 import com.kevin.modelos.Area;
 import com.kevin.servicio.DBConnection;
+import com.kevin.servicio.GeneradorHTML;
 
 public class ManejadorSession  {
      
@@ -95,4 +96,75 @@ public class ManejadorSession  {
 	return codigoUsuario;
     }
     
+    public String leerUsuarios() {
+	String credenciales = null;
+	String sql = "SELECT id_credenciales, correo_electronico, password FROM Credenciales"; 
+	try {
+	    PreparedStatement stm = DBConnection.getInstanceConnection().getConexion().prepareStatement(sql);
+	    ResultSet r = stm.executeQuery(); 
+	    credenciales =GeneradorHTML.convertirTabla(r, "seleccionarCredenciales(this)", "Editar", false, false, true); 
+	} catch (SQLException e) {
+	    e.printStackTrace();
+	} 
+	return credenciales; 
+    }
+    
+    public String actualizarCredenciales(int codigo, String correo, String password) {
+	String respuesta = null;
+	String sql = "UPDATE Credenciales SET correo_electronico = ? , password = ?" + 
+		"WHERE id_credenciales = ?"; 
+	try {
+	    PreparedStatement stm = DBConnection.getInstanceConnection().getConexion().prepareStatement(sql);
+	    stm.setString(1, correo);
+	    stm.setString(2, password);
+	    stm.setInt(3, codigo);
+	    stm.execute(); 
+	    respuesta = "Actualizacion con exito";
+	} catch (SQLException e) {
+	    e.printStackTrace();
+	    respuesta = "Error de actualizacion";
+	} 
+	return respuesta; 
+    }
+    
+    
+    public String borrarCredenciales(int codigo) {//4
+	String respuesta = null;
+	String sql = "DELETE FROM Credenciales" + 
+		" WHERE id_credenciales = ?"; 
+	try {
+	    PreparedStatement stm = DBConnection.getInstanceConnection().getConexion().prepareStatement(sql);
+	    stm.setInt(1, codigo);
+	    stm.execute(); 
+	    respuesta = "Actualizacion con exito";
+	} catch (SQLException e) {
+	    e.printStackTrace();
+	    respuesta = "Error de actualizacion";
+	} 
+	return respuesta; 
+    }
+    
+    public String leerCredencial(int codigo) {
+	String credenciales = null;
+	String sql = "SELECT id_credenciales, correo_electronico, password FROM Credenciales WHERE id_credenciales = ? "; 
+	try {
+	    PreparedStatement stm = DBConnection.getInstanceConnection().getConexion().prepareStatement(sql);
+	    stm.setInt(1, codigo);
+	    ResultSet r = stm.executeQuery(); 
+	    r.next(); 
+	    credenciales = "    <div id = 'form-edicion-credenciales'>" + 
+	    	"        <div class=\"input-group\">" + 
+	    	"            <input id='correo"+codigo+"' type=\"text\" value=\""+r.getString(2)+"\">" + 
+	    	"            <input id='password"+codigo+"'type=\"password\" value=\""+r.getString(3)+"\">" + 
+	    	"        </div>" + 
+	    	"        <div class=\"button-group\">" + 
+	    	"            <input id=\""+r.getInt(1)+"\" class=\"btn btn-primary\"    type=\"button\" value=\"Actualizar\" onclick='actualizarCredencial(this)'>" + 
+	    	"            <input id=\""+r.getInt(1)+"\" class=\"btn btn-info\"       type=\"button\" value=\"Eliminar\" onclick='borrarCredencial(this)'>" + 
+	    	"        </div>" + 
+	    	"    </div>";
+	} catch (SQLException e) {
+	    e.printStackTrace();
+	} 
+	return credenciales; 
+    }
 }

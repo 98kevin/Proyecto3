@@ -17,8 +17,6 @@ import com.kevin.servicio.GeneradorHTML;
 public class ManejadorFarmacia{
 
     
-    public static final String REPORTE_MAESTRO_GANANCIAS_MEDICAMENTOS = "resources/ReporteGananciasMedicamentos.jasper";
-    public static final String SUB_REPORTE_GANANCIAS_MEDICAMENTOS = "resources/SubReporteVentasDeMedicamentos.jasper";
     public static final boolean VENTA = true;
     public static final boolean COMPRA = false; 
 
@@ -136,7 +134,7 @@ public class ManejadorFarmacia{
     public void transaccionMedicamento(Medicamento m, Date fecha, int cantidad, boolean operacion, boolean pagado, Empleado e, String cuiPaciente) {
 	String sql = "INSERT INTO Transacciones_Medicamentos (fecha, costo_actual_medicamento, precio_actual_medicamento, "
 		+ "cantidad, tipo_operacion, id_medicamento, id_empleado, id_area, pagado, cui_paciente) 	"
-		+ "VALUES (?,?,?,?,?,?,?,?)"; 
+		+ "VALUES (?,?,?,?,?,?,?,?,?,?)"; 
 	PreparedStatement stm;
 	try {
 	    stm = DBConnection.getInstanceConnection().getConexion().prepareStatement(sql);

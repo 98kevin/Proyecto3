@@ -7,8 +7,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
-import javax.servlet.http.HttpServletRequest;
-
 import com.kevin.exceptions.DataBaseException;
 import com.kevin.modelos.Area;
 import com.kevin.modelos.Empleado;

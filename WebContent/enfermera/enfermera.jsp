@@ -25,6 +25,6 @@
 	
 	<script src="../scripts/enfermera/enfermera.js" 					type="text/javascript"></script>
 	<script src="../scripts/alertifyjs/alertify.js" 								type="text/javascript"></script>
-	<script src="../JQuery/jquery-3.4.1.js"										type="text/javascript"></script>s
+	<script src="../JQuery/jquery-3.4.1.js"										type="text/javascript"></script>
 	<script src="../bootstrap-4.4.1-dist/js/bootstrap.js"				type="text/javascript"></script>
 </body>
