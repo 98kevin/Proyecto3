@@ -75,5 +75,88 @@ public class ManejadorArea{
 	return respuesta.toString();
     }
     
+    public String actualizarArea(int codigo, String descripcion) {
+	String respuesta = null;
+	String sql = "UPDATE Area SET descripcion = ? " + 
+		"WHERE id_area = ? "; 
+	PreparedStatement stm;
+	try {
+	    stm = DBConnection.getInstanceConnection().getConexion().prepareStatement(sql);
+	    stm.setString(1, descripcion);
+	    stm.setInt(2, codigo);
+	    stm.execute(); 
+	    respuesta = "Actualizacion exitosa"; 
+	} catch (SQLException e) {
+	    respuesta = "error de actualizacion"; 
+	    e.printStackTrace();
+	} 
+	return respuesta; 
+    }
     
-}
+    public String borrarArea(int codigo) {
+	String respuesta = null;
+	String sql = "DELETE FROM Area " + 
+		"WHERE id_area = ? "; 
+	PreparedStatement stm;
+	try {
+	    stm = DBConnection.getInstanceConnection().getConexion().prepareStatement(sql);
+	    stm.setInt(1, codigo);
+	    stm.execute(); 
+	    respuesta = "Actualizacion exitosa"; 
+	} catch (SQLException e) {
+	    respuesta = "Error, hay empleados referenciando esta area";
+	    e.printStackTrace();
+	} 
+	return respuesta; 
+    }
+    
+    public String leerAreas () {
+	String respuesta = null;
+	String sql = "SELECT id_area, descripcion, Modulo.nombre AS 'Modulo' "
+		+ " FROM Area INNER JOIN Modulo ON Modulo.id_modulo = Area.id_modulo "
+		+ " GROUP BY id_area"; 
+	PreparedStatement stm;
+	try {
+	    stm = DBConnection.getInstanceConnection().getConexion().prepareStatement(sql);
+	    
+	    ResultSet r = stm.executeQuery(); 
+	    respuesta =GeneradorHTML.convertirTabla(r, "seleccionarArea(this)", "Editar", false, false, true); 
+	} catch (SQLException e) {
+	    respuesta = "error de actualizacion"; 
+	    e.printStackTrace();
+	} 
+	return respuesta; 
+    }
+    
+    public String leerArea(int codigo) {
+	String respuesta = null;
+	String sql = "SELECT descripcion "
+		+ " FROM Area " + 
+		"WHERE id_area = ? "; 
+	PreparedStatement stm;
+	try {
+	    stm = DBConnection.getInstanceConnection().getConexion().prepareStatement(sql);
+	    stm.setInt(1, codigo);
+	    ResultSet r = stm.executeQuery(); 
+	    r.next(); 
+	    respuesta = "<div>" + 
+	    	"    <h3>Edicion de area</h3>" + 
+	    	"    <div class=\"form-group mb-2\">" + 
+	    	"        <label for=\"staticEmail2\" class=\"sr-only\">Descripcion</label>" + 
+	    	"        Descripcion <input type=\"text\" class=\"form-control-plaintext\" id=\"descripcionArea\" value=\""+r.getString(1)+"\">" + 
+	    	"      </div>"
+	    	+ "<div class=\"button-group\">" + 
+	    	"  <input class=\"btn btn-primary\" value=\"Editar\" type=\"button\" id=\""+codigo+"\"    onclick=\"actualizarArea(this)\">" + 
+	    	"  <input class=\"btn btn-danger\" value=\"Eliminar\"  type=\"button\" id=\""+codigo+"\"  onclick=\"eliminarArea(this)\">" + 
+	    	"</div>" + 
+	    	"</div>";
+	} catch (SQLException e) {
+	    respuesta = "error de actualizacion"; 
+	    e.printStackTrace();
+	} 
+	return respuesta; 
+    }
+    
+    }
+    
+

@@ -15,6 +15,11 @@ const REPORTE_GANANCIAS= 11;
 const TIPO_HTML =1; 
 const TIPO_PDF = 2; 
 
+const LEER_AREAS = 1; 
+const ACTUALIZAR_AREAS  = 2; 
+const BORRAR_AREAS  = 3; 
+const LEER_AREA = 4; 
+
 //botones del panel superior
 let botonCrear =  document.getElementById('crearModulo');
 let botonArea = document.getElementById('crearArea');
@@ -453,4 +458,92 @@ function enviarEmpleado(){
 			}
 		})
 	}
+}
+
+$('#btnConsultarAreas').click(() =>{
+	let tablaResultados = document.getElementById('tablaResultados');
+	$.ajax({
+		url: 'servlet-area',
+		dataType: 'text',
+		type: 'post',
+		data: {
+			operacion: CONSULTAR_AREAS
+       } ,
+	   success: function( response){
+			ocultarComponentes(); 
+			tablaResultados.style.display = 'block';
+			tablaResultados.innerHTML = response; 
+		},
+		error: function( jqXhr, textStatus, errorThrown ){
+			alertify.error(errorThrown); 
+		}
+	})
+});
+
+function seleccionarArea(boton){
+	let id = boton.getAttribute('id'); 
+	let tablaResultados = document.getElementById('tablaResultados');
+	$.ajax({
+		url: 'servlet-area',
+		dataType: 'text',
+		type: 'post',
+		data: {
+			operacion: LEER_AREA, 
+			codigo: id
+       } ,
+	   success: function( response){
+			ocultarComponentes(); 
+			tablaResultados.style.display = 'block';
+			tablaResultados.innerHTML = response; 
+		},
+		error: function( jqXhr, textStatus, errorThrown ){
+			alertify.error(errorThrown); 
+		}
+	})
+}
+
+
+function actualizarArea(boton){
+	let id = boton.getAttribute('id'); 
+	let tablaResultados = document.getElementById('tablaResultados');
+	$.ajax({
+		url: 'servlet-area',
+		dataType: 'text',
+		type: 'post',
+		data: {
+			operacion: ACTUALIZAR_AREAS, 
+			codigo: id, 
+			descripcion: document.getElementById('descripcionArea').value
+       } ,
+	   success: function( response){
+			ocultarComponentes(); 
+			tablaResultados.style.display = 'block';
+			tablaResultados.innerHTML = response; 
+		},
+		error: function( jqXhr, textStatus, errorThrown ){
+			alertify.error(errorThrown); 
+		}
+	})
+}
+
+function eliminarArea(boton){
+	let id = boton.getAttribute('id'); 
+	let tablaResultados = document.getElementById('tablaResultados');
+	$.ajax({
+		url: 'servlet-area',
+		dataType: 'text',
+		type: 'post',
+		data: {
+			operacion: BORRAR_AREAS, 
+			codigo: id
+       } ,
+	   success: function( response){
+			ocultarComponentes(); 
+			tablaResultados.style.display = 'block';
+			tablaResultados.innerHTML = response; 
+		},
+		error: function( jqXhr, textStatus, errorThrown ){
+			alertify.error(errorThrown); 
+		}
+	})
 }
