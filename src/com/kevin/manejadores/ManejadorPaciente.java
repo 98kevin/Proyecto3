@@ -27,7 +27,7 @@ public class ManejadorPaciente {
 	   mensaje.append("Creacion de paciente exitosa realizada con exito"); 
 	} catch (SQLException e) {
 	    e.printStackTrace();
-	    mensaje.append("Error de intregridad de base de datos.  \n codigo de error " + e.getErrorCode());
+	    mensaje.append("Error de intregridad de base de datos.   codigo de error " + e.getErrorCode());
 	    try {
 		conexion.rollback();
 	    } catch (SQLException e1) {
@@ -213,6 +213,111 @@ public class ManejadorPaciente {
 	return GeneradorHTML.convertirTabla(resultados, funcionJS, textoBoton, false, false, true);
     }
     
+    
+    public String leerPacientesRegistrados() {
+	String sql = "SELECT Persona.cui,  Persona.nombre, Persona.direccion, Paciente.nit "+
+		" FROM Persona "+
+		" INNER JOIN Paciente ON Persona.cui=Paciente.cui ";
+	PreparedStatement stm = null ;
+	ResultSet pacientes = null ;
+	try {
+	    stm = DBConnection.getInstanceConnection().getConexion().prepareStatement(sql);
+	    pacientes = stm.executeQuery();
+	} catch (SQLException e) {
+	    e.printStackTrace();
+	}
+	return GeneradorHTML.convertirTabla(pacientes, "seleccionarPaciente(this)", "Editar", false ,false,true ); 
+    }
+    
+    public String leerPaciente(String cui) {
+	String respuesta= null;
+	String sql = "SELECT Persona.cui,  Persona.nombre, Persona.direccion, Paciente.nit "+
+		" FROM Persona "+
+		" INNER JOIN Paciente ON Persona.cui=Paciente.cui "
+		+ " WHERE Paciente.cui = ? ";
+
+	ResultSet paciente = null ;
+	try {
+	    PreparedStatement stm  = DBConnection.getInstanceConnection().getConexion().prepareStatement(sql);
+	    stm.setString(1, cui);
+	    paciente = stm.executeQuery();
+	    if (paciente.next()) {
+		respuesta = "<div>" + 
+			"    <h3>Edicion de Paciente</h3>" + 
+			"    <div class=\"form-group row\">" + 
+			"      <label class=\"col-sm-2 col-form-label\">CUI </label>" + 
+			"      <div class=\"col-sm-10\">" + 
+			"        <input type=\"text\" class=\"form-control\" id=\"cuiPacienteNuevo\" value=\""+paciente.getString(1)+"\">" + 
+			"        <input type=\"hidden\" class=\"form-control\" id=\"cuiPacienteActual\" value=\""+paciente.getString(1)+"\">" + 
+			"      </div>" + 
+			"    </div>" + 
+			"" + 
+			"    <div class=\"form-group row\">" + 
+			"      <label class=\"col-sm-2 col-form-label\">Nombre </label>" + 
+			"      <div class=\"col-sm-10\">" + 
+			"        <input type=\"text\" class=\"form-control\" id=\"nombrePaciente\" value=\""+paciente.getString(2)+"\">" + 
+			"      </div>" + 
+			"    </div>" + 
+			"" + 
+			"    <div class=\"form-group row\">" + 
+			"      <label class=\"col-sm-2 col-form-label\">Direccion </label>" + 
+			"      <div class=\"col-sm-10\">" + 
+			"        <input type=\"text\" class=\"form-control\" id=\"direccionPaciente\" value=\""+paciente.getString(3)+"\">" + 
+			"      </div>" + 
+			"    </div>" + 
+			"" + 
+			"    <div class=\"form-group row\">" + 
+			"      <label class=\"col-sm-2 col-form-label\">Nit </label>" + 
+			"      <div class=\"col-sm-10\">" + 
+			"        <input type=\"text\" class=\"form-control\" id=\"nitPaciente\" value=\""+paciente.getString(4)+"\">" + 
+			"      </div>" + 
+			"    </div>" + 
+			"</div>" + 
+			"" + 
+			"<div class=\"button-group\">" + 
+			"  <input class=\"btn btn-primary\"  type=\"button\" id=\"\"  value=\"Guardar Cambios\"  onclick=\"actualizarPaciente()\">" + 
+			"</div>"; 
+	    }
+	} catch (SQLException e) {
+	    e.printStackTrace();
+	    respuesta = "Ha ocurrido un error"+ e.getErrorCode(); 
+	}
+	return respuesta; 
+    }
+    
+    public String actualizarPaciente(String cuiActual, String cuiNuevo, String nombre, String direccion, String nit) {
+	String respuesta = null; 
+	Connection conexion = DBConnection.getInstanceConnection().getConexion();
+	try {
+	conexion.setAutoCommit(false);
+	ManejadorPersona p = new ManejadorPersona(); 
+	p.acutalizarPersona(cuiActual, cuiNuevo, nombre, direccion); 
+	String sql = "UPDATE Paciente SET nit = ?   " + 
+		" WHERE Paciente.cui  = ?" ; 
+	PreparedStatement stm;
+	    stm = DBConnection.getInstanceConnection().getConexion().prepareStatement(sql);
+	    stm.setString(1, nit);
+	    stm.setString(2, cuiNuevo);
+	    stm.execute(); 
+	    respuesta = Main.MENSAJE_EXITO;
+	} catch (SQLException e) {
+	    e.printStackTrace();
+		    try {
+			conexion.rollback();
+		    } catch (SQLException e1) {
+			e1.printStackTrace();
+		    }
+	    respuesta  = "Error de registro. Codigo " + e.getErrorCode(); 
+	} finally {
+	    try {
+		conexion.setAutoCommit(true);
+	    } catch (SQLException e) {
+		e.printStackTrace();
+	    }
+	}
+	return respuesta; 
+    }
+  
     
     
 }
