@@ -1,5 +1,7 @@
 //CONSTANTES DEL METODO POST
 const CONSULTAR_SALARIOS_PENDIENTES = 1; 
+const CONSULTAR_CIRUGIAS = 2;
+const CONSULTAR_CIRUGIA = 3;
 //CONSTANTES DEL METODO GET 
 const CONSULTAR_AREAS = 1;
 const CONSULTAR_MODULOS = 2;
@@ -7,6 +9,8 @@ const CONSULTAR_EMPLEADOS = 3;
 const CONSULTAR_TARIFAS = 4;
 const REGISTRAR_CIRUGIA = 5; 
 const PAGAR_SALARIO = 6; 
+const ACTUALIZAR_CIRUGIA = 7;
+
 
 const REPORTE_INGRESOS_MONETARIOS= 9;
 const REPORTE_EGRESOS_MONETARIOS= 10;
@@ -536,6 +540,69 @@ function eliminarArea(boton){
 		data: {
 			operacion: BORRAR_AREAS, 
 			codigo: id
+       } ,
+	   success: function( response){
+			ocultarComponentes(); 
+			tablaResultados.style.display = 'block';
+			tablaResultados.innerHTML = response; 
+		},
+		error: function( jqXhr, textStatus, errorThrown ){
+			alertify.error(errorThrown); 
+		}
+	})
+}
+
+$('#consultarCirugias').click(() => {
+	$.ajax({
+		url: 'administrador',
+		dataType: 'text',
+		type: 'get',
+		data: {
+			operacion: CONSULTAR_CIRUGIAS
+       } ,
+	   success: function( response){
+			ocultarComponentes(); 
+			tablaResultados.style.display = 'block';
+			tablaResultados.innerHTML = response; 
+		},
+		error: function( jqXhr, textStatus, errorThrown ){
+			alertify.error(errorThrown); 
+		}
+	})
+});
+
+function seleccionarCirugia(boton){
+	$.ajax({
+		url: 'administrador',
+		dataType: 'text',
+		type: 'get',
+		data: {
+			operacion: CONSULTAR_CIRUGIA, 
+			codigoCirugia : boton.getAttribute('id')
+       } ,
+	   success: function( response){
+			ocultarComponentes(); 
+			tablaResultados.style.display = 'block';
+			tablaResultados.innerHTML = response; 
+		},
+		error: function( jqXhr, textStatus, errorThrown ){
+			alertify.error(errorThrown); 
+		}
+	})
+};
+
+function actualizarCirugia(){
+	$.ajax({
+		url: 'administrador',
+		dataType: 'text',
+		type: 'post',
+		data: {
+			operacion: ACTUALIZAR_CIRUGIA, 
+			codigoCirugia : document.getElementById('codigoCirugia').value,
+			descripcionCirugia : document.getElementById('descripcionCirugia').value,
+			costoCirugia : document.getElementById('costoCirugia').value,
+			precioCirugia : document.getElementById('precioCirugia').value,
+			tarifaEspecialista : document.getElementById('tarifaEspecialista').value
        } ,
 	   success: function( response){
 			ocultarComponentes(); 

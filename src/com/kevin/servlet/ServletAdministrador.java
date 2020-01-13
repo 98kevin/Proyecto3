@@ -21,10 +21,15 @@ public class ServletAdministrador extends HttpServlet {
     
     // CONSTANTES DEL METODO GET
     private static final int CONSULTAR_SALARIOS_PENDIENTES = 1;
+    private static final int CONSULTAR_CIRUGIAS = 2;
+    private static final int CONSULTAR_CIRUGIA = 3;
+    
     //CONSTANTES DEL METODO POST
     private static final int CONSULTA_AREAS = 1;
     private static final int REGISTRAR_CIRUGIA = 2;
     private static final int PAGAR_SALARIO = 6;
+    private static final int ACTUALIZAR_CIRUGIA = 7;
+    
     
 	private static final long serialVersionUID = 1L;
 
@@ -49,6 +54,14 @@ public class ServletAdministrador extends HttpServlet {
 		response.getWriter().append(administrador.consultarSalariosPendientes(
 			Integer.parseInt(request.getParameter("mes")), 
 			Integer.parseInt(request.getParameter("anio")))); 
+		break; 
+	    case CONSULTAR_CIRUGIAS: 
+		response.getWriter().append(administrador.consultarTarifas()); 
+		break; 
+	    case CONSULTAR_CIRUGIA: 
+		response.getWriter().append(administrador.consultarTarifa(
+			Integer.parseInt(request.getParameter("codigoCirugia"))
+			)); 
 		break; 
 	    default:
 		break;
@@ -77,6 +90,15 @@ public class ServletAdministrador extends HttpServlet {
 			    Integer.parseInt(request.getParameter("mes")),
 			    Integer.parseInt(request.getParameter("anio")), 
 			    new Date(Long.parseLong(request.getParameter("fechaEnMilisegundos"))))); 
+		    break; 
+		case ACTUALIZAR_CIRUGIA: 
+		    response.getWriter().append(administrador.actualizarCirugia(
+			    Integer.parseInt(request.getParameter("codigoCirugia")), 
+			    request.getParameter("descripcionCirugia"), 
+			    Double.parseDouble(request.getParameter("costoCirugia")), 
+			    Double.parseDouble(request.getParameter("precioCirugia")), 
+			    Double.parseDouble(request.getParameter("tarifaEspecialista")))); 
+		    break; 
 	    default:
 		break;
 	    }

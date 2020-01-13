@@ -8,6 +8,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 import com.kevin.modelos.Administrador;
+import com.kevin.modelos.Main;
 import com.kevin.servicio.DBConnection;
 import com.kevin.servicio.GeneradorHTML;
 
@@ -31,7 +32,7 @@ public class ManejadorAdministrador {
 	    msj += "Creacion de administrador exitosa"; 
 	} catch (SQLException e) {
 	    e.printStackTrace();
-	    msj += "Error de intregridad de base de datos.  \n codigo de error" + e.getErrorCode();
+	    msj += "Error de intregridad de base de datos.   codigo de error" + e.getErrorCode();
 	    System.out.println(msj);
 	    try {
 		conexion.rollback();
@@ -167,5 +168,100 @@ public class ManejadorAdministrador {
 	    	resp.append("Ocurrio un error. Codigo de error " + e.getErrorCode()); 
 	}
 	return resp.toString(); 
+    }
+    
+    public String consultarTarifas() {
+	String sql = "SELECT id_tarfia, descripcion AS 'Cirugia', costo_al_hospital AS 'Costo', tarifa_de_especialista AS 'Precio', " + 
+		" precio_al_cliente AS 'Tarifa de especialista'" + 
+		" FROM Cirugias_Disponibles" ; 
+	ResultSet registros = null; 
+	try {
+		PreparedStatement stm = DBConnection.getInstanceConnection().getConexion().prepareStatement(sql); 
+	    registros = stm.executeQuery(); 
+	} catch (SQLException e) {
+	    e.printStackTrace();
+	}
+	return GeneradorHTML.convertirTabla(registros, "seleccionarCirugia(this)", "Editar", false, false, true);
+    }
+    
+    public String consultarTarifa(int codigo) {
+	String respuesta  = null; 
+	String sql = "SELECT id_tarfia, descripcion AS 'Cirugia', costo_al_hospital AS 'Costo', tarifa_de_especialista AS 'Precio', " + 
+		" precio_al_cliente AS 'Tarifa de especialista'" + 
+		" FROM Cirugias_Disponibles "
+		+ " WHERE id_tarfia = ? " ; 
+	ResultSet r = null; 
+	try {
+		PreparedStatement stm = DBConnection.getInstanceConnection().getConexion().prepareStatement(sql); 
+		stm.setInt(1, codigo);
+	    r = stm.executeQuery(); 
+	    if (r.next()) {
+		respuesta  = "  <div>" + 
+			"    <h3>Edicion de Cirugia</h3>" + 
+			"    <div class=\"form-group row\">" + 
+			"      <label class=\"col-sm-2 col-form-label\">Codigo </label>" + 
+			"      <div class=\"col-sm-10\">" + 
+			"        <input type=\"nubmer\" class=\"form-control\" id=\"codigoCirugia\" value=\""+r.getInt(1)+ "\" readonly>" + 
+			"      </div>" + 
+			"    </div>" + 
+			"" + 
+			"    <div class=\"form-group row\">" + 
+			"      <label class=\"col-sm-2 col-form-label\">Cirugia </label>" + 
+			"      <div class=\"col-sm-10\">" + 
+			"        <input type=\"text\" class=\"form-control\" id=\"descripcionCirugia\" value=\""+r.getString(2)+"\">" + 
+			"      </div>" + 
+			"    </div>" + 
+			"" + 
+			"    <div class=\"form-group row\">" + 
+			"      <label class=\"col-sm-2 col-form-label\">Costo </label>" + 
+			"      <div class=\"col-sm-10\">" + 
+			"        <input type=\"number\" step=\"0.01\" class=\"form-control\" id=\"costoCirugia\" value=\""+r.getDouble(3)+"\">" + 
+			"      </div>" + 
+			"    </div>" + 
+			"" + 
+			"    <div class=\"form-group row\">" + 
+			"      <label class=\"col-sm-2 col-form-label\">Precio </label>" + 
+			"      <div class=\"col-sm-10\">" + 
+			"        <input type=\"number\" step=\"0.01\" class=\"form-control\" id=\"precioCirugia\" value=\""+r.getDouble(4)+"\">" + 
+			"      </div>" + 
+			"    </div>" + 
+			"" + 
+			"" + 
+			"    <div class=\"form-group row\">" + 
+			"      <label class=\"col-sm-2 col-form-label\">Tarifa de Especialista </label>" + 
+			"      <div class=\"col-sm-10\">" + 
+			"        <input type=\"number\" step=\"0.01\" class=\"form-control\" id=\"tarifaEspecialista\" value=\""+r.getDouble(5)+ "\">" + 
+			"      </div>" + 
+			"    </div>" + 
+			"</div>" + 
+			"" + 
+			"<div class=\"button-group\">" + 
+			"  <input class=\"btn btn-primary\"  type=\"button\" id=\"\"  value=\"Guardar Cambios\"  onclick=\"actualizarCirugia()\">" + 
+			"</div>" ;
+	    }
+	} catch (SQLException e) {
+	    e.printStackTrace();
+	}
+	return respuesta;
+    }
+    
+    public String actualizarCirugia(int codigo, String descripcion, double costo, double precio, double tarifaEspecialista) {
+	String respuesta  = null; 
+	String sql  = "UPDATE Cirugias_Disponibles SET descripcion = ?, costo_al_hospital  = ?, precio_al_cliente = ?, tarifa_de_especialista = ? " + 
+		" WHERE id_tarfia = ? "; 									
+	try {
+	    PreparedStatement stm = DBConnection.getInstanceConnection().getConexion().prepareStatement(sql);
+	    stm.setString(1, descripcion);
+	    stm.setDouble(2, costo);
+	    stm.setDouble(3, precio);
+	    stm.setDouble(4, tarifaEspecialista);
+	    stm.setInt(5, codigo);
+	    stm.execute(); 
+	    respuesta = Main.MENSAJE_EXITO; 
+	} catch (SQLException e) {
+	    respuesta = "Ha ocurrido un error. Codigo  " + e.getErrorCode(); 
+	    e.printStackTrace();
+	} 
+	return respuesta ; 
     }
 }
