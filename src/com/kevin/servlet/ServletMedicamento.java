@@ -19,11 +19,18 @@ import com.kevin.modelos.Medicamento;
 @WebServlet("/farmacia/medicamento")
 public class ServletMedicamento extends HttpServlet {
     	private static final long serialVersionUID = 1L;
+    	
+    	//POST
 	private static final int REGISTRO_MEDICAMENTO = 1;
 	private static final int CONSULTAR_MEDICAMENTOS = 2;
 	private static final int COMPRAR_MEDICAMENTOS = 3;
 	private static final int CONSULTAR_INVENTARIO = 4;
 	private static final int REGISTRAR_ACTUALIZACION = 5;
+	private static final int ACTUALIZAR_MEDICAMENTO = 6;
+	
+	//GET 
+	private static final int LEER_MEDICAMENTOS= 1; 
+	private static final int LEER_MEDICAMENTO= 2; 
 	
 	
 	       
@@ -39,7 +46,19 @@ public class ServletMedicamento extends HttpServlet {
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		response.getWriter().append("Served at: ").append(request.getContextPath());
+	    int operacion= Integer.parseInt(request.getParameter("operacion"));
+	    ManejadorFarmacia f = new ManejadorFarmacia(); 
+	    switch (operacion) {
+	    case LEER_MEDICAMENTOS:
+		response.getWriter().append(f.leerMedicamentos()); 
+		break;
+	    case LEER_MEDICAMENTO:
+		response.getWriter().append(f.leerMedicamentoEnFormulario((
+			Integer.parseInt(request.getParameter("codigo"))))); 
+		break;
+	    default:
+		break;
+	    }
 	}
 
 	/**
@@ -75,6 +94,14 @@ public class ServletMedicamento extends HttpServlet {
 		    e.printStackTrace();
 		}
 		break;
+	    case ACTUALIZAR_MEDICAMENTO: 
+		response.getWriter().append(farmacia.actualizarMedicamento(
+			Integer.parseInt(request.getParameter("codigo")), 
+			request.getParameter("nombre"), 
+			Double.parseDouble(request.getParameter("costo")), 
+			Double.parseDouble(request.getParameter("precio")),
+			Integer.parseInt(request.getParameter("cantidadMinima")))); 
+		break; 
 	    default:
 		break;
 	    }

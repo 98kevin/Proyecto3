@@ -11,25 +11,12 @@ public class Main {
     public static final boolean EGRESOS= false;
     
     
+    public static final String MENSAJE_EXITO = 
+		"<div class=\"alert alert-success\">"
+       +" Operacion realizada exitosamente" 
+       +" </div>";
+    
     public static void main(String args[])  {
-	/*
-	Map<String, Object> parametros = new HashMap<String, Object>();
-        parametros.put("FILTRO_NOMBRE", "a");
-	new ControladorDeReportes().imprimirReporte(parametros,   //parametros
-		"/ReporteDeMedicamentos.jasper", //reporte
-		"ReporteDeMedicametnos.pdf");  //documento		        
-		
-	ControladorDeReportes reportes = new ControladorDeReportes(); 		
-	      DataBeanList DataBeanList = new DataBeanList();
-	      ArrayList<DataBean> dataList = DataBeanList.getDataBeanList();
-	      JRBeanCollectionDataSource beanColDataSource = new 
-	         JRBeanCollectionDataSource(dataList);
-	     reportes.generarReporteConSubReporte(ManejadorFarmacia.REPORTE_MAESTRO_GANANCIAS_MEDICAMENTOS,
-		     ManejadorFarmacia.SUB_REPORTE_GANANCIAS_MEDICAMENTOS, dataList, "ejemplo de Reporte.pdf", ControladorDeReportes.PDF);
-	 */ 
-	     
-
-	
 
     }    
 }

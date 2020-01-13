@@ -7,17 +7,13 @@ import java.sql.SQLException;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.kevin.modelos.Main;
 import com.kevin.modelos.MedicoEspecialista;
 import com.kevin.servicio.DBConnection;
 import com.kevin.servicio.GeneradorHTML;
 
 public class ManejadorRecursosHumanos {
-    
-    public static final String MENSAJE_EXITO = 
-		"<div class=\"alert alert-success\">"
-       +" Operacion realizada exitosamente" 
-       +" </div>";
-    
+        
     
 /**
  * Se encarga del proceso de registrar un medico especiliasta en la DB.
@@ -142,7 +138,7 @@ public class ManejadorRecursosHumanos {
 	    stm.execute();
 	    modificarEstadoDelEmpleado(true, contrato, conexion);  //se activa el usuario
 	    conexion.commit();
-	    respuesta = MENSAJE_EXITO;
+	    respuesta = Main.MENSAJE_EXITO;
 	} catch (SQLException e) {
 	    e.printStackTrace();
 	    revertirCambios(conexion);
@@ -299,7 +295,7 @@ public class ManejadorRecursosHumanos {
 	    stm.setInt(2, irtra);
 	    stm.setString(3, cuiNuevo);
 	    stm.execute(); 
-	    respuesta = MENSAJE_EXITO; 
+	    respuesta = Main.MENSAJE_EXITO;
 	} catch (SQLException e) {
 	    e.printStackTrace();
 		    try {

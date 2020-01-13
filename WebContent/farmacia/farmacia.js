@@ -5,6 +5,11 @@ const CONSULTAR_MEDICAMENTOS=2;
 const COMPRAR_MEDICAMENTOS = 3; 
 const ACTUALIZAR_INVENTARIO= 4;
 const REGISTRAR_ACTUALIZACION = 5;
+const ACTUALIZAR_MEDICAMENTO = 6; 
+
+const LEER_MEDICAMENTOS= 1;  
+const LEER_MEDICAMENTO= 2; 
+
 
 const REPORTE_MEDICAMENTOS = 1; 
 const REPORTE_GANANCIAS_MEDICAMENTOS= 2;
@@ -294,4 +299,65 @@ botonActualiarInventario.addEventListener('click', () => {
 function acutalizarControlFecha(){
 	let controlFecha = document.getElementById('controlFecha');  
 	controlFecha.value = new Date().toLocaleDateString('en-CA');
+}
+
+$('#btnConsultarMedicamentos').click(() => {
+	$.ajax({
+        url: 'medicamento',
+        dataType: 'text',
+        type: 'get',
+        data: {
+			operacion : LEER_MEDICAMENTOS
+       },
+       success: function(response){
+		   document.getElementById('tablaResultados').style.display = 'block';
+		   document.getElementById('tablaResultados').innerHTML = response; 
+        },
+        error: function( jqXhr, textStatus, errorThrown ){
+            alertify.error(errorThrown);
+        }
+    })
+});
+
+function seleccionarMedicamento(boton){
+	let id = boton.getAttribute ('id'); 
+	$.ajax({
+        url: 'medicamento',
+        dataType: 'text',
+        type: 'get',
+        data: {
+			operacion : LEER_MEDICAMENTO, 
+			codigo: id
+       },
+       success: function(response){
+		   document.getElementById('tablaResultados').style.display = 'block';
+		   document.getElementById('tablaResultados').innerHTML = response; 
+        },
+        error: function( jqXhr, textStatus, errorThrown ){
+            alertify.error(errorThrown);
+        }
+    })
+}
+
+function actualizarMedicamento (boton){
+	$.ajax({
+        url: 'medicamento',
+        dataType: 'text',
+        type: 'post',
+        data: {
+			operacion : ACTUALIZAR_MEDICAMENTO, 
+			codigo: document.getElementById('codigo').value,
+			nombre: document.getElementById('nombre').value,
+			costo: document.getElementById('costo').value,
+			precio: document.getElementById('precio').value,
+			cantidadMinima: document.getElementById('cantidadMinima').value
+       },
+       success: function(response){
+		   document.getElementById('tablaResultados').style.display = 'block';
+		   document.getElementById('tablaResultados').innerHTML = response; 
+        },
+        error: function( jqXhr, textStatus, errorThrown ){
+            alertify.error(errorThrown);
+        }
+    })
 }

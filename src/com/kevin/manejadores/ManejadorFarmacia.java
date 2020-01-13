@@ -10,6 +10,7 @@ import java.sql.Statement;
 import javax.servlet.http.HttpServletRequest;
 
 import com.kevin.modelos.Empleado;
+import com.kevin.modelos.Main;
 import com.kevin.modelos.Medicamento;
 import com.kevin.servicio.DBConnection;
 import com.kevin.servicio.GeneradorHTML;
@@ -35,7 +36,7 @@ public class ManejadorFarmacia{
 	    mensaje.append("Registro de medicamento con exito"); 
 	} catch (SQLException e) {
 	    e.printStackTrace();
-	    mensaje.append("Error de intregridad de base de datos.  \n codigo de error " + e.getErrorCode()) ;
+	    mensaje.append("Error de intregridad de base de datos.   codigo de error " + e.getErrorCode()) ;
 	    try {
 		conexion.rollback();
 	    } catch (SQLException e1) {
@@ -289,6 +290,101 @@ public class ManejadorFarmacia{
 	return registros.toString();
     }
     
-   
+    public String leerMedicamentos() {
+   String medicamentos = null;
+	String sql = "SELECT id_medicamento, nombre, costo, precio, cant_minima " + 
+		"FROM Medicamento";
+	Connection conexion = DBConnection.getInstanceConnection().getConexion();
+	try {
+	    PreparedStatement stm = conexion.prepareStatement(sql);
+	    ResultSet r = stm.executeQuery();
+	    medicamentos =GeneradorHTML.convertirTabla(r, "seleccionarMedicamento(this)", "Seleccionar", false, false, true); 
+	} catch (SQLException e) {
+	    e.printStackTrace();
+	    medicamentos = "Ocurrio un error. Codigo " + e.getErrorCode(); 
+	}
+	return medicamentos; 
+    }
+    
+    public String leerMedicamentoEnFormulario(int id_medicamento) {
+	String medicamento = null;
+	String sql = "SELECT id_medicamento, nombre, costo, precio, cant_minima " + 
+		"FROM Medicamento WHERE id_medicamento = ? ";
+	Connection conexion = DBConnection.getInstanceConnection().getConexion();
+	try {
+	    PreparedStatement stm = conexion.prepareStatement(sql);
+	    stm.setInt(1, id_medicamento);
+	    ResultSet r = stm.executeQuery();
+	    r.next(); 
+	    medicamento ="  <div>" + 
+	    	"    <h3>Edicion de Medicamento</h3>" + 
+	    	"" + 
+	    	"" + 
+	    	"    <div class=\"form-group row\">" + 
+	    	"      <label class=\"col-sm-2 col-form-label\">Codigo </label>" + 
+	    	"      <div class=\"col-sm-10\">" + 
+	    	"        <input type=\"text\" class=\"form-control\" id=\"codigo\" value=\""+r.getInt(1)+"\" readonly >" + 
+	    	"      </div>" + 
+	    	"    </div>" + 
+	    	"" + 
+	    	"    <div class=\"form-group row\">" + 
+	    	"      <label class=\"col-sm-2 col-form-label\">Nombre </label>" + 
+	    	"      <div class=\"col-sm-10\">" + 
+	    	"        <input type=\"text\" class=\"form-control\" id=\"nombre\" value=\""+r.getString(2)+"\">" + 
+	    	"      </div>" + 
+	    	"    </div>" + 
+	    	"" + 
+	    	"    <div class=\"form-group row\">" + 
+	    	"      <label class=\"col-sm-2 col-form-label\">Costo </label>" + 
+	    	"      <div class=\"col-sm-10\">" + 
+	    	"        <input type=\"number\" step=\"0.01\" class=\"form-control\" id=\"costo\" value=\""+r.getDouble(3)+"\">" + 
+	    	"      </div>" + 
+	    	"    </div>" + 
+	    	"" + 
+	    	"    <div class=\"form-group row\">" + 
+	    	"      <label class=\"col-sm-2 col-form-label\">Precio </label>" + 
+	    	"      <div class=\"col-sm-10\">" + 
+	    	"        <input type=\"number\" step=\"0.01\" class=\"form-control\" id=\"precio\" value=\""+r.getDouble(4)+"\">" + 
+	    	"      </div>" + 
+	    	"    </div>" + 
+	    	"" + 
+	    	"    <div class=\"form-group row\">" + 
+	    	"      <label class=\"col-sm-2 col-form-label\">Cantidad Minima </label>" + 
+	    	"      <div class=\"col-sm-10\">" + 
+	    	"        <input type=\"number\" class=\"form-control\" id=\"cantidadMinima\" value=\""+r.getInt(5)+"\">" + 
+	    	"      </div>" + 
+	    	"    </div>" + 
+	    	"</div>" + 
+	    	"" + 
+	    	"<div class=\"button-group\">" + 
+	    	"  <input class=\"btn btn-primary\"  type=\"button\" id=\"\"  value=\"Guardar Cambios\"  onclick=\"actualizarMedicamento(this)\">" + 
+	    	"</div>";
+	} catch (SQLException e) {
+	    e.printStackTrace();
+	    medicamento = "Ocurrio un error. Codigo " + e.getErrorCode(); 
+	}
+	return medicamento; 
+    }
+    
+    public String actualizarMedicamento(int idMedicamento, String nombre, Double costo, Double precio, int cantidadMinima) {
+	    String respuesta = null;
+	 	String sql = "UPDATE Medicamento SET nombre = ? , costo = ? , precio= ? , cant_minima = ? " + 
+	 		"WHERE id_medicamento = ? ";
+	 	Connection conexion = DBConnection.getInstanceConnection().getConexion();
+	 	try {
+	 	    PreparedStatement stm = conexion.prepareStatement(sql);
+	 	    stm.setString(1, nombre);
+	 	    stm.setDouble(2, costo);
+	 	    stm.setDouble(3, precio);
+	 	    stm.setInt(4, cantidadMinima);
+	 	    stm.setInt(5, idMedicamento);
+	 	    stm.execute(); 
+	 	    respuesta = Main.MENSAJE_EXITO; 
+	 	} catch (SQLException e) {
+	 	    e.printStackTrace();
+	 	    respuesta = "Ocurrio un error. Codigo " + e.getErrorCode();
+	 	}
+	 	return respuesta; 
+    }
 
 }
