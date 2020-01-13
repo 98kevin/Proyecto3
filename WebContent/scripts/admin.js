@@ -2,6 +2,9 @@
 const CONSULTAR_SALARIOS_PENDIENTES = 1; 
 const CONSULTAR_CIRUGIAS = 2;
 const CONSULTAR_CIRUGIA = 3;
+const CONSULTAR_HABITACIONES = 4;
+const CONSULTAR_HABITACION = 5;
+
 //CONSTANTES DEL METODO GET 
 const CONSULTAR_AREAS = 1;
 const CONSULTAR_MODULOS = 2;
@@ -10,6 +13,9 @@ const CONSULTAR_TARIFAS = 4;
 const REGISTRAR_CIRUGIA = 5; 
 const PAGAR_SALARIO = 6; 
 const ACTUALIZAR_CIRUGIA = 7;
+const ACTUALIZAR_HABITACION= 8;
+const ELIMINAR_HABITACION  = 9;
+
 
 
 const REPORTE_INGRESOS_MONETARIOS= 9;
@@ -614,3 +620,85 @@ function actualizarCirugia(){
 		}
 	})
 }
+
+$('#consultarHabitaciones').click(() =>{
+	$.ajax({
+		url: 'administrador',
+		dataType: 'text',
+		type: 'get',
+		data: {
+			operacion: CONSULTAR_HABITACIONES
+       } ,
+	   success: function( response){
+			ocultarComponentes(); 
+			tablaResultados.style.display = 'block';
+			tablaResultados.innerHTML = response; 
+		},
+		error: function( jqXhr, textStatus, errorThrown ){
+			alertify.error(errorThrown); 
+		}
+	})
+});
+
+function seleccionarHabitacion(boton){
+	$.ajax({
+		url: 'administrador',
+		dataType: 'text',
+		type: 'get',
+		data: {
+			operacion: CONSULTAR_HABITACION, 
+			codigo: boton.getAttribute('id')
+       } ,
+	   success: function( response){
+			ocultarComponentes(); 
+			tablaResultados.style.display = 'block';
+			tablaResultados.innerHTML = response; 
+		},
+		error: function( jqXhr, textStatus, errorThrown ){
+			alertify.error(errorThrown); 
+		}
+	})
+}
+
+function actualizarHabitacion(){
+	 var valorCheckHabilitada=$("#checkHabilitada").is(":checked");
+	$.ajax({
+		url: 'administrador',
+		dataType: 'text',
+		type: 'post',
+		data: {
+			operacion: ACTUALIZAR_HABITACION, 
+			codigo: document.getElementById('codigoHabitacion').value, 
+			habilitada: valorCheckHabilitada, 
+			precioMantenimiento: document.getElementById('costoDeMantenimiento').value			
+       } ,
+	   success: function( response){
+			ocultarComponentes(); 
+			tablaResultados.style.display = 'block';
+			tablaResultados.innerHTML = response; 
+		},
+		error: function( jqXhr, textStatus, errorThrown ){
+			alertify.error(errorThrown); 
+		}
+	})
+};
+
+function eliminarHabitacion(){
+	$.ajax({
+		url: 'administrador',
+		dataType: 'text',
+		type: 'post',
+		data: {
+			operacion: ELIMINAR_HABITACION, 
+			codigo: document.getElementById('codigoHabitacion').value, 	
+       } ,
+	   success: function( response){
+			ocultarComponentes(); 
+			tablaResultados.style.display = 'block';
+			tablaResultados.innerHTML = response; 
+		},
+		error: function( jqXhr, textStatus, errorThrown ){
+			alertify.error(errorThrown); 
+		}
+	})
+};

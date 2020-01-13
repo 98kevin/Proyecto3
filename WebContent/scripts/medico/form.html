@@ -10,46 +10,46 @@
 </head>
 <body>
   <div>
-    <h3>Edicion de Paciente</h3>
+    <h3>Edicion de Cirugia</h3>
     <div class="form-group row">
       <label class="col-sm-2 col-form-label">Codigo </label>
       <div class="col-sm-10">
-        <input type="nubmer" class="form-control" id="cuiPaciente" value="" readonly>
+        <input type="nubmer" class="form-control" id="codigoHabitacion" readonly value="" >
       </div>
     </div>
 
     <div class="form-group row">
-      <label class="col-sm-2 col-form-label">Cirugia </label>
-      <div class="col-sm-10">
-        <input type="text" class="form-control" id="nombrePaciente" value="">
+      <label class="col-sm-2 col-form-label">Esta Ocupada</label>
+      <div class="form-check">
+        <input class="form-check-input" type="checkbox" id="checkOcupada" disabled value="true">
       </div>
     </div>
 
     <div class="form-group row">
-      <label class="col-sm-2 col-form-label">Costo </label>
+      <label class="col-sm-2 col-form-label">Codigo </label>
       <div class="col-sm-10">
-        <input type="number" step="0.01" class="form-control" id="direccoinPaciente" value="">
+        <input type="text" class="form-control" id="paciente" readonly value="" >
       </div>
     </div>
 
     <div class="form-group row">
-      <label class="col-sm-2 col-form-label">Precio </label>
-      <div class="col-sm-10">
-        <input type="number" step="0.01" class="form-control" id="nitPaciente" value="">
+      <label class="col-sm-2 col-form-label">Esta Habilitada</label>
+      <div class="form-check">
+        <input class="form-check-input" type="checkbox" value="true" id="checkHabilitada">
       </div>
     </div>
 
-
     <div class="form-group row">
-      <label class="col-sm-2 col-form-label">Tarifa de Especialista </label>
+      <label class="col-sm-2 col-form-label">Costo de mantenimiento</label>
       <div class="col-sm-10">
-        <input type="number" step="0.01" class="form-control" id="nitPaciente" value="">
+        <input type="number" step="0.01" class="form-control" id="costoDeMantenimiento" value="">
       </div>
     </div>
 </div>
 
 <div class="button-group">
-  <input class="btn btn-primary"  type="button" id=""  value="Guardar Cambios"  onclick="actualizarPaciente()">
+  <input class="btn btn-primary"  type="button" id=""  value="Guardar Cambios"  onclick="actualizarHabitacion()">
+  <input class="btn btn-danger"  type="button" id=""  value="Eliminar"  onclick="eliminarHabitacion()">
 </div>
 
 <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>

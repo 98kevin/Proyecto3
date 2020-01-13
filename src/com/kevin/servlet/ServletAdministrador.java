@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.kevin.manejadores.ManejadorAdministrador;
 import com.kevin.manejadores.ManejadorArea;
+import com.kevin.manejadores.ManejadorHabitacion;
 
 /**
  * Servlet implementation class ServletAdministrador
@@ -23,12 +24,17 @@ public class ServletAdministrador extends HttpServlet {
     private static final int CONSULTAR_SALARIOS_PENDIENTES = 1;
     private static final int CONSULTAR_CIRUGIAS = 2;
     private static final int CONSULTAR_CIRUGIA = 3;
+    private static final int CONSULTAR_HABITACIONES = 4;
+    private static final int CONSULTAR_HABITACION = 5;
+    
     
     //CONSTANTES DEL METODO POST
     private static final int CONSULTA_AREAS = 1;
     private static final int REGISTRAR_CIRUGIA = 2;
     private static final int PAGAR_SALARIO = 6;
     private static final int ACTUALIZAR_CIRUGIA = 7;
+    private static final int ACTUALIZAR_HABITACION= 8;
+    private static final int ELIMINAR_HABITACION  = 9;
     
     
 	private static final long serialVersionUID = 1L;
@@ -48,7 +54,8 @@ public class ServletAdministrador extends HttpServlet {
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 	    int operacion =Integer.parseInt(request.getParameter("operacion")); 
-	    ManejadorAdministrador administrador = new ManejadorAdministrador(); 
+	    ManejadorAdministrador administrador = new ManejadorAdministrador();
+	    ManejadorHabitacion habitaciones =null;
 	    switch (operacion) {
 	    case CONSULTAR_SALARIOS_PENDIENTES:
 		response.getWriter().append(administrador.consultarSalariosPendientes(
@@ -63,6 +70,16 @@ public class ServletAdministrador extends HttpServlet {
 			Integer.parseInt(request.getParameter("codigoCirugia"))
 			)); 
 		break; 
+	    case CONSULTAR_HABITACIONES:
+		habitaciones = new ManejadorHabitacion(); 
+		response.getWriter().append(habitaciones.consultarHabitaciones()); 
+		break;
+	    case CONSULTAR_HABITACION:
+		habitaciones = new ManejadorHabitacion(); 
+		response.getWriter().append(habitaciones.consultarHabitacion(
+			Integer.parseInt(request.getParameter("codigo"))
+			));
+			break;
 	    default:
 		break;
 	    }
@@ -75,6 +92,7 @@ public class ServletAdministrador extends HttpServlet {
 	    int operacion =Integer.parseInt(request.getParameter("operacion")); 
 	    ManejadorArea manejador = new ManejadorArea(); 
 	    ManejadorAdministrador administrador = new ManejadorAdministrador(); 
+	    ManejadorHabitacion habitaciones =null;
 	    try {
 		switch (operacion) {
 		case CONSULTA_AREAS:
@@ -99,6 +117,20 @@ public class ServletAdministrador extends HttpServlet {
 			    Double.parseDouble(request.getParameter("precioCirugia")), 
 			    Double.parseDouble(request.getParameter("tarifaEspecialista")))); 
 		    break; 
+		    case ACTUALIZAR_HABITACION :
+			habitaciones = new ManejadorHabitacion(); 
+			response.getWriter().append(habitaciones.actualizarHabitacion(
+				Integer.parseInt(request.getParameter("codigo")),
+				Boolean.parseBoolean(request.getParameter("habilitada")),
+				Double.parseDouble(request.getParameter("precioMantenimiento"))
+				)); 
+			break;
+		    case ELIMINAR_HABITACION:
+			habitaciones = new ManejadorHabitacion(); 
+			response.getWriter().append(habitaciones.eliminarHabitacion(
+				Integer.parseInt(request.getParameter("codigo"))
+			)); 
+			break;
 	    default:
 		break;
 	    }
