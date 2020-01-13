@@ -13,6 +13,11 @@ import com.kevin.servicio.GeneradorHTML;
 
 public class ManejadorRecursosHumanos {
     
+    public static final String MENSAJE_EXITO = 
+		"<div class=\"alert alert-success\">"
+       +" Operacion realizada exitosamente" 
+       +" </div>";
+    
     
 /**
  * Se encarga del proceso de registrar un medico especiliasta en la DB.
@@ -124,7 +129,8 @@ public class ManejadorRecursosHumanos {
     }
     
     
-    public void recontratar(HttpServletRequest request) {
+    public String recontratar(HttpServletRequest request) {
+	String respuesta = null;
 	int contrato = Integer.parseInt(request.getParameter("contrato"));
 	String sql = "INSERT INTO Contrato (salario, id_empleado) VALUES (?,?)"; 
 	Connection conexion = DBConnection.getInstanceConnection().getConexion();
@@ -136,12 +142,15 @@ public class ManejadorRecursosHumanos {
 	    stm.execute();
 	    modificarEstadoDelEmpleado(true, contrato, conexion);  //se activa el usuario
 	    conexion.commit();
+	    respuesta = MENSAJE_EXITO;
 	} catch (SQLException e) {
 	    e.printStackTrace();
 	    revertirCambios(conexion);
+	    respuesta = "Error de la operacion"; 
 	} finally {
 	    cerrarConexion(conexion); 
 	}
+	return respuesta;
     }
 
 
@@ -193,4 +202,119 @@ public class ManejadorRecursosHumanos {
 	return empleado;
     }
     
+    public String cosultarPlanillaEmpleadosActivos() {
+	String empleados = null;
+	String sql = "SELECT Persona.cui, Persona.nombre, Persona.direccion, " + 
+		"Empleado.porcentaje_igss AS 'IGGS', Empleado.porcentaje_irtra AS 'IRTRA', Area.descripcion AS 'Area'" + 
+		"FROM Persona " + 
+		"INNER JOIN Empleado ON Empleado.cui_persona = Persona.cui " + 
+		"INNER JOIN Area ON Area.id_area = Empleado.id_area";
+	Connection conexion = DBConnection.getInstanceConnection().getConexion();
+	try {
+	    PreparedStatement stm = conexion.prepareStatement(sql);
+	    ResultSet r = stm.executeQuery();
+	    empleados =GeneradorHTML.convertirTabla(r, "seleccionarEmpleado(this)", "Seleccionar", false, false, true); 
+	} catch (SQLException e) {
+	    e.printStackTrace();
+	    empleados = "Ocurrio un error. Codigo " + e.getErrorCode(); 
+	}
+	return empleados; 
+    }
+    
+    public String leerEmpleado(String cuiEmpleado) {
+	String empleado = null;
+	Connection conexion = DBConnection.getInstanceConnection().getConexion();
+	String sql = "SELECT Persona.cui, Persona.nombre, Persona.direccion, " + 
+		" Empleado.porcentaje_igss AS 'IGGS', Empleado.porcentaje_irtra AS 'IRTRA', Area.descripcion AS 'Area'" + 
+		" FROM Persona " + 
+		" INNER JOIN Empleado ON Empleado.cui_persona = Persona.cui " + 
+		" INNER JOIN Area ON Area.id_area = Empleado.id_area" + 
+		" WHERE Persona.cui = ? ";
+	try {
+	    PreparedStatement stm = conexion.prepareStatement(sql);
+	    stm.setString(1, cuiEmpleado);
+	    ResultSet r = stm.executeQuery();
+	    r.next();
+	    empleado =" <div>" + 
+	    	"    <h3>Edicion de Empleado</h3>" + 
+	    	"    <div class=\"form-group row\">" + 
+	    	"      <label class=\"col-sm-2 col-form-label\">CUI </label>" + 
+	    	"      <div class=\"col-sm-10\">" + 
+	    	"        <input type=\"text\" class=\"form-control\" id=\"campo-cui\" value = '"+r.getString(1)+"'>" + 
+	    	"        <input type=\"hidden\" class=\"form-control\" id=\"campo-cui-viejo\" value = '"+r.getString(1)+"'>" + 
+	    	"      </div>" + 
+	    	"    </div>" + 
+	    	"" + 
+	    	"    <div class=\"form-group row\">" + 
+	    	"      <label class=\"col-sm-2 col-form-label\">Nombre </label>" + 
+	    	"      <div class=\"col-sm-10\">" + 
+	    	"        <input type=\"text\" class=\"form-control\" id=\"campo-nombre\" value = '"+r.getString(2)+"'>" + 
+	    	"      </div>" + 
+	    	"    </div>" + 
+	    	"" + 
+	    	"    <div class=\"form-group row\">" + 
+	    	"      <label class=\"col-sm-2 col-form-label\">Direccion </label>" + 
+	    	"      <div class=\"col-sm-10\">" + 
+	    	"        <input type=\"text\" class=\"form-control\" id=\"campo-direccion\" value = '"+r.getString(3)+"'>" + 
+	    	"      </div>" + 
+	    	"    </div>" + 
+	    	"" + 
+	    	"    <div class=\"form-group row\">" + 
+	    	"      <label class=\"col-sm-2 col-form-label\">IGGS </label>" + 
+	    	"      <div class=\"col-sm-10\">" + 
+	    	"        <input type=\"number\" class=\"form-control\" id=\"campo-iggs\" value = '"+r.getInt(4)+"'>" + 
+	    	"      </div>" + 
+	    	"    </div>" + 
+	    	"" + 
+	    	"    <div class=\"form-group row\">" + 
+	    	"      <label class=\"col-sm-2 col-form-label\">IRTRA </label>" + 
+	    	"      <div class=\"col-sm-10\">" + 
+	    	"        <input type=\"number\" class=\"form-control\" id=\"campo-irtra\" value = '"+r.getInt(5)+"'>" + 
+	    	"      </div>" + 
+	    	"    </div>" + 
+	    	"</div>"
+	    	+ ""
+	    	+ "<div class=\"button-group\">" + 
+	    	"  <input class=\"btn btn-primary\"  type=\"button\" id=\"btnEditarEmpleado\"  value=\"Actualizar\"  onclick=\"actualizarEmpleado(this)\">" + 
+	    	"</div>";
+	} catch (SQLException e) {
+	    e.printStackTrace();
+	    empleado = "Ocurrio un error. Codigo " + e.getErrorCode(); 
+	}
+	return empleado; 
+    }
+    
+    public String actualizarEmpleado(String cuiActual, String cuiNuevo, String nombre, String direccion, int iggs, int irtra) {
+	String respuesta = null; 
+	Connection conexion = DBConnection.getInstanceConnection().getConexion();
+	try {
+	conexion.setAutoCommit(false);
+	ManejadorPersona p = new ManejadorPersona(); 
+	p.acutalizarPersona(cuiActual, cuiNuevo, nombre, direccion); 
+	String sql = "UPDATE Empleado SET Empleado.porcentaje_igss = ?, Empleado.porcentaje_irtra = ? " + 
+		" WHERE Empleado.cui_persona = ?" ; 
+	PreparedStatement stm;
+	    stm = DBConnection.getInstanceConnection().getConexion().prepareStatement(sql);
+	    stm.setInt(1, iggs);
+	    stm.setInt(2, irtra);
+	    stm.setString(3, cuiNuevo);
+	    stm.execute(); 
+	    respuesta = MENSAJE_EXITO; 
+	} catch (SQLException e) {
+	    e.printStackTrace();
+		    try {
+			conexion.rollback();
+		    } catch (SQLException e1) {
+			e1.printStackTrace();
+		    }
+	    respuesta  = "Error de registro. Codigo " + e.getErrorCode(); 
+	} finally {
+	    try {
+		conexion.setAutoCommit(true);
+	    } catch (SQLException e) {
+		e.printStackTrace();
+	    }
+	}
+	return respuesta; 
+    }
 }

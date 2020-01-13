@@ -1,11 +1,12 @@
 //post
 const DESPIDO_DE_EMPLEADO = 2;
 const RECONTRATACION_DE_EMPLEADO = 3;
-
+const ACTUALIZAR_EMPLEADO = 4;
 //get
 const CONSULTAR_EMPLEADOS_ACTIVOS = 1;
 const CONSULTAR_EMPLEADOS_NO_ACTIVOS = 2;
-
+const CONSULTAR_EMPLEADOS = 3;
+const CONSULTAR_EMPLEADO = 4;
 //constantes de reportes
 
 const REPORTE_EMPLEADOS_CONTRATADOS= 4;
@@ -467,3 +468,69 @@ botonRegistroMedicoEspecialista.addEventListener('click', () =>{
 		}
 	);
 });
+
+
+$('#consultarEmpleados').click(() => {
+    $.ajax({
+        url: 'recursos-humanos',
+        dataType: 'text',
+        type: 'get',
+        data: {
+            operacion: CONSULTAR_EMPLEADOS
+       },
+       success: function(response){
+        document.getElementById('empleados').style.display = 'block';
+           document.getElementById('empleados').innerHTML = response;
+        },
+        error: function( jqXhr, textStatus, errorThrown ){
+            alertify.error(' error '+ errorThrown);
+        }
+    })
+});
+
+function seleccionarEmpleado(boton){
+    let id = boton.getAttribute('id');
+    $.ajax({
+        url: 'recursos-humanos',
+        dataType: 'text',
+        type: 'get',
+        data: {
+            operacion: CONSULTAR_EMPLEADO,
+            cuiEmpleado : id
+       },
+       success: function(response){
+        document.getElementById('empleados').style.display = 'block';
+           document.getElementById('empleados').innerHTML = response;
+        },
+        error: function( jqXhr, textStatus, errorThrown ){
+            alertify.error(' error '+ errorThrown);
+        }
+    })
+}
+
+
+//terminar esta funcion
+function actualizarEmpleado(boton){
+    let id = boton.getAttribute('id');
+    $.ajax({
+        url: 'recursos-humanos',
+        dataType: 'text',
+        type: 'post',
+        data: {
+            operacion: ACTUALIZAR_EMPLEADO, 
+            cuiActual: document.getElementById('campo-cui-viejo').value, 
+            cuiNuevo: document.getElementById('campo-cui').value, 
+            nombre: document.getElementById('campo-nombre').value, 
+            direccion: document.getElementById('campo-direccion').value, 
+            igss: document.getElementById('campo-iggs').value, 
+            irtra: document.getElementById('campo-irtra').value 
+       },
+       success: function(response){
+            document.getElementById('empleados').style.display = 'block';
+            document.getElementById('empleados').innerHTML = response;
+        },
+        error: function( jqXhr, textStatus, errorThrown ){
+            alertify.error(' error '+ errorThrown);
+        }
+    })
+}

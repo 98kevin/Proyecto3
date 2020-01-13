@@ -55,7 +55,7 @@ public class ManejadorArea{
     }
 
 
-    public CharSequence registrarCirugia(HttpServletRequest request) {
+    public String registrarCirugia(HttpServletRequest request) {
 	StringBuffer respuesta = new StringBuffer(); 
 	Connection conexion = DBConnection.getInstanceConnection().getConexion();
 	String sql = "INSERT INTO Cirugias_Disponibles (descripcion, costo_al_hospital, tarifa_de_especialista, precio_al_cliente)  VALUES (?,?,?,?)";

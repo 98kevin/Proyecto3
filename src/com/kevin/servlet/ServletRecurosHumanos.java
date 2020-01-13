@@ -20,10 +20,16 @@ public class ServletRecurosHumanos extends HttpServlet {
 	private static final int REGISTRO_MEDICO_ESPECIALISTA = 1;
 	private static final int DESPIDO_DE_EMPLEADO = 2;
 	private static final int RECONTRATACION_DE_EMPLEADO = 3;
+	private static final int ACTUALIZAR_EMPLEADO = 4;
+	
 	//constantes GET
 	private static final int CONSULTAR_EMPLEADOS_ACTIVOS = 1;
 	private static final int CONSULTAR_EMPLEADOS_NO_ACTIVOS = 2;
-       
+	private static final int CONSULTAR_EMPLEADOS = 3;
+	private static final int CONSULTAR_EMPLEADO = 4;
+	
+	
+
     /**
      * @see HttpServlet#HttpServlet()
      */
@@ -36,13 +42,21 @@ public class ServletRecurosHumanos extends HttpServlet {
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+	    ManejadorRecursosHumanos mrh = new ManejadorRecursosHumanos(); 
 	    int operacion = Integer.parseInt(request.getParameter("operacion"));
 	    switch (operacion) {
 	    case CONSULTAR_EMPLEADOS_ACTIVOS: 
-		response.getWriter().append( new ManejadorRecursosHumanos().consultarEmpleadosActivos()); 
+		response.getWriter().append(mrh.consultarEmpleadosActivos()); 
 		break;
 	    case CONSULTAR_EMPLEADOS_NO_ACTIVOS: 
-		response.getWriter().append( new ManejadorRecursosHumanos().consultarEmpleadosDespedidos()); 
+		response.getWriter().append( mrh.consultarEmpleadosDespedidos()); 
+		break;
+	    case CONSULTAR_EMPLEADOS: 
+		response.getWriter().append( mrh.cosultarPlanillaEmpleadosActivos()); 
+		break;
+	    case CONSULTAR_EMPLEADO: 
+		response.getWriter().append( mrh.leerEmpleado(
+			request.getParameter("cuiEmpleado"))); 
 		break;
 	    }
 	}
@@ -61,7 +75,16 @@ public class ServletRecurosHumanos extends HttpServlet {
 		manejador.despedirEmpleado(request); 
 		break;
 	    case RECONTRATACION_DE_EMPLEADO: 
-		manejador.recontratar(request);
+		response.getWriter().append(manejador.recontratar(request));
+		break;
+	    case ACTUALIZAR_EMPLEADO: 
+		response.getWriter().append(manejador.actualizarEmpleado(
+			request.getParameter("cuiActual"),
+			request.getParameter("cuiNuevo"),
+			request.getParameter("nombre"), 
+			request.getParameter("direccion"), 
+			Integer.parseInt(request.getParameter("igss")), 
+			Integer.parseInt(request.getParameter("irtra"))));
 		break;
 	    }
 	}
