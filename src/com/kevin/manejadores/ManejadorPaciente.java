@@ -54,7 +54,7 @@ public class ManejadorPaciente {
     
     
     public String pacientesRegistrados() {
-	String sql = "SELECT Paciente.id_paciente, Persona.nombre, Persona.direccion, Persona.cui "+
+	String sql = "SELECT Persona.cui, Persona.nombre, Persona.direccion"+
 		" FROM Persona "+
 		" INNER JOIN Paciente ON Persona.cui=Paciente.cui ";
 	PreparedStatement stm = null ;
@@ -65,18 +65,21 @@ public class ManejadorPaciente {
 	} catch (SQLException e) {
 	    e.printStackTrace();
 	}
-	return GeneradorHTML.convertirTabla(pacientes, "seleccionarPaciente(this)", "Seleccionar Paciente", true ,true,true ); 
+	return GeneradorHTML.convertirTabla(pacientes, "seleccionarPaciente(this)", "Seleccionar", false ,false,true ); 
     }
 
 
-    public boolean isInternadoActualmente(int paciente) {
+    public boolean isInternadoActualmente(String cuiPaciente) {
 	boolean resultado= false;
-	String sql = "SELECT * FROM Internado WHERE id_paciente=? AND fin IS NULL";
+	String sql = "SELECT * FROM Internado WHERE INNER  "
+		+ " INNER JOIN Paciente ON Paciente.id_paciente = Internado.id_paciente"
+		+ " INNER JOIN Persona ON Paciente.cui = Persona.cui "
+		+ " WHERE Persona.cui = ? AND Internado.fin IS NULL";
 	Connection conexion = DBConnection.getInstanceConnection().getConexion();
 	PreparedStatement stm=null;
 	try { 
 	    stm = conexion.prepareStatement(sql);
-	    stm.setInt(1, paciente);
+	    stm.setString(1, cuiPaciente);
 	    ResultSet resultados = stm.executeQuery();	
 	    resultado =  (resultados.next()) ? true : false;
 	} catch (SQLException e) {
@@ -164,9 +167,9 @@ public class ManejadorPaciente {
     }
 
 
-    public PreparedStatement registroCuentaCliente(String cuiPaciente, Date fecha) throws SQLException, DataBaseException {
+    public PreparedStatement registroDiasInternadosPaciente(String cuiPaciente, Date fecha) throws SQLException, DataBaseException {
 	int dias = consultarDiasInternado(cuiPaciente, fecha); 
-	String sql ="INSERT INTO Cuenta (id_paciente, detalle, monto, pagado, fecha, id_area) "
+	String sql ="INSERT INTO Registro_Internados (id_paciente, detalle, monto, pagado, fecha, id_area) "
 		+ " VALUES ((SELECT id_paciente FROM Paciente WHERE cui = ?), " //1
 		+"?, "//2
 		+ "(SELECT monto FROM Constantes WHERE id_constante = 2) * ?, " //3
@@ -194,24 +197,7 @@ public class ManejadorPaciente {
     }
 
 
-    public String consultarPacientesConCuentaPendiente(String funcionJS, String textoBoton) {
-	PreparedStatement stm;
-	ResultSet resultados = null;
-	String sql ="	SELECT Persona.cui, Persona.nombre, IFNULL(Internado.inicio, '--') AS 'Ingreso', IFNULL(Internado.fin, '--') AS 'Egreso', " + 
-		"	(SELECT SUM(Cuenta.monto) FROM Cuenta WHERE id_paciente = Paciente.id_paciente AND pagado = false) AS 'Cuenta' FROM Persona  " + 
-		"	INNER JOIN Paciente ON Persona.cui = Paciente.cui  " + 
-		"	INNER JOIN Internado ON Paciente.id_paciente = Internado.id_paciente  " + 
-		"	INNER JOIN Cuenta ON Paciente.id_paciente = Cuenta.id_paciente   " + 
-		"	WHERE (SELECT SUM(Cuenta.monto) FROM Cuenta WHERE id_paciente = Paciente.id_paciente AND pagado = false) > 0 " + 
-		"	GROUP BY Persona.cui";
-	try {
-	    stm = DBConnection.getInstanceConnection().getConexion().prepareStatement(sql);
-	    resultados = stm.executeQuery(); 
-	} catch (SQLException e) {
-	    e.printStackTrace();
-	}
-	return GeneradorHTML.convertirTabla(resultados, funcionJS, textoBoton, false, false, true);
-    }
+    
     
     
     public String leerPacientesRegistrados() {

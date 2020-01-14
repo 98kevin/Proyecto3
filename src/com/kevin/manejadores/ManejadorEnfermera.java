@@ -23,13 +23,15 @@ public class ManejadorEnfermera {
      * @throws SQLException 
      */
     public String consultarEnfermeras()  {
-    String sql = "SELECT e.id_empleado, p.nombre FROM Persona p INNER JOIN Empleado e ON p.cui=e.cui_persona WHERE e.id_area=?";
+    String sql = " SELECT Empleado.id_empleado, Persona.nombre " + 
+    	" FROM Persona INNER JOIN Empleado ON Persona.cui=Empleado.cui_persona" + 
+    	" WHERE Empleado.id_area= ?";
 	Connection conexion = DBConnection.getInstanceConnection().getConexion();
 	ResultSet enfermeras = null;
 	try {
 		PreparedStatement stm = conexion.prepareStatement(sql); 
 		stm.setInt(1, Area.ENFERMEROS);
-		enfermeras = stm.executeQuery(sql);
+		enfermeras = stm.executeQuery();
 	} catch (SQLException e) {
 	    e.printStackTrace();
 	}
@@ -61,7 +63,7 @@ public class ManejadorEnfermera {
 	} catch (SQLException e) {
 	    e.printStackTrace();
 	}
-	return GeneradorHTML.convertirTabla(resultado, "suministrarMedicamento(this)", "Suministrar", true, true, true);
+	return GeneradorHTML.convertirTabla(resultado, "suministrarMedicamento(this)", "Suministrar", false, false, true);
     }
 
     /**
@@ -76,8 +78,8 @@ public class ManejadorEnfermera {
 	    ManejadorPaciente manejadorPaciente = new ManejadorPaciente();
 	    Medicamento medicamento = manejador.leerMedicamento(idMedicamento);
 	    int idInternado  = manejadorPaciente.consultarCodigoDeInternado(cuiPaciente);
-	    preparedStatements.add(suministrarMedicamento(idInternado, medicamento.getCodigo(), cantidad)); 
-	    preparedStatements.add(sumarCuentaCliente(getIdPaciente(cuiPaciente), medicamento, cantidad, fecha, consultarArea(idEmpleado)));
+	    preparedStatements.add(suministrarMedicamento(idInternado, medicamento.getCodigo(), cantidad));
+	    preparedStatements.add(sumarCuentaCliente(cuiPaciente, medicamento,  cantidad, fecha, idEmpleado)); 
 	    preparedStatements.add(restarCantidad(medicamento, cantidad));
 	    manejador.transaccionMedicamento(medicamento, fecha, cantidad, ManejadorFarmacia.VENTA, false, new Empleado(idEmpleado), cuiPaciente);
 	    DBConnection.getInstanceConnection().transaccion(preparedStatements);
@@ -90,6 +92,23 @@ public class ManejadorEnfermera {
     }
     
     
+    private PreparedStatement sumarCuentaCliente(String cuiPaciente, Medicamento m, int cantidad, Date fecha, int idEmpelado) throws SQLException {
+	String sql  = "INSERT INTO Transacciones_Medicamentos (fecha, costo_actual_medicamento, precio_actual_medicamento, cantidad, tipo_operacion, pagado, "
+		+ "id_medicamento, id_empleado, cui_paciente) values (?,?,?,?,?,?,?,?,?)";
+	PreparedStatement stm = DBConnection.getInstanceConnection().getConexion().prepareStatement(sql);
+	stm.setDate(1, fecha);
+	stm.setDouble(2, m.getCostoCompra());
+	stm.setDouble(3, m.getPrecioVenta());
+	stm.setInt(4, cantidad);
+	stm.setBoolean(5, true);
+	stm.setBoolean(6, false);
+	stm.setInt(7, m.getCodigo());
+	stm.setInt(8, idEmpelado);
+	stm.setString(9, cuiPaciente);
+	return stm;
+    }
+
+
     private int getIdPaciente(String cui) throws SQLException {
 	String consulta  = "SELECT id_paciente FROM Paciente WHERE cui= ?";
 	PreparedStatement stm = DBConnection.getInstanceConnection().getConexion().prepareStatement(consulta);
@@ -101,12 +120,12 @@ public class ManejadorEnfermera {
 	    return 0;
     }
 
-    public PreparedStatement sumarCuentaCliente(int paciente, Medicamento medicamento, int cantidad, Date fecha, int area) 
+    public PreparedStatement registrarPagoDeMedicamento(int paciente, Medicamento medicamento, int cantidad, Date fecha, int area) 
 	    throws SQLException, DataBaseException {
-	    String sql = "INSERT INTO Cuenta (id_paciente, detalle, monto, pagado, fecha, id_area) VALUES (?,?,?,?,?,?)"; 
+	    String sql = "INSERT INTO Transacciones_Medicamentos SET  pagado = true WHERE id_medicamento = ? AND cui_paciente = ? "; 
 	    PreparedStatement stm = DBConnection.getInstanceConnection().getConexion().prepareStatement(sql);  
-	    stm.setInt(1, paciente); 
-	    stm.setString(2, getDescripcionSuministroMedicamento(medicamento)); 
+	    stm.setInt(1, medicamento.getCodigo()); 
+	    stm.setString(2, consultarCui(paciente)); 
 	    stm.setDouble(3, getMontoSuministro(cantidad, medicamento)); 
 	    stm.setBoolean(4, false);
 	    stm.setDate(5, fecha);
@@ -172,11 +191,9 @@ public class ManejadorEnfermera {
      * @throws SQLException
      */
     public PreparedStatement suministrarMedicamento(int idInternado, int medicamento,int  cantidad) throws SQLException {
-	    int cantidadActual = consultarCantidadActual(idInternado, medicamento);
-	    int nuevaCantidad = cantidadActual - cantidad; 
 	    String sql = "UPDATE Internado_tiene_Medicamento SET cantidad = ? WHERE id_medicamento = ? AND id_internado = ? ";
 	    PreparedStatement stm = DBConnection.getInstanceConnection().getConexion().prepareStatement(sql); 
-	    stm.setInt(1, nuevaCantidad);
+	    stm.setInt(1, 0);
 	    stm.setInt(2, medicamento);
 	    stm.setInt(3,idInternado );
 	return stm;
@@ -206,4 +223,42 @@ public class ManejadorEnfermera {
 	return stm; 
     }
     
+    
+    private String consultarCui(int idPaciente) throws SQLException, DataBaseException {
+	String consulta  = "SELECT cui FROM Persona inner join Empleado on Empleado.cui = Persona.cui WHERE id_paciente = ? "; 
+	PreparedStatement stm = DBConnection.getInstanceConnection().getConexion().prepareStatement(consulta);
+	stm.setInt(1, idPaciente);
+	ResultSet resultado = stm.executeQuery();
+	if(resultado.next())
+	    return resultado.getString(1);
+	else
+	    throw  new DataBaseException("No existe el paciente con codigo " + idPaciente);
+    }
+
+
+    public String consultarMedicamentosIndividuales(int idEmpleado, String cuiPaciente) {
+	PreparedStatement stm;
+	ResultSet resultado =null;
+	String sql ="SELECT Medicamento.id_medicamento, Medicamento.nombre, Persona.nombre AS 'Paciente', " +
+		" Internado_tiene_Medicamento.cantidad AS 'Cantidad Faltante' FROM Medicamento  " +
+		" INNER JOIN Internado_tiene_Medicamento ON Internado_tiene_Medicamento.id_medicamento = Medicamento.id_medicamento "+
+		" INNER JOIN Internado ON Internado_tiene_Medicamento.id_internado = Internado.id_internado"+
+		" INNER JOIN Internado_tiene_Empleado ON Internado_tiene_Empleado.id_internado = Internado.id_internado"+
+		
+		" INNER JOIN Empleado ON Empleado.id_empleado = Internado_tiene_Empleado.id_empleado"+
+		
+		" INNER JOIN Paciente ON Paciente.id_paciente = Internado.id_paciente "+
+		" INNER JOIN Persona ON Persona.cui = Paciente.cui "+
+		" WHERE Internado.fin IS NULL AND Empleado.id_empleado = ? "
+		+ " AND Persona.cui = ? ";
+	try {
+	     stm = DBConnection.getInstanceConnection().getConexion().prepareStatement(sql);
+	     stm.setString(2, cuiPaciente);
+	     stm.setInt(1, idEmpleado);
+	     resultado = stm.executeQuery();
+	} catch (SQLException e) {
+	    e.printStackTrace();
+	}
+	return GeneradorHTML.convertirTabla(resultado, "suministrarMedicamento(this)", "Suministrar", false, false, true);
+    }
 }

@@ -9,7 +9,7 @@ public class Cirugia {
     private Date fecha;
     private boolean realizada;
     private int codigoTarifa;
-    private int codigoPaciente; 
+    private String cuiPaciente; 
     /**
      * @return the codigo
      */
@@ -21,14 +21,14 @@ public class Cirugia {
      * @param fecha
      * @param realizada
      * @param codigoTarifa
-     * @param codigoPaciente
+     * @param cuiPaciente
      */
-    public Cirugia(int codigo, Date fecha, boolean realizada, int codigoTarifa, int codigoPaciente) {
+    public Cirugia(int codigo, Date fecha, boolean realizada, int codigoTarifa, String cuiPaciente) {
 	super();
 	this.codigo = codigo;
 	this.realizada = realizada;
 	this.codigoTarifa = codigoTarifa;
-	this.codigoPaciente = codigoPaciente;
+	this.cuiPaciente = cuiPaciente;
 
     }
     /**
@@ -76,32 +76,32 @@ public class Cirugia {
     /**
      * @return the codigoPaciente
      */
-    public int getCodigoPaciente() {
-        return codigoPaciente;
+    public String getCuiPaciente() {
+        return cuiPaciente;
     }
     /**
-     * @param codigoPaciente the codigoPaciente to set
+     * @param cuiPaciente the codigoPaciente to set
      */
-    public void setCodigoPaciente(int codigoPaciente) {
-        this.codigoPaciente = codigoPaciente;
+    public void setCodigoPaciente(String cuiPaciente) {
+        this.cuiPaciente = cuiPaciente;
     }
     /**
      * @param fecha
      * @param realizada
      * @param codigoTarifa
-     * @param codigoPaciente
+     * @param cuiPaciente
      */
-    public Cirugia( Date fecha, int codigoTarifa, int codigoPaciente) {
+    public Cirugia( Date fecha, int codigoTarifa, String cuiPaciente) {
 	super();
 	this.fecha = fecha;
 	this.codigoTarifa = codigoTarifa;
-	this.codigoPaciente = codigoPaciente;
+	this.cuiPaciente = cuiPaciente;
     }
     
     public Cirugia(HttpServletRequest request) {
 	this(new Date(Long.parseLong(request.getParameter("fecha"))), 
 		Integer.parseInt(request.getParameter("cirugia")), 
-		Integer.parseInt(request.getParameter("paciente")));
+		(request.getParameter("paciente")));
     }
     
 }

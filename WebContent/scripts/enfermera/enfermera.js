@@ -3,7 +3,7 @@ const CONSULTAR_MEDICAMENTOS_PACIENTE = 1;
 const CONSULTAR_PACIENTES_DE_ENFERMERA = 2; 
 //constantes de post 
 const ASINGAR_MEDICAMENTOS_PACIENTE = 1;
-
+const CONSULTAR_MEDICAMENTOS_DE_PACIENTE = 2
 var pacienteSeleccionado = 0; 
 
 let botonConsultarMedicamentos  = document.getElementById('suministrarMedicamento');
@@ -30,14 +30,16 @@ function ocultarComponentes(){
 
 /**
  * Se encarga de mostrar los medicamentos recetados de los medicos a los pacientes. 
- */
+*/
+
 botonConsultarMedicamentos.addEventListener('click', () => {
     $.ajax({
         url: 'medicamentosDeInternados',
         dataType: 'html',
         type: 'get',
         data: {
-            operacion: CONSULTAR_MEDICAMENTOS_PACIENTE
+            operacion: CONSULTAR_MEDICAMENTOS_DE_PACIENTE,
+            cui: pacienteSeleccionado
        },
     success: function( response){
         consultarPacientesDeEnfermera(); 
@@ -67,9 +69,7 @@ botonVenderMedicamento.addEventListener('click',  ()=>{
  */
 function suministrarMedicamento(boton){
     id = boton.getAttribute('id');
-    cantidad = document.getElementById('caja'+id).value;
     let fecha = new Date(controlFecha.value);
-
     $.ajax({
         url: 'suministarMedicamento',
         dataType: 'html',
@@ -77,7 +77,7 @@ function suministrarMedicamento(boton){
         data: {
             operacion: ASINGAR_MEDICAMENTOS_PACIENTE, 
             medicamento : id, 
-            cantidad : cantidad, 
+            cantidad : document.getElementById('cantidad' + id).value, 
             pacienteSeleccionado : pacienteSeleccionado,
             fecha : fecha.getTime()
        },
@@ -116,7 +116,26 @@ function consultarPacientesDeEnfermera(){
 function seleccionarPaciente (){
     var select= document.getElementById("selector");
     pacienteSeleccionado = select.options[select.selectedIndex].value;
-    alertify.message('Codigo del paciente: ' + pacienteSeleccionado);
+    $.ajax({
+        url: 'medicamentosDeInternados',
+        dataType: 'html',
+        type: 'post',
+        data: {
+            operacion: CONSULTAR_MEDICAMENTOS_DE_PACIENTE, 
+            cui: pacienteSeleccionado 
+       },
+    success: function( response){
+        tablaMedicamentos.innerHTML = response;
+        tablaMedicamentos.style.display = 'block';
+        acutalizarControlFecha(); 
+        controlFecha.style.display = 'block'; 
+        alertify.message('Codigo del paciente: ' + pacienteSeleccionado);
+        },
+    error:  function ( jqXhr, textStatus, errorThrown ){
+        alertify.error('estado del registros'+ textStatus+ ' error '+ errorThrown);
+        console.log('estado del registros'+ textStatus+ ' error '+ errorThrown);
+    }
+    })  
 }
 
 
@@ -125,9 +144,5 @@ function seleccionarPaciente (){
  * Actualiza el control de fechas a la fecha actual 
  */
 function acutalizarControlFecha(){
-    let fechaActual = new Date();
-    let dias = fechaActual.getDate();
-    let mes = fechaActual.getMonth()+1;
-    let anio = fechaActual.getFullYear();
-    controlFecha.value=anio+'-'+mes+'-'+dias;
+    controlFecha.value = new Date().toLocaleDateString('en-CA');
 }

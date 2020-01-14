@@ -8,8 +8,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.kevin.manejadores.ManejadorPaciente;
-import com.kevin.manejadores.ManejadorRegistrosMonetarios;
+import com.kevin.manejadores.ManejadorCuentaCliente;
 
 /**
  * Servlet implementation class ServletCajero
@@ -37,11 +36,10 @@ public class ServletCajero extends HttpServlet {
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 	    int operacion = Integer.parseInt(request.getParameter("operacion")); 
-	    ManejadorRegistrosMonetarios registrosMonetarios = new ManejadorRegistrosMonetarios();
-	    ManejadorPaciente manejadorPacietne = new ManejadorPaciente(); 
+	    ManejadorCuentaCliente registrosMonetarios = new ManejadorCuentaCliente();
 	    switch (operacion) {
 	    case CONSULTAR_CUENTAS_DE_INTERNADOS: 
-		response.getWriter().append(manejadorPacietne.consultarPacientesConCuentaPendiente("consultarCuentaCliente(this)", 
+		response.getWriter().append(registrosMonetarios.consultarPacientesConCuentaPendiente("consultarCuentaCliente(this)", 
 			"Seleccionar "));
 		break;
 	    case CONSULTAR_DETALLE_CUENTA : 
@@ -57,7 +55,7 @@ public class ServletCajero extends HttpServlet {
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 	    int operacion = Integer.parseInt(request.getParameter("operacion")); 
-	    ManejadorRegistrosMonetarios registrosMonetarios = new ManejadorRegistrosMonetarios(); 
+	    ManejadorCuentaCliente registrosMonetarios = new ManejadorCuentaCliente(); 
 	    switch (operacion) {
 	    case PAGAR_CUENTA_CLIENTE: 
 		response.getWriter().append(registrosMonetarios.pagarCuentaCliente(

@@ -1,6 +1,12 @@
 package com.kevin.modelos;
 
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
 import javax.servlet.http.HttpServletRequest;
+
+import com.kevin.servicio.DBConnection;
 
 public class Medicamento {
 
@@ -118,6 +124,20 @@ public class Medicamento {
 		Double.parseDouble(request.getParameter("costo")), 
 		Double.parseDouble(request.getParameter("precio")),
 		Integer.parseInt(request.getParameter("minimo")));
+    }
+    
+    public Medicamento (int codigo) throws SQLException {
+	String sql = "SELECT * FROM Medicamento where id_medicamento = ? ";
+	PreparedStatement stm = DBConnection.getInstanceConnection().getConexion().prepareStatement(sql); 
+	stm.setInt(1, codigo);
+	ResultSet r = stm.executeQuery(); 
+	r.next(); 
+	this.codigo =r.getInt(1); 
+	this.nombre=  r.getString(2); 
+	this.costoCompra = r.getDouble(3) ; 
+	this.precioVenta = r.getDouble(4);
+	this.cantidadMinima = r.getInt(5);
+	this.cantidadExistente = r.getInt(6);
     }
     
 }

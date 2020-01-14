@@ -5,12 +5,6 @@ const CONSULTAR_DETALLE_CUENTA = 2 ;
 //constate del metodo POST 
 const PAGAR_CUENTA_CLIENTE = 1; 
 
-//botones del encabezado
-let btnConsultarCuenta = document.getElementById('btnConsultarCuentas'); 
-
-//Agregando funciones a los botones
-btnConsultarCuenta.addEventListener('click', consultarPacientesConCuenta)
-
 //componentes 
 let tablaPacientes = document.getElementById('tablaPacientes'); 
 let pagarCuenta = document.getElementById('botonPagarCuenta'); 
@@ -30,24 +24,25 @@ pagarCuenta.addEventListener('click', pagarCuentaCliente);
 /**
  * Consulta los pacientes que contienen una cuenta por pagar en el hospital
  */
-function consultarPacientesConCuenta(){
+
+ $('#btnConsultarCuentas').click(() => {
     $.ajax({
-        url: 'cajero',
-        dataType: 'text',
-        type: 'get',
-        data: {
-            operacion : CONSULTAR_CUENTAS_DE_INTERNADOS
-       },
-       success: function( response){
+		url: 'cajero',
+		dataType: 'text',
+		type: 'get',
+		data: {
+			operacion: 1
+       } ,
+	   success: function( response){
+			ocultarComponentes(); 
+			tablaPacientes.style.display = 'block';
             tablaPacientes.innerHTML = response; 
-            tablaPacientes.style.display = 'block';
-        },
-        error: function( jqXhr, textStatus, errorThrown ){
-        	alertify.error('estado del registros'+ textStatus+ ' error '+ errorThrown); 
-        	console.log('estado del registros'+ textStatus+ ' error '+ errorThrown);
-        }
-    })
-}
+		},
+		error: function( jqXhr, textStatus, errorThrown ){
+			alertify.error(errorThrown); 
+		}
+	})
+ }); 
 
 
 /**

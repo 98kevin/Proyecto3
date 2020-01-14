@@ -1,15 +1,21 @@
-SELECT Habitacion.id_habitacion, IF((SELECT COUNT(Internado.id_habitacion) FROM Internado 
-WHERE Internado.id_habitacion = Habitacion.id_habitacion AND Internado.fin IS NULL ) > 0 , 'Ocupada', '--') AS 'Ocupada',
-Persona.nombre AS 'Paciente',  esta_habilitada, precio_de_mantenimiento AS 'Costo de Mantenimiento'
-FROM Habitacion
-LEFT JOIN Internado ON Habitacion.id_habitacion = Internado.id_habitacion
-LEFT JOIN Paciente ON Internado.id_paciente = Paciente.id_paciente
-LEFT JOIN Persona ON Paciente.cui = Persona.cui
-WHERE Internado.fin is null; 
+SELECT persona.cui, persona.nombre, IFNULL(Internado.inicio, '--') AS 'Ingreso', IFNULL(Internado.fin, '--') AS 'Egreso', 
+IFNULL(( 
+(SELECT SUM(precio_de_consulta) FROM Consulta 	WHERE Consulta.pagado = false AND Consulta.id_paciente = paciente.id_paciente) 
+) 	+ (SELECT SUM(precio_actual_medicamento) FROM Transacciones_Medicamentos WHERE Transacciones_Medicamentos.cui_paciente = persona.cui AND Transacciones_Medicamentos.pagado = false) +
+	(SELECT SUM(Cirugias_Disponibles.precio_al_cliente) FROM Cirugias_Disponibles INNER JOIN Cirugia  ON Cirugia.id_tarifa = Cirugias_Disponibles.id_tarfia WHERE Cirugia.id_paciente = paciente.id_paciente AND Cirugia.pagada = false) + 
+    (SELECT SUM(monto) FROM Registro_Internados WHERE id_paciente = paciente.id_paciente AND pagado = false)  , 0 )  AS 'Cuenta'
+FROM Persona persona
+INNER JOIN Paciente paciente ON persona.cui = paciente.cui  
+LEFT JOIN Internado ON paciente.id_paciente = Internado.id_paciente  
+LEFT JOIN Registro_Internados ON paciente.id_paciente = Registro_Internados.id_paciente
+GROUP BY persona.cui;  
 
-UPDATE Habitacion SET precio_de_mantenimiento = 10 ;
 
-SELECT COUNT(Internado.id_habitacion) FROM Internado 
-INNER JOIN Habitacion ON  Internado.id_habitacion = Habitacion.id_habitacion 
-WHERE Internado.fin IS NULL 
-AND Habitacion.id_habitacion = 1
+    
+
+
+
+
+
+
+

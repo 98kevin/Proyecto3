@@ -98,7 +98,6 @@ function consultarInternados(){
 
 function darDeAlta(boton){
     let cuiPaciente = boton.getAttribute('id'); 
-    acutalizarControlFecha(); 
     let fecha = new Date(controlFecha.value); 
     $.ajax({
         url: 'medico',
@@ -175,11 +174,7 @@ function nuevaCirugia(){
  * Actualiza el control de fechas a la fecha actual 
  */
 function acutalizarControlFecha(){
-    let fechaActual = new Date();
-    let dias = fechaActual.getDate();
-    let mes = fechaActual.getMonth()+1;
-    let anio = fechaActual.getFullYear();
-    controlFecha.value=anio+'-'+mes+'-'+dias;
+    controlFecha.value = new Date().toLocaleDateString('en-CA');
 }
 
 /**
@@ -378,7 +373,10 @@ function agregarMedicamento(botonAgregar){
 botonTerminarConsulta.addEventListener('click', () => {
     valueFecha = document.getElementById('fecha-consulta').value;
     let fechaActual = new Date(valueFecha);
-    let habitacionSeleccionada = document.getElementById('habitaciones').value;
+    let habitacionSeleccionada =0; 
+    if(internado.checked){
+        habitacionSeleccionada = document.getElementById('habitaciones').value;
+    }
     $.ajax({
         url: 'medico',
         dataType: 'text',

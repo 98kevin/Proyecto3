@@ -28,7 +28,7 @@ public class ServletEnfermera extends HttpServlet {
 	
        //constantes del metodo post 
 	private static final int ASINGAR_MEDICAMENTOS_PACIENTE= 1; 
-	
+	private static final int CONSULTAR_MEDICAMENTOS_DE_PACIENTE = 2 ; 
     /**
      * @see HttpServlet#HttpServlet()
      */
@@ -71,6 +71,10 @@ public class ServletEnfermera extends HttpServlet {
 			  new Date(Long.parseLong(request.getParameter("fecha"))),
 			  (Integer) request.getSession().getAttribute("user")));
 		    break;
+		case CONSULTAR_MEDICAMENTOS_DE_PACIENTE: 
+		    response.getWriter().append(manejador.consultarMedicamentosIndividuales(
+			    (Integer) request.getSession().getAttribute("user"),
+			    request.getParameter("cui"))); 
 		default:
 		    break;
 		}

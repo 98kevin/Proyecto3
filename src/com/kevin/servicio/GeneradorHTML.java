@@ -49,6 +49,7 @@ public class GeneradorHTML {
 	  if(tieneBoton)
 	  data.append("<td><button id=\""+resultadoConsulta.getLong(1)+"\" " +
 	  	 "onClick=\""+funcionJs+" \" class=\"btn btn-info \">"+textoBoton+"</button></td>"); 
+	  	data.append("<input id = 'cantidad"+resultadoConsulta.getLong(1)+"' type = 'hidden' value = '"+resultadoConsulta.getLong(1)+"'>"); 
 	  }
 	 return data.toString();
 }
@@ -70,7 +71,7 @@ public class GeneradorHTML {
 	StringBuffer caja = new StringBuffer();
 	caja.append("<td><input id=\"caja"+resultado.getInt(1)+"\" type=\"number\" min = \"0\" ");  //id de esta form id="cajaX"
 	if (rango)
-	    caja.append("max = \""+resultado.getInt(columnCount)+"\"");
+	    caja.append("max = \""+resultado.getLong(columnCount)+"\"");
 	caja.append("></td>");
 	return caja.toString();
     }
@@ -83,6 +84,7 @@ public class GeneradorHTML {
     public static String convertirSelector(ResultSet resultados, String evento) {
 	StringBuffer select = new StringBuffer(); 
 	select.append("<select id=\"selector\" class=\"form-control\" onchange = \""+evento+"\">"); 
+	select.append("<option></option>");
 	try {
 	    while (resultados.next()) {
 	       select.append("<option value=\""+resultados.getInt(1)+"\">"+resultados.getString(2)+"</option> ");
